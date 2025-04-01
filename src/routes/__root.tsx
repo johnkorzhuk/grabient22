@@ -4,7 +4,10 @@ import { ConvexClientProvider } from '../convex';
 
 import appCss from '../styles.css?url';
 import { seo } from '~/utils/seo';
-import { SentryWrappedErrorBoundary } from '~/components/DefaultCatchBoundary';
+import {
+  SentryWrappedErrorBoundary,
+  DefaultCatchBoundary,
+} from '~/components/DefaultCatchBoundary';
 import { NotFound } from '~/components/NotFound';
 import { ThemeProvider } from '~/components/theme/ThemeProvider';
 import { wrapCreateRootRouteWithSentry } from '@sentry/tanstackstart-react';
@@ -51,7 +54,11 @@ export const Route = wrapCreateRootRouteWithSentry(
     errorComponent: (props) => {
       return (
         <RootDocument>
-          <SentryWrappedErrorBoundary {...props} />
+          {import.meta.env.VITE_SENTRY_DSN ? (
+            <SentryWrappedErrorBoundary {...props} />
+          ) : (
+            <DefaultCatchBoundary {...props} />
+          )}
         </RootDocument>
       );
     },

@@ -2,14 +2,13 @@ import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 
 import { ThemeToggle } from '~/components/theme/ThemeToggle';
 import { fetchCollections } from '~/lib/fetchCollections';
-import * as Sentry from '@sentry/tanstackstart-react';
 
 function CollectionsDisplay() {
   const loaderData = useLoaderData({
     from: '/',
   });
 
-  console.log({ loaderData });
+  // console.log({ loaderData });
 
   return (
     <div>
