@@ -2,6 +2,7 @@ import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 
 import { ThemeToggle } from '~/components/theme/ThemeToggle';
 import { fetchCollections } from '~/lib/fetchCollections';
+import * as Sentry from '@sentry/tanstackstart-react';
 
 function CollectionsDisplay() {
   const loaderData = useLoaderData({
@@ -14,6 +15,7 @@ function CollectionsDisplay() {
     <div>
       <h1>Home</h1>
       <ThemeToggle />
+
       <pre>{JSON.stringify(loaderData, null, 2)}</pre>
     </div>
   );

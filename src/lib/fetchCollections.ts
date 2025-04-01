@@ -7,7 +7,7 @@ export type AppCollection = Omit<Doc<'collections'>, '_id' | '_creationTime'> & 
 
 // Create a server function without static prerendering
 export const fetchCollections = createServerFn({
-  // Set to undefined to run as a regular server function. TODO: figure why making this static doesnt build
+  // Set to undefined to run as a regular server function.
   type: import.meta.env.PROD ? 'static' : undefined,
 }).handler(async () => {
   const CONVEX_SITE_URL = import.meta.env.VITE_CONVEX_SITE_URL;

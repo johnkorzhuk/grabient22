@@ -11,8 +11,8 @@ const basePlugins = [TanStackRouterVite({ autoCodeSplitting: true }), viteReact(
 if (process.env.SENTRY_AUTH_TOKEN) {
   basePlugins.push(
     sentryVitePlugin({
-      org: 'org-name',
-      project: 'project-name',
+      org: 'grabient',
+      project: 'grabient',
       authToken: process.env.SENTRY_AUTH_TOKEN,
     }),
   );
