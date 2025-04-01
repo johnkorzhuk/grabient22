@@ -5,16 +5,16 @@ import {
   useNavigate,
   useSearch,
 } from '@tanstack/react-router';
-import { AppHeader } from '~/components/AppHeader';
+import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
 import { applyGlobals, getCoeffs } from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useDebouncedCallback, useElementSize } from '@mantine/hooks';
+import { useDebouncedCallback } from '@mantine/hooks';
 import * as v from 'valibot';
 
 const searchDefaults = {
-  itemHeight: 25,
+  itemHeight: 33,
 };
 
 const minItemHeight = 20;
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/')({
   },
 });
 
-function GradientSwatch({ collection }: { collection: AppCollection }) {
+function Gradient({ collection }: { collection: AppCollection }) {
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs, false), collection.globals);
 
   const gradientStyle = {
@@ -57,11 +57,12 @@ function GradientSwatch({ collection }: { collection: AppCollection }) {
     </div>
   );
 }
+
 function CollectionsDisplay() {
   const loaderData = useLoaderData({
     from: '/',
   }) as AppCollection[];
-  const { ref, height: headerHeight } = useElementSize();
+
   const searchData = useSearch({
     from: '/',
   });
@@ -70,10 +71,8 @@ function CollectionsDisplay() {
     from: '/',
   });
 
-  const handlePanelResize = useDebouncedCallback(([_itemHeight]: number[]) => {
-    // Truncate to 2 decimal places by using toFixed and converting back to number
+  const handlePanelReHeight = useDebouncedCallback(([_itemHeight]: number[]) => {
     const truncatedValue = Number(Number(_itemHeight).toFixed(1));
-
     const parsed = v.safeParse(itemHeightValidator, truncatedValue);
     let itemHeight = truncatedValue;
 
@@ -89,44 +88,42 @@ function CollectionsDisplay() {
       }
     }
 
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        itemHeight,
-      }),
-      replace: true,
-    });
+    if (parsed.success) {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          itemHeight,
+        }),
+        replace: true,
+      });
+    }
   }, 100);
 
-  // Calculate the total available height (viewport height minus header height)
-  const availableHeight = headerHeight ? `calc(100vh - ${headerHeight}px)` : '100vh';
-
   return (
-    <div className="min-h-screen">
-      <AppHeader ref={ref} />
-      <main className="mx-auto w-full">
-        <ResizablePanelGroup
-          direction="vertical"
-          className="min-h-screen"
-          style={{
-            height: availableHeight,
-          }}
-          onLayout={handlePanelResize}
-        >
+    <>
+      <AppHeader />
+      <main
+        className="mx-auto w-full"
+        style={{
+          marginTop: `${APP_HEADER_HEIGHT}px`,
+          height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
+        }}
+      >
+        <ResizablePanelGroup direction="vertical" className="h-full" onLayout={handlePanelReHeight}>
           <ResizablePanel defaultSize={searchData.itemHeight} minSize={minItemHeight}>
-            <div className="flex h-full items-center justify-center p-6">
-              <span className="font-semibold">Header</span>
+            <div className="flex h-full items-center justify-center">
+              <span className="font-semibold">Primary swatches</span>
             </div>
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel defaultSize={100 - searchData.itemHeight}>
-            <div className="flex h-full items-center justify-center p-6">
-              <span className="font-semibold">Content</span>
+          <ResizablePanel defaultSize={100 - searchData.itemHeight} minSize={minItemHeight}>
+            <div className="flex h-full items-center justify-center">
+              <span className="font-semibold">Rest of swatches</span>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
-    </div>
+    </>
   );
 }
 

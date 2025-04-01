@@ -1,6 +1,9 @@
 import { ThemeToggle } from './theme/ThemeToggle';
 import { forwardRef } from 'react';
 
+/** be sure to update this if content is changed in AppHeader */
+export const APP_HEADER_HEIGHT = 60.67;
+
 export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
   return (
     <header
