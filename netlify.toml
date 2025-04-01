@@ -1,0 +1,3 @@
+[template.environment]
+VITE_CONVEX_URL="https://successful-chihuahua-848.convex.cloud"
+VITE_CONVEX_SITE_URL="https://successful-chihuahua-848.convex.site"
