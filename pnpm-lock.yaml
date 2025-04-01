@@ -53,6 +53,9 @@ dependencies:
   '@thi.ng/api':
     specifier: ^8.11.24
     version: 8.11.24
+  '@thi.ng/color':
+    specifier: ^5.7.30
+    version: 5.7.30
   class-variance-authority:
     specifier: ^0.7.1
     version: 0.7.1
@@ -80,6 +83,9 @@ dependencies:
   react-dom:
     specifier: ^19.1.0
     version: 19.1.0(react@19.1.0)
+  react-resizable-panels:
+    specifier: ^2.1.7
+    version: 2.1.7(react-dom@19.1.0)(react@19.1.0)
   rehype-highlight:
     specifier: ^7.0.0
     version: 7.0.2
@@ -3627,6 +3633,163 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
+  /@thi.ng/arrays@2.10.21:
+    resolution: {integrity: sha512-5msfNh/Dwvm/WeTQ1bBXPTJgLtJG9QFWzCjUrNmqfC/IcXZx5e44+8M7VjRiW3q01nJ3CMJ3+oOUdCVpkCiu/w==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/checks': 3.7.4
+      '@thi.ng/compare': 2.4.16
+      '@thi.ng/equiv': 2.1.80
+      '@thi.ng/errors': 2.5.30
+      '@thi.ng/random': 4.1.15
+    dev: false
+
+  /@thi.ng/binary@3.4.47:
+    resolution: {integrity: sha512-FQhWdPOpRA6Ngba58rC2ORpnbJLUcw3jOMYHpEu5mJt5HIIbOqDEA6FxWS/uGs0MGUzvajGomFR6Fz43zEbA7g==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+    dev: false
+
+  /@thi.ng/checks@3.7.4:
+    resolution: {integrity: sha512-I1wm3YwnLadLfcBj+rnl3VfztNK7/eyaIzBuDfQILEx7aZHcua0SSUq3xsJReumtmPEfkClz+xwwjWA1L0o4Kg==}
+    engines: {node: '>=18'}
+    dependencies:
+      tslib: 2.8.1
+    dev: false
+
+  /@thi.ng/color@5.7.30:
+    resolution: {integrity: sha512-v1LHzvz0e8vrns+qqJFvDJtrgn4mrJMOgL/TTG1Xd9h/IE8Fu1gGf42vm0JsSN6WjS4mEHhr7VXs+pT13v/lUA==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/arrays': 2.10.21
+      '@thi.ng/binary': 3.4.47
+      '@thi.ng/checks': 3.7.4
+      '@thi.ng/compare': 2.4.16
+      '@thi.ng/compose': 3.0.27
+      '@thi.ng/defmulti': 3.0.64
+      '@thi.ng/errors': 2.5.30
+      '@thi.ng/math': 5.11.24
+      '@thi.ng/random': 4.1.15
+      '@thi.ng/strings': 3.9.9
+      '@thi.ng/transducers': 9.2.24
+      '@thi.ng/vectors': 7.12.26
+    dev: false
+
+  /@thi.ng/compare@2.4.16:
+    resolution: {integrity: sha512-Z/j4/1YF+hmK8IZMm4vJzk/xwR3Y1kIOrm2TCCDAOOJJps3y9gU+eH17+6qmvQY9cGK5OLwUiAFjXsqUfLkcRw==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+    dev: false
+
+  /@thi.ng/compose@3.0.27:
+    resolution: {integrity: sha512-YMM8989jx+tqwCDOMoWswnEoPdhr7qzKDj2WdRxEsnr9MwVndein4owwB4IGbx4uGomdt80s+91dWzKgScWiiw==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/errors': 2.5.30
+    dev: false
+
+  /@thi.ng/defmulti@3.0.64:
+    resolution: {integrity: sha512-mWZ46Fk6lC7VNg1wO9IDDavix+It25hlkQWKhd11oB9Bj67j0z30A5g75aBsreXIjNTDj+9n1XLwRlT2faI5Xw==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/errors': 2.5.30
+      '@thi.ng/logger': 3.1.5
+    dev: false
+
+  /@thi.ng/equiv@2.1.80:
+    resolution: {integrity: sha512-27f+/Da8FMwLcfJbL8UV4tc6kd5G7Fu2vzJSX7RCodbQVA9UW2LS0ofvAPnwI2b503vqT4H8K+T8WIeHDZR8vg==}
+    engines: {node: '>=18'}
+    dev: false
+
+  /@thi.ng/errors@2.5.30:
+    resolution: {integrity: sha512-KCc+tlIvn+eC1Gcix/6FknCyJFiL+BzJF7Z+pyJz3V3+cQpgnBhVKU7jf/eOKm1XIl9fKP9NEhdi/HDUj2YeWg==}
+    engines: {node: '>=18'}
+    dev: false
+
+  /@thi.ng/hex@2.3.68:
+    resolution: {integrity: sha512-cJNKKJvD8xdi9FPhYb9fbEZbgI+qT4+N3sGLaW35Up2w3rv/phTCdVTn1uYUVeiiAgikxnBoB2H7mqoFZBAuGQ==}
+    engines: {node: '>=18'}
+    dev: false
+
+  /@thi.ng/logger@3.1.5:
+    resolution: {integrity: sha512-x+55LNc4Ks/vLTFbgamvMc08pwQIYgBGsf4LRN29FEDGIYwb4bwAgLPMYhDEQwqDa4x5jW+IEKg8/lk8AWUdbw==}
+    engines: {node: '>=18'}
+    dev: false
+
+  /@thi.ng/math@5.11.24:
+    resolution: {integrity: sha512-Ol/Yw25B+16ex/hfCbNRT0JK9iuzXZigNWcePsMYGFF12mliRMCTOTy5IY3YOZLPOYiSDXT6rW9UNgPvSHtntg==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+    dev: false
+
+  /@thi.ng/memoize@4.0.14:
+    resolution: {integrity: sha512-0GPYU8MuAdOI8m5ppSzJvYg4dNwhRcbNUnH4kFTojTzS+8ZKZurLGBf7u+qp8ACFBVGP0PRiPnEIVYJIiWBnOA==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+    dev: false
+
+  /@thi.ng/random@4.1.15:
+    resolution: {integrity: sha512-/7clmkHRcm5khCYj47TARTOggayD/ZAhOkcC85CVtg6EPU7o+11HpZk8rdaLYyB9ONF2jmPABs2XsZ8S9GMCQw==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/errors': 2.5.30
+    dev: false
+
+  /@thi.ng/strings@3.9.9:
+    resolution: {integrity: sha512-LkdKhq1V3jwKWbfaaVUEADWakMP9T7FtpT2js3hgN9YguMVpL/R3WoGcVB/xWn9JRaVjtByWFiOFzW2a3ig8qA==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/errors': 2.5.30
+      '@thi.ng/hex': 2.3.68
+      '@thi.ng/memoize': 4.0.14
+    dev: false
+
+  /@thi.ng/timestamp@1.1.9:
+    resolution: {integrity: sha512-LZe/t/T0ffjteP/TKNZ3qDGDHIB/oxhTlD/SxUDyKxVzxqimoQoPr7zdHrc7oNKgixPRs2aeFHf7rX6JlarLjA==}
+    engines: {node: '>=18'}
+    dev: false
+
+  /@thi.ng/transducers@9.2.24:
+    resolution: {integrity: sha512-Qcm+p9zWMvJRNKQ0+vY1ZqBp+t9rDo+AJQh+U46IeiLW+CnDUwOqgNTvxjYIrjPs8zUr0uDS0touODuTKyK22A==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/arrays': 2.10.21
+      '@thi.ng/checks': 3.7.4
+      '@thi.ng/compare': 2.4.16
+      '@thi.ng/compose': 3.0.27
+      '@thi.ng/errors': 2.5.30
+      '@thi.ng/math': 5.11.24
+      '@thi.ng/random': 4.1.15
+      '@thi.ng/timestamp': 1.1.9
+    dev: false
+
+  /@thi.ng/vectors@7.12.26:
+    resolution: {integrity: sha512-xWKnFbJ+Zcfb8AoJRdez6fZ4MKKyl5MkRP76xo+TUoz94bG7jywycqzLxFDtUW1niyOkc+8CsrJJizVgCCmmFQ==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@thi.ng/api': 8.11.24
+      '@thi.ng/binary': 3.4.47
+      '@thi.ng/checks': 3.7.4
+      '@thi.ng/equiv': 2.1.80
+      '@thi.ng/errors': 2.5.30
+      '@thi.ng/math': 5.11.24
+      '@thi.ng/memoize': 4.0.14
+      '@thi.ng/random': 4.1.15
+      '@thi.ng/strings': 3.9.9
+      '@thi.ng/transducers': 9.2.24
+    dev: false
+
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
     dependencies:
@@ -6537,6 +6700,16 @@ packages:
     resolution: {integrity: sha512-jCvmsr+1IUSMUyzOkRcvnVbX3ZYC6g9TDrDbFuFmRDq7PD4yaGbLKNQL6k2jnArV8hjYxh7hVhAZB6s9HDGpZA==}
     engines: {node: '>=0.10.0'}
 
+  /react-resizable-panels@2.1.7(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-JtT6gI+nURzhMYQYsx8DKkx6bSoOGFp7A3CwMrOb8y5jFHFyqwo9m68UhmXRw57fRVJksFn1TSlm3ywEQ9vMgA==}
+    peerDependencies:
+      react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: false
+
   /react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
     engines: {node: '>=0.10.0'}
@@ -7139,7 +7312,6 @@ packages:
 
   /tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
-    dev: true
 
   /tsx@4.19.3:
     resolution: {integrity: sha512-4H8vUNGNjQ4V2EOoGw005+c+dGuPSnhpPBPHBtsZdGZBk/iJb4kguGlPWaZTZ3q5nMtFOEsY0nRDlh9PJyd6SQ==}
