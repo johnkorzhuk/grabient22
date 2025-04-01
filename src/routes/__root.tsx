@@ -1,6 +1,6 @@
 import { createRootRoute, Outlet, HeadContent, Scripts } from '@tanstack/react-router';
 
-import { ConvexClientProvider } from '../convex';
+// import { ConvexClientProvider } from '../convex';
 
 import appCss from '../styles.css?url';
 import { seo } from '~/utils/seo';
@@ -24,8 +24,8 @@ export const Route = wrapCreateRootRouteWithSentry(
           content: 'width=device-width, initial-scale=1',
         },
         ...seo({
-          title: 'TanStack Start | Type-Safe, Client-First, Full-Stack React Framework',
-          description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+          title: 'Grabient | CSS Gradient Generator & Palette Finder',
+          description: `Use Grabient, a cosine gradient generator, to create custom CSS gradients and discover inspiring color palettes. Perfect for designers and developers.`,
         }),
       ],
       links: [
@@ -83,7 +83,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          {/* <ConvexClientProvider>{children}</ConvexClientProvider> */}
+          {children}
         </ThemeProvider>
         <Scripts />
       </body>

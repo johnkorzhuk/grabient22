@@ -1,9 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import type { Doc } from '../../convex/_generated/dataModel';
-
-export type AppCollection = Omit<Doc<'collections'>, '_id' | '_creationTime'> & {
-  _id: string;
-};
+import type { AppCollection } from '~/types';
 
 // Create a server function without static prerendering
 export const fetchCollections = createServerFn({

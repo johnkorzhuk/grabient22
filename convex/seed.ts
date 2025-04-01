@@ -1,6 +1,6 @@
 import { mutation } from './_generated/server';
 import { v } from 'convex/values';
-import type { Tuple } from '@thi.ng/api';
+import type { CollectionPreset } from '../src/types';
 
 /**
  * Seed the collections table with CosGradientPresets data.
@@ -27,20 +27,10 @@ export const seedCollections = mutation({
   },
 });
 
-type GradientCoeffs = [Tuple<number, 4>, Tuple<number, 4>, Tuple<number, 4>, Tuple<number, 4>];
-
-type CosGradientPreset = {
-  coeffs: GradientCoeffs;
-  numStops: number;
-  globals: Tuple<number, 4>;
-  id: string;
-};
-
-type CosGradientPresets = Record<string, CosGradientPreset>;
+type CosGradientPresets = Record<string, CollectionPreset>;
 
 const cosGradientsPresets: CosGradientPresets = {
   custom2: {
-    id: 'custom2',
     coeffs: [
       [0.6824829447322633, 0.4847113864668177, 0.2240798845368405, 1],
       [-0.31751705526773666, -0.29611827819590014, 0.028044170833745524, 0],
@@ -51,7 +41,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-NpvW4': {
-    id: 'custom-NpvW4',
     coeffs: [
       [0.388, 0.062, 0.444, 1],
       [-0.516, 0.711, -0.301, 1],
@@ -62,7 +51,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.37, 1.47, 1.37, -0.561592653589793],
   },
   'custom-I33v2': {
-    id: 'custom-I33v2',
     coeffs: [
       [0.453, 0.477, 0.402, 1],
       [0.151, 0.279, 0.255, 1],
@@ -73,7 +61,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom--cs8y': {
-    id: 'custom--cs8y',
     coeffs: [
       [0.989, 0.219, 0.533, 1],
       [0.734, 0.197, 0.916, 1],
@@ -84,7 +71,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-WqXvP': {
-    id: 'custom-WqXvP',
     coeffs: [
       [0.8, 0.6, 0.4, 1],
       [0.6, 0.4, 0.2, 1],
@@ -95,7 +81,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-Uke8a': {
-    id: 'custom-Uke8a',
     coeffs: [
       [0.335, 0.137, 0.205, 1],
       [-0.418, 0.123, -0.005, 1],
@@ -106,7 +91,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.26, 1, 1, 0],
   },
   'custom-_y5F_': {
-    id: 'custom-_y5F_',
     coeffs: [
       [0.178, 0.591, 0.186, 1],
       [0.303, -0.671592653589793, -0.204, 1],
@@ -117,7 +101,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.26, 1, 0.74, 0.118407346410207],
   },
   'deep-sea': {
-    id: 'deep-sea',
     coeffs: [
       [-0.182, 0.51, 0.123, 1],
       [-0.42, 0.4, -0.657, 1],
@@ -128,7 +111,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 0.88, 0],
   },
   'custom-YPsnG': {
-    id: 'custom-YPsnG',
     coeffs: [
       [0.628407346410207, 0.4847113864668177, 0.2240798845368405, 1],
       [-0.31751705526773666, -0.29611827819590014, 0.498407346410207, 1],
@@ -139,7 +121,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 0.34, -1.64159265358979],
   },
   'custom-c9xvq': {
-    id: 'custom-c9xvq',
     coeffs: [
       [0.628407346410207, 0.4847113864668177, 0.2240798845368405, 1],
       [-0.31751705526773666, -0.29611827819590014, 0.498407346410207, 1],
@@ -150,7 +131,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 0.34, -1.59159265358979],
   },
   'custom-ErLzH': {
-    id: 'custom-ErLzH',
     coeffs: [
       [0.057, 0.242, 0.669, 1],
       [-0.169, 0.674, -0.206, 1],
@@ -161,7 +141,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.32, 0.84, 1.57, 0],
   },
   'custom-Awo5_': {
-    id: 'custom-Awo5_',
     coeffs: [
       [0.658, 0.19, -0.112, 1],
       [0.616, 0.365, 0.363, 1],
@@ -172,7 +151,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.46, 1.48, 1.05, -0.011592653589793],
   },
   'custom-k-FQc': {
-    id: 'custom-k-FQc',
     coeffs: [
       [0.751, 0.919, 0.898, 1],
       [0.27, 0.417, 0.344, 1],
@@ -183,7 +161,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, -0.421592653589793],
   },
   'custom-VKzin': {
-    id: 'custom-VKzin',
     coeffs: [
       [0.282, 0.265, 0.474, 1],
       [-0.067, -0.297, -0.158, 1],
@@ -194,7 +171,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.23, 1, 1.17, -0.421592653589793],
   },
   custom1: {
-    id: 'custom1',
     coeffs: [
       [0.4922, 0.2043, 0.3775, 1],
       [0.1577, 0.2446, 0.1518, 1],
@@ -205,7 +181,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-ejbtS': {
-    id: 'custom-ejbtS',
     coeffs: [
       [0.844, 1.1300000000000001, 0.691, 1],
       [0.8789000000000001, 0.8558000000000001, 0.20240000000000002, 1],
@@ -216,7 +191,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 0.75, 0.038407346410207],
   },
   'custom-EeySJ': {
-    id: 'custom-EeySJ',
     coeffs: [
       [0.369, 0.356, 0.17, 1],
       [0.178, 0.373, -1.3468732026062182, 1],
@@ -228,7 +202,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-wuPPq': {
-    id: 'custom-wuPPq',
     coeffs: [
       [0.247, 0.412, 0.044, 1],
       [1.2325599999999999, 1.20274, 0.33512, 1],
@@ -239,7 +212,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-rAYK8': {
-    id: 'custom-rAYK8',
     coeffs: [
       [0.086, 0.779, 0.622, 1],
       [0.22878, 0.28576999999999997, 0.10947, 1],
@@ -250,7 +222,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-C2qle': {
-    id: 'custom-C2qle',
     coeffs: [
       [0.773, 0.33699999999999997, 0.34099999999999997, 1],
       [0.3876, 0.31312, 0.20520000000000002, 1],
@@ -261,7 +232,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-n8_Do': {
-    id: 'custom-n8_Do',
     coeffs: [
       [0.671, 0.706, 0.232, 1],
       [0.31242, 0.53628, 0.3321, 1],
@@ -272,7 +242,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-vv8MH': {
-    id: 'custom-vv8MH',
     coeffs: [
       [0.397, 0.16700000000000004, 0.127, 1],
       [0.29756, 0.12125999999999999, 0.21328, 1],
@@ -283,7 +252,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-ipJ1J': {
-    id: 'custom-ipJ1J',
     coeffs: [
       [0.9870000000000001, 0.671, 0.611, 1],
       [0.40807000000000004, 0.36135, 0.027739999999999997, 1],
@@ -294,7 +262,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-2i-ui': {
-    id: 'custom-2i-ui',
     coeffs: [
       [0.989, 0.219, 0.533, 1],
       [0.734, 0.197, 0.916, 1],
@@ -306,7 +273,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-phm2Y': {
-    id: 'custom-phm2Y',
     coeffs: [
       [0.04, 0.509, 0.869, 1],
       [0.292, 0.438, 0.202, 1],
@@ -317,7 +283,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-aXLgu': {
-    id: 'custom-aXLgu',
     coeffs: [
       [0.603, 0.615, 0.11100000000000002, 1],
       [0.20882, 0.3816, 0.23691, 1],
@@ -328,7 +293,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-N_Fw5': {
-    id: 'custom-N_Fw5',
     coeffs: [
       [0.487, 0.304, 0.285, 1],
       [0.411, 0.918, 0.317, 1],
@@ -339,7 +303,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-5ZcsH': {
-    id: 'custom-5ZcsH',
     coeffs: [
       [0.331, 0.638, 0.966, 1],
       [0.181, 0.732, 0.177, 1],
@@ -351,7 +314,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-nZR21': {
-    id: 'custom-nZR21',
     coeffs: [
       [0.751, 0.919, 0.898, 1],
       [0.27, 0.417, 0.344, 1],
@@ -362,7 +324,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-FjQlb': {
-    id: 'custom-FjQlb',
     coeffs: [
       [0.639, 0.678, 0.021, 1],
       [0.298, 0.477, 0.975, 1],
@@ -373,7 +334,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-6lUV_': {
-    id: 'custom-6lUV_',
     coeffs: [
       [0.5609999999999999, 0.5549999999999999, -0.0049999999999999975, 1],
       [0.09584, 0.15744, 0.14928000000000002, 1],
@@ -385,7 +345,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-caLxz': {
-    id: 'custom-caLxz',
     coeffs: [
       [0.41, 0.783, 0.624, 1],
       [0.906, 0.236, 0.135, 1],
@@ -396,7 +355,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1.13, 1.27, 0],
   },
   'custom-wDOVw': {
-    id: 'custom-wDOVw',
     coeffs: [
       [0.091, 0.569, 0.745, 1],
       [0.3003, 0.33792, 0.04422, 1],
@@ -407,7 +365,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0.1, 0.66, 0.96, 0.058407346410207],
   },
   'custom-nDXfO': {
-    id: 'custom-nDXfO',
     coeffs: [
       [0.508, 0.279, 0.383, 1],
       [-0.395, -0.281, 0.267, 1],
@@ -418,7 +375,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-OMd-c': {
-    id: 'custom-OMd-c',
     coeffs: [
       [0.12099999999999998, 0.537, 0.092, 1],
       [0.08075, 0.39425, 0.9062999999999999, 1],
@@ -430,7 +386,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-0P8rn': {
-    id: 'custom-0P8rn',
     coeffs: [
       [0.541, 0.054, 0.191, 1],
       [0.346, 0.128, 0.05, 1],
@@ -442,7 +397,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-t43An': {
-    id: 'custom-t43An',
     coeffs: [
       [0.27, 0.567, 0.502, 1],
       [0.596, 0.369, 0.078, 1],
@@ -454,7 +408,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-8EwJy': {
-    id: 'custom-8EwJy',
     coeffs: [
       [0.2, 0.8, 0.6, 1],
       [0.4, 0.6, 0.8, 1],
@@ -465,7 +418,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   custom3: {
-    id: 'custom3',
     coeffs: [
       [0.98, 0.98, 0.348, 1],
       [0.53, 0.53, 0.53, 1],
@@ -477,7 +429,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-vLKdE': {
-    id: 'custom-vLKdE',
     coeffs: [
       [0.938, 0.991, 0.68, 1],
       [0.672, 0.678, 0.102, 1],
@@ -488,7 +439,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-v2zZh': {
-    id: 'custom-v2zZh',
     coeffs: [
       [0.436, 0.488, 0.574, 1],
       [0.09, 0.079, 0.503, 1],
@@ -499,7 +449,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-TNd_-': {
-    id: 'custom-TNd_-',
     coeffs: [
       [0.635, 1.004, 0.368, 1],
       [0.20879999999999999, 0.7355999999999999, 0.0096, 1],
@@ -511,7 +460,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-TJgC9': {
-    id: 'custom-TJgC9',
     coeffs: [
       [0.55, 0.396, 0.588, 1],
       [0.777, 0.088, 0.144, 1],
@@ -523,7 +471,6 @@ const cosGradientsPresets: CosGradientPresets = {
   },
 
   'custom-e7-OH': {
-    id: 'custom-e7-OH',
     coeffs: [
       [0.536, 0.607, 0.232, 1],
       [0.599, 0.434, 0.206, 1],
@@ -534,7 +481,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-jjxmu': {
-    id: 'custom-jjxmu',
     coeffs: [
       [0.533, 0.566, 0.97, 1],
       [0.297, 0.495, 0.789, 1],
@@ -545,7 +491,6 @@ const cosGradientsPresets: CosGradientPresets = {
     globals: [0, 1, 1, 0],
   },
   'custom-C8tOe': {
-    id: 'custom-C8tOe',
     coeffs: [
       [0.425, 0.508, 0.757, 1],
       [0.382, 0.902, 0.308, 1],
