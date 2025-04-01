@@ -1,6 +1,6 @@
 {
-  "date": "2025-04-01T01:29:34.257Z",
-  "preset": "nitro-prerender",
+  "date": "2025-04-01T04:20:37.175Z",
+  "preset": "vercel",
   "framework": {
     "name": "nitro",
     "version": ""
@@ -9,7 +9,8 @@
     "nitro": "2.11.8"
   },
   "commands": {
-    "preview": "npx serve ./static"
+    "preview": "",
+    "deploy": ""
   },
   "config": {}
 }

@@ -1,6 +1,6 @@
 {
   "C:/Users/jkorz/projects/grabient2two/src/styles.css": {
-    "file": "assets/styles-DIfMGfqE.css",
+    "file": "assets/styles-CEA5kg7e.css",
     "src": "C:/Users/jkorz/projects/grabient2two/src/styles.css"
   },
   "__vite-browser-external": {
@@ -9,8 +9,8 @@
     "src": "__vite-browser-external",
     "isDynamicEntry": true
   },
-  "_client-DresgVIS.js": {
-    "file": "assets/client-DresgVIS.js",
+  "_client-CsM6ApVc.js": {
+    "file": "assets/client-CsM6ApVc.js",
     "name": "client",
     "dynamicImports": [
       "__vite-browser-external",
@@ -19,26 +19,29 @@
       "__vite-browser-external",
       "src/routes/index.tsx?tsr-split=component"
     ],
+    "css": [
+      "assets/styles-CEA5kg7e.css"
+    ],
     "assets": [
-      "assets/styles-DIfMGfqE.css"
+      "assets/styles-CEA5kg7e.css"
     ]
   },
   "src/routes/index.tsx?tsr-split=component": {
-    "file": "assets/index-CEGP9KJC.js",
+    "file": "assets/index-B33DTQUw.js",
     "name": "index",
     "src": "src/routes/index.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
-      "_client-DresgVIS.js"
+      "_client-CsM6ApVc.js"
     ]
   },
   "virtual:$vinxi/handler/client": {
-    "file": "assets/client-Di4I3UYa.js",
+    "file": "assets/client-BoOogKsV.js",
     "name": "client",
     "src": "virtual:$vinxi/handler/client",
     "isEntry": true,
     "imports": [
-      "_client-DresgVIS.js"
+      "_client-CsM6ApVc.js"
     ]
   }
 }

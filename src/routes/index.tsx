@@ -4,17 +4,17 @@ import { ThemeToggle } from '~/components/theme/ThemeToggle';
 import { fetchCollections } from '~/lib/fetchCollections';
 
 function CollectionsDisplay() {
-  const loaderData = useLoaderData({
-    from: '/',
-  });
+  // const loaderData = useLoaderData({
+  //   from: '/',
+  // });
 
-  console.log({ loaderData });
+  // console.log({ loaderData });
 
   return (
     <div>
       <h1>Home</h1>
       <ThemeToggle />
-      <pre>{JSON.stringify(loaderData, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(loaderData, null, 2)}</pre> */}
     </div>
   );
 }
@@ -25,9 +25,9 @@ function Home() {
 
 export const Route = createFileRoute('/')({
   component: Home,
-  loader: async () => {
-    const data = await fetchCollections();
+  // loader: async () => {
+  //   const data = await fetchCollections();
 
-    return data;
-  },
+  //   return data;
+  // },
 });
