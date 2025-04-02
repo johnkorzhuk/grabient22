@@ -14,6 +14,7 @@
     "@convex-dev/react-query": "0.0.0-alpha.8",
     "@legendapp/state": "3.0.0-beta.30",
     "@mantine/hooks": "^7.17.3",
+    "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@sentry/react": "^9.5.0",
     "@sentry/tanstackstart-react": "^9.10.1",
