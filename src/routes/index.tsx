@@ -345,11 +345,7 @@ function CollectionsDisplay() {
               onResize={handleResize}
               className="pointer-events-none"
             >
-              <div className="h-full relative">
-                {/* <div className="absolute bottom-0 left-0 right-0 bg-black/5 py-1 px-4 text-center text-sm pointer-events-auto">
-                  <span>Drag below to resize all gradients</span>
-                </div> */}
-              </div>
+              <div className="h-full relative"></div>
             </ResizablePanel>
 
             <ResizableHandle className="cursor-ns-resize h-2 pointer-events-auto invisible" />
