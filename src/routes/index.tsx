@@ -18,7 +18,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Constants
 const SEARCH_DEFAULTS = {
-  itemHeight: 33,
+  itemHeight: 25,
 };
 
 const MIN_ITEM_HEIGHT = 20;
@@ -66,7 +66,7 @@ function GradientItem({
   ) => void;
   index: number;
 }) {
-  const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs, false), collection.globals);
+  const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
   const { hovered, ref } = useHover<HTMLDivElement>();
 
   useEffect(() => {
@@ -81,7 +81,7 @@ function GradientItem({
   }, [hovered, index, onAnchorStateChange]);
 
   return (
-    <li className="relative">
+    <li className="relative" data-id={collection._id}>
       <div
         style={{
           height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
@@ -106,7 +106,6 @@ function CollectionsDisplay() {
   const activeElementRef = useRef<HTMLDivElement | null>(null);
   const resizeInProgressRef = useRef<boolean>(false);
 
-  // Add new refs for improved resize handling
   const activeItemPositionRef = useRef<{
     // Position of the element relative to the top of the viewport
     viewportRelativePosition: number;
@@ -126,6 +125,14 @@ function CollectionsDisplay() {
   // Initialize with URL state as source of truth
   const [localItemHeight, setLocalItemHeight] = useState<number>(searchData.itemHeight);
   const prevItemHeight = usePrevious(localItemHeight);
+  const viewPortHeight = typeof window !== 'undefined' ? window.innerHeight - APP_HEADER_HEIGHT : 0;
+  const itemHeightPx = viewPortHeight * (localItemHeight / 100);
+
+  // Calculate the dynamic top position using localItemHeight
+  let resizableContainerTop = 0;
+  if (resizeAnchorYPos !== null && viewPortHeight > 0) {
+    resizableContainerTop = resizeAnchorYPos - APP_HEADER_HEIGHT - itemHeightPx;
+  }
 
   // Effect to sync URL state to local state when URL changes
   useEffect(() => {
@@ -183,7 +190,6 @@ function CollectionsDisplay() {
     };
   };
 
-  // Handle resize with improved logic
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
     const parsed = v.safeParse(itemHeightValidator, truncatedValue);
@@ -230,9 +236,7 @@ function CollectionsDisplay() {
     const scrollContainer = scrollContainerRef.current;
     const positionData = activeItemPositionRef.current;
     const viewportHeight = window.innerHeight - APP_HEADER_HEIGHT;
-
-    // Calculate the old and new item heights in pixels
-    const oldItemHeightPx = (viewportHeight * (prevItemHeight || localItemHeight)) / 100;
+    // const oldItemHeightPx = (viewportHeight * (prevItemHeight || localItemHeight)) / 100;
     const newItemHeightPx = viewportHeight * (localItemHeight / 100);
 
     // Calculate the new total height
@@ -287,22 +291,10 @@ function CollectionsDisplay() {
       replace: true,
     });
 
-    // Reset resize flag after URL update
     setTimeout(() => {
       resizeInProgressRef.current = false;
     }, 100);
-  }, 200); // Increased debounce time for better performance
-
-  const viewPortHeight = typeof window !== 'undefined' ? window.innerHeight - APP_HEADER_HEIGHT : 0;
-
-  // Calculate itemHeight in pixels using local state for immediate feedback
-  const itemHeightPx = viewPortHeight * (localItemHeight / 100);
-
-  // Calculate the dynamic top position using localItemHeight
-  let resizableContainerTop = 0;
-  if (resizeAnchorYPos !== null && viewPortHeight > 0) {
-    resizableContainerTop = resizeAnchorYPos - APP_HEADER_HEIGHT - itemHeightPx;
-  }
+  }, 150);
 
   return (
     <>
@@ -314,7 +306,6 @@ function CollectionsDisplay() {
           height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
         }}
       >
-        {/* Gradient Items */}
         <ul className="h-full w-full overflow-auto" ref={scrollContainerRef}>
           {collections.map((collection, index) => (
             <GradientItem
