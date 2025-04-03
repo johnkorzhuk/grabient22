@@ -90,16 +90,16 @@ function GradientItem({
   }, [hovered, index, onAnchorStateChange]);
 
   return (
-    <li className="relative" data-id={collection._id}>
-      <div
-        style={{
-          height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-          background: `linear-gradient(90deg, 
-            rgb(${processedCoeffs[0][0] * 255}, ${processedCoeffs[0][1] * 255}, ${processedCoeffs[0][2] * 255}),
-            rgb(${processedCoeffs[1][0] * 255}, ${processedCoeffs[1][1] * 255}, ${processedCoeffs[1][2] * 255})
-          )`,
-        }}
-      ></div>
+    <li
+      className="relative"
+      style={{
+        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
+        background: `linear-gradient(90deg, 
+        rgb(${processedCoeffs[0][0] * 255}, ${processedCoeffs[0][1] * 255}, ${processedCoeffs[0][2] * 255}),
+        rgb(${processedCoeffs[1][0] * 255}, ${processedCoeffs[1][1] * 255}, ${processedCoeffs[1][2] * 255})
+      )`,
+      }}
+    >
       <Separator ref={ref} />
     </li>
   );
@@ -243,7 +243,6 @@ function CollectionsDisplay() {
     const scrollContainer = scrollContainerRef.current;
     const positionData = activeItemPositionRef.current;
     const viewportHeight = window.innerHeight - APP_HEADER_HEIGHT;
-    // const oldItemHeightPx = (viewportHeight * (prevItemHeight || localItemHeight)) / 100;
     const newItemHeightPx = viewportHeight * (localItemHeight / 100);
 
     // Calculate the new total height
@@ -252,9 +251,8 @@ function CollectionsDisplay() {
     // Calculate where the item should be positioned in the new layout
     const newItemTopPosition = positionData.itemIndex * newItemHeightPx;
 
-    // Add one newItemHeightPx to the target scroll position
-    const targetScrollPosition =
-      newItemTopPosition - positionData.viewportRelativePosition + newItemHeightPx;
+    // Calculate target scroll position without the extra newItemHeightPx
+    const targetScrollPosition = newItemTopPosition - positionData.viewportRelativePosition;
 
     // Calculate bounds for scrolling
     const maxScroll = Math.max(0, newTotalHeight - scrollContainer.clientHeight);
