@@ -1,8 +1,8 @@
 import { ThemeToggle } from './theme/ThemeToggle';
 import { forwardRef } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { type CollectionType } from '~/stores/ui';
-import { TypeSelect } from './TypeSelect';
+import { StyleSelect } from './StyleSelect';
+import type { CollectionStyle } from '~/types';
 
 /** be sure to update this if content is changed in AppHeader */
 export const APP_HEADER_HEIGHT = 60.67;
@@ -11,7 +11,7 @@ export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate({ from: '/' });
   const searchData = useSearch({ from: '/' });
 
-  const handleTypeChange = (value: CollectionType) => {
+  const handleTypeChange = (value: CollectionStyle) => {
     navigate({
       search: (prev) => ({
         ...prev,
@@ -37,7 +37,7 @@ export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
           >
             About
           </a>
-          <TypeSelect value={searchData.type} onValueChange={handleTypeChange} />
+          <StyleSelect value={searchData.style} onValueChange={handleTypeChange} />
         </div>
         <ThemeToggle />
       </div>

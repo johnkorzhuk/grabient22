@@ -6,7 +6,12 @@ import {
   useSearch,
 } from '@tanstack/react-router';
 import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import { applyGlobals, getCoeffs, getCollectionStyle, cosineGradient } from '~/lib/cosineGradient';
+import {
+  applyGlobals,
+  getCoeffs,
+  getCollectionStyleCSS,
+  cosineGradient,
+} from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
@@ -14,31 +19,33 @@ import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
 import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { validateItemHeight } from '~/lib/utils';
-import { collectionTypeValidator, uiStore$ } from '~/stores/ui';
+import { validateRowHeight } from '~/lib/utils';
+import { collectionStyleValidator, uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 
 // Constants
 const SEARCH_DEFAULTS = {
-  itemHeight: 25,
-  type: 'linearGradient' as const,
+  rowHeight: 25,
+  style: 'linearGradient' as const,
 };
 
-export const MIN_ITEM_HEIGHT = 20;
+export const MIN_ITEM_HEIGHT = 10;
 export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
-
-export const itemHeightValidator = v.pipe(
+export const rowHeightValidator = v.pipe(
   v.number(),
   v.minValue(MIN_ITEM_HEIGHT),
   v.maxValue(MAX_ITEM_HEIGHT),
 );
 
 const searchValidatorSchema = v.object({
-  itemHeight: v.optional(
-    v.fallback(itemHeightValidator, SEARCH_DEFAULTS.itemHeight),
-    SEARCH_DEFAULTS.itemHeight,
+  rowHeight: v.optional(
+    v.fallback(rowHeightValidator, SEARCH_DEFAULTS.rowHeight),
+    SEARCH_DEFAULTS.rowHeight,
   ),
-  type: v.optional(v.fallback(collectionTypeValidator, SEARCH_DEFAULTS.type), SEARCH_DEFAULTS.type),
+  style: v.optional(
+    v.fallback(collectionStyleValidator, SEARCH_DEFAULTS.style),
+    SEARCH_DEFAULTS.style,
+  ),
 });
 
 // Route definition
@@ -64,12 +71,12 @@ export const Route = createFileRoute('/')({
 
 const CollectionRow = observer(function CollectionRow({
   collection,
-  itemHeight,
+  rowHeight,
   onAnchorStateChange,
   index,
 }: {
   collection: AppCollection;
-  itemHeight: number;
+  rowHeight: number;
   onAnchorStateChange: (
     centerY: number | null,
     index: number,
@@ -79,13 +86,13 @@ const CollectionRow = observer(function CollectionRow({
 }) {
   const searchData = useSearch({ from: '/' });
   const { hovered, ref } = useHover<HTMLDivElement>();
-  const previewType = use$(uiStore$.previewType);
+  const previewStyle = use$(uiStore$.previewStyle);
 
   // Process coefficients
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
 
   // Use our custom gradient generator directly
-  const numStops = collection.numStops || processedCoeffs.length;
+  const numStops = collection.steps;
   const gradientColors = cosineGradient(numStops, processedCoeffs);
 
   // Effect for hover state
@@ -104,8 +111,8 @@ const CollectionRow = observer(function CollectionRow({
     <li
       className="relative"
       style={{
-        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-        ...getCollectionStyle(previewType || searchData.type, gradientColors),
+        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${rowHeight} / 100)`,
+        ...getCollectionStyleCSS(previewStyle || searchData.style, gradientColors),
       }}
     >
       <Separator ref={ref} />
@@ -139,21 +146,21 @@ function CollectionsDisplay() {
 
   // Add local state for immediate updates
   // Initialize with URL state as source of truth
-  const [localItemHeight, setLocalItemHeight] = useState<number>(searchData.itemHeight);
-  const prevItemHeight = usePrevious(localItemHeight);
+  const [localRowHeight, setLocalRowHeight] = useState<number>(searchData.rowHeight);
+  const prevRowHeight = usePrevious(localRowHeight);
   const viewPortHeight = typeof window !== 'undefined' ? window.innerHeight - APP_HEADER_HEIGHT : 0;
-  const itemHeightPx = viewPortHeight * (localItemHeight / 100);
+  const rowHeightPx = viewPortHeight * (localRowHeight / 100);
 
-  // Calculate the dynamic top position using localItemHeight
+  // Calculate the dynamic top position using localRowHeight
   let resizableContainerTop = 0;
   if (resizeAnchorYPos !== null && viewPortHeight > 0) {
-    resizableContainerTop = resizeAnchorYPos - APP_HEADER_HEIGHT - itemHeightPx;
+    resizableContainerTop = resizeAnchorYPos - APP_HEADER_HEIGHT - rowHeightPx;
   }
 
   // Effect to sync URL state to local state when URL changes
   useEffect(() => {
-    setLocalItemHeight(searchData.itemHeight);
-  }, [searchData.itemHeight]);
+    setLocalRowHeight(searchData.rowHeight);
+  }, [searchData.rowHeight]);
 
   const handleAnchorStateChange = (
     centerY: number | null,
@@ -184,7 +191,7 @@ function CollectionsDisplay() {
     const scrollContainer = scrollContainerRef.current;
     const element = activeElementRef.current;
     const viewportHeight = window.innerHeight - APP_HEADER_HEIGHT;
-    const oldItemHeightPx = viewportHeight * (localItemHeight / 100);
+    const oldRowHeightPx = viewportHeight * (localRowHeight / 100);
 
     // Get the element's position relative to the viewport
     const elementRect = element.getBoundingClientRect();
@@ -194,7 +201,7 @@ function CollectionsDisplay() {
     const viewportRelativePosition = elementRect.top - scrollContainerRect.top;
 
     // Calculate the total scroll height
-    const totalHeight = collections.length * oldItemHeightPx;
+    const totalHeight = collections.length * oldRowHeightPx;
 
     // Store all the measurements we'll need for accurate repositioning
     activeItemPositionRef.current = {
@@ -208,7 +215,7 @@ function CollectionsDisplay() {
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
-    const finalHeight = validateItemHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT)(truncatedValue);
+    const finalHeight = validateRowHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT)(truncatedValue);
 
     // Mark resize as in progress
     resizeInProgressRef.current = true;
@@ -220,7 +227,7 @@ function CollectionsDisplay() {
     }
 
     // Update local state immediately for responsive UI
-    setLocalItemHeight(finalHeight);
+    setLocalRowHeight(finalHeight);
 
     // Debounced update to URL
     throttledUpdateURL(finalHeight);
@@ -231,7 +238,7 @@ function CollectionsDisplay() {
     if (
       !scrollContainerRef.current ||
       !activeItemPositionRef.current ||
-      prevItemHeight === localItemHeight ||
+      prevRowHeight === localRowHeight ||
       activeItemIndex === null
     ) {
       return;
@@ -240,15 +247,14 @@ function CollectionsDisplay() {
     const scrollContainer = scrollContainerRef.current;
     const positionData = activeItemPositionRef.current;
     const viewportHeight = window.innerHeight - APP_HEADER_HEIGHT;
-    const newItemHeightPx = viewportHeight * (localItemHeight / 100);
+    const newRowHeightPx = viewportHeight * (localRowHeight / 100);
 
     // Calculate the new total height
-    const newTotalHeight = collections.length * newItemHeightPx;
+    const newTotalHeight = collections.length * newRowHeightPx;
 
     // Calculate where the item should be positioned in the new layout
-    const newItemTopPosition = positionData.itemIndex * newItemHeightPx;
-
-    // Calculate target scroll position without the extra newItemHeightPx
+    const newItemTopPosition = positionData.itemIndex * newRowHeightPx;
+    // Calculate target scroll position without the extra newRowHeightPx
     const targetScrollPosition = newItemTopPosition - positionData.viewportRelativePosition;
 
     // Calculate bounds for scrolling
@@ -268,7 +274,7 @@ function CollectionsDisplay() {
     navigate({
       search: (prev) => ({
         ...prev,
-        itemHeight: height,
+        rowHeight: height,
       }),
       replace: true,
     });
@@ -283,7 +289,7 @@ function CollectionsDisplay() {
     if (resizeInProgressRef.current) {
       adjustScrollPosition();
     }
-  }, [localItemHeight, collections.length]);
+  }, [localRowHeight, collections.length]);
 
   // Reset scrolling state when resize is complete
   useEffect(() => {
@@ -312,7 +318,7 @@ function CollectionsDisplay() {
             <CollectionRow
               key={collection._id}
               collection={collection}
-              itemHeight={localItemHeight}
+              rowHeight={localRowHeight}
               onAnchorStateChange={handleAnchorStateChange}
               index={index}
             />
@@ -331,7 +337,7 @@ function CollectionsDisplay() {
         >
           <ResizablePanelGroup direction="vertical" className="h-full">
             <ResizablePanel
-              defaultSize={localItemHeight}
+              defaultSize={localRowHeight}
               minSize={MIN_ITEM_HEIGHT}
               maxSize={MAX_ITEM_HEIGHT}
               onResize={handleResize}
@@ -343,7 +349,7 @@ function CollectionsDisplay() {
             <ResizableHandle className="cursor-ns-resize h-2 pointer-events-auto invisible" />
 
             <ResizablePanel
-              defaultSize={100 - localItemHeight}
+              defaultSize={100 - localRowHeight}
               minSize={MIN_ITEM_HEIGHT}
               maxSize={MAX_ITEM_HEIGHT}
               className="pointer-events-none"

@@ -7,45 +7,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { COLLECTION_TYPES, uiStore$, type CollectionType } from '~/stores/ui';
+import { COLLECTION_STYLES, uiStore$ } from '~/stores/ui';
+import type { CollectionStyle } from '~/types';
 
-const TYPE_LABELS: Record<CollectionType, string> = {
+const STYLE_LABELS: Record<CollectionStyle, string> = {
   linearGradient: 'Linear Gradient',
   linearSwatches: 'Linear Swatches',
   angularGradient: 'Angular Gradient',
   angularSwatches: 'Angular Swatches',
 };
 
-export const TypeSelect = observer(function TypeSelect({
+export const StyleSelect = observer(function TypeSelect({
   value,
   onValueChange,
 }: {
-  onValueChange: (value: CollectionType) => void;
-  value: CollectionType;
+  onValueChange: (value: CollectionStyle) => void;
+  value: CollectionStyle;
 }) {
-  const previewValue = use$(uiStore$.previewType);
+  const previewValue = use$(uiStore$.previewStyle);
 
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue>{TYPE_LABELS[value]}</SelectValue>
+        <SelectValue>{STYLE_LABELS[value]}</SelectValue>
       </SelectTrigger>
       <SelectContent
         onMouseLeave={() => {
           if (previewValue) {
-            uiStore$.previewType.set(null);
+            uiStore$.previewStyle.set(null);
           }
         }}
       >
-        {COLLECTION_TYPES.map((type) => (
+        {COLLECTION_STYLES.map((type) => (
           <SelectItem
             key={type}
             value={type}
             onMouseEnter={() => {
-              uiStore$.previewType.set(type);
+              uiStore$.previewStyle.set(type);
             }}
           >
-            {TYPE_LABELS[type]}
+            {STYLE_LABELS[type]}
           </SelectItem>
         ))}
       </SelectContent>

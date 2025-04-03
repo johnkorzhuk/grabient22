@@ -1,5 +1,4 @@
-import type { CollectionType } from '~/stores/ui';
-import type { CoeffsRanges, CollectionPreset } from '~/types';
+import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '~/types';
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
   return withAlpha ? coeffs : coeffs.map((channels) => channels.slice(0, 3));
@@ -33,8 +32,8 @@ export const getRandomCoeffsFromRanges = (ranges: CoeffsRanges, showAlpha: boole
   );
 };
 
-export function getCollectionStyle(
-  type: CollectionType = 'linearGradient',
+export function getCollectionStyleCSS(
+  type: CollectionStyle = 'linearGradient',
   processedColors: number[][],
   angle: number = 90,
 ): React.CSSProperties {
@@ -162,7 +161,7 @@ const TAU = Math.PI * 2;
  * See https://github.com/thi-ng/umbrella/blob/38ecd7cd02564594ab21dbf0d84a44222fd7e4ef/packages/color/src/cosine-gradients.ts#L246
  *
  * @param numStops Number of color stops to generate
- * @param coeffs Cosine gradient coefficients (from applyGlobals)
+ * @param coeffs Cosine gradient coefficients
  * @returns Array of color arrays (RGB or RGBA)
  */
 export function cosineGradient(numStops: number, coeffs: number[][]): number[][] {

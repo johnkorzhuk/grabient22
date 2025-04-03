@@ -30,7 +30,7 @@ export function createContextFactory<ContextData>(options?: {
   return [context.Provider, useContextFactory] as const;
 }
 
-export const validateItemHeight = (min: number, max: number) => (input: number) => {
+export const validateRowHeight = (min: number, max: number) => (input: number) => {
   const result = v.safeParse(v.pipe(v.number(), v.minValue(min), v.maxValue(max)), input);
 
   if (!result.success && result.issues && result.issues.length > 0) {
