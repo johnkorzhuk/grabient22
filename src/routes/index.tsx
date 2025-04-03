@@ -62,15 +62,15 @@ export const Route = createFileRoute('/')({
   loader: async () => {
     return await fetchCollections();
   },
-  // headers: () => {
-  //   return {
-  //     'cache-control': 'public, max-age=3600, must-revalidate', // 1 hour
-  //     'cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=1800, durable', // 1 hour + 30min stale
-  //     // from https://github.com/TanStack/tanstack.com/blob/5ee97b505d0f9ef3fdbff12a5f70cfaad60a795a/app/routes/%24libraryId/%24version.docs.tsx#L37
-  //     // 'cache-control': 'public, max-age=0, must-revalidate',
-  //     // 'cdn-cache-control': 'max-age=300, stale-while-revalidate=300, durable',
-  //   };
-  // },
+  headers: () => {
+    return {
+      'cache-control': 'public, max-age=3600, must-revalidate', // 1 hour
+      'cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=1800, durable', // 1 hour + 30min stale
+      // from https://github.com/TanStack/tanstack.com/blob/5ee97b505d0f9ef3fdbff12a5f70cfaad60a795a/app/routes/%24libraryId/%24version.docs.tsx#L37
+      // 'cache-control': 'public, max-age=0, must-revalidate',
+      // 'cdn-cache-control': 'max-age=300, stale-while-revalidate=300, durable',
+    };
+  },
 });
 
 function CollectionRow({
@@ -119,17 +119,19 @@ function CollectionRow({
     }
   }, [hovered, index, onAnchorStateChange]);
 
-  return (
-    <li
-      className="relative"
-      style={{
-        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-        ...getCollectionStyle(searchData.type, gradientColors),
-      }}
-    >
-      <Separator ref={ref} />
-    </li>
-  );
+  console.log({ gradientColors });
+  return null;
+  // return (
+  //   <li
+  //     className="relative"
+  //     style={{
+  //       height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
+  //       ...getCollectionStyle(searchData.type, gradientColors),
+  //     }}
+  //   >
+  //     <Separator ref={ref} />
+  //   </li>
+  // );
 }
 
 function CollectionsDisplay() {
