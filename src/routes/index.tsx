@@ -97,16 +97,32 @@ function CollectionRow({
 
   // Generate the colors using cosineGradient
   const numStops = collection.numStops || processedCoeffs.length;
-  // const swatches = cosineGradient(numStops, processedCoeffs);
+  const swatches = cosineGradient(numStops, processedCoeffs);
 
-  // const vecColors = multiCosineGradient({
-  //   num: numStops - 1,
-  //   stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
-  //   tx: srgb,
-  // });
+  // Add safety checks and clamping for color values
+  const vecColors = multiCosineGradient({
+    num: numStops - 1,
+    stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
+    tx: srgb,
+  });
 
-  // // Convert Vec objects to regular number arrays
-  // const gradientColors = vecColors.map((vec) => Array.from(vec));
+  // Add validation when converting Vec objects to arrays
+  const gradientColors = vecColors.map((vec) => {
+    const array = Array.from(vec);
+    // Clamp values between 0 and 1
+    return array.map((value) =>
+      Math.min(
+        1,
+        Math.max(
+          0,
+          // Handle NaN and Infinity
+          Number.isFinite(value) ? value : 0,
+        ),
+      ),
+    );
+  });
+
+  console.log(gradientColors);
 
   useEffect(() => {
     if (hovered && ref.current) {
@@ -118,21 +134,18 @@ function CollectionRow({
       onAnchorStateChange(null, index, null);
     }
   }, [hovered, index, onAnchorStateChange]);
-  console.log('yo');
 
-  // console.log({ gradientColors });
-  return null;
-  // return (
-  //   <li
-  //     className="relative"
-  //     style={{
-  //       height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-  //       ...getCollectionStyle(searchData.type, gradientColors),
-  //     }}
-  //   >
-  //     <Separator ref={ref} />
-  //   </li>
-  // );
+  return (
+    <li
+      className="relative"
+      style={{
+        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
+        ...getCollectionStyle(searchData.type, gradientColors),
+      }}
+    >
+      <Separator ref={ref} />
+    </li>
+  );
 }
 
 function CollectionsDisplay() {
