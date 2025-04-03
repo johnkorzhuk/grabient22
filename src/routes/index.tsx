@@ -9,9 +9,8 @@ import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
 import { applyGlobals, getCoeffs } from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
-
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useDebouncedCallback, useHover, usePrevious } from '@mantine/hooks';
+import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
 import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -226,7 +225,7 @@ function CollectionsDisplay() {
     setLocalItemHeight(finalHeight);
 
     // Debounced update to URL
-    debouncedUpdateURL(finalHeight);
+    throttledUpdateURL(finalHeight);
   };
 
   // Function to adjust scroll position on resize
@@ -267,6 +266,20 @@ function CollectionsDisplay() {
     });
   };
 
+  const throttledUpdateURL = useThrottledCallback((height: number) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        itemHeight: height,
+      }),
+      replace: true,
+    });
+
+    setTimeout(() => {
+      resizeInProgressRef.current = false;
+    }, 100);
+  }, 150);
+
   // Use layout effect to apply scroll adjustments after render but before paint
   useLayoutEffect(() => {
     if (resizeInProgressRef.current) {
@@ -285,21 +298,6 @@ function CollectionsDisplay() {
       return () => clearTimeout(resetTimer);
     }
   }, [resizeInProgressRef.current]);
-
-  // Debounced function to update URL state
-  const debouncedUpdateURL = useDebouncedCallback((height: number) => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        itemHeight: height,
-      }),
-      replace: true,
-    });
-
-    setTimeout(() => {
-      resizeInProgressRef.current = false;
-    }, 100);
-  }, 150);
 
   return (
     <>
