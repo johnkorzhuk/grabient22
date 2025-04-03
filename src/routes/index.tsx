@@ -45,7 +45,10 @@ export const collectionTypeValidator = v.union(COLLECTION_TYPES.map((t) => v.lit
 export type CollectionType = v.InferOutput<typeof collectionTypeValidator>;
 
 const searchValidatorSchema = v.object({
-  itemHeight: v.pipe(v.number(), v.transform(validateItemHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT))),
+  itemHeight: v.optional(
+    v.fallback(itemHeightValidator, SEARCH_DEFAULTS.itemHeight),
+    SEARCH_DEFAULTS.itemHeight,
+  ),
   type: v.optional(v.fallback(collectionTypeValidator, SEARCH_DEFAULTS.type), SEARCH_DEFAULTS.type),
 });
 
