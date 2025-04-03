@@ -48,6 +48,15 @@ export const Route = createFileRoute('/')({
   loader: async () => {
     return await fetchCollections();
   },
+  headers: () => {
+    return {
+      'cache-control': 'public, max-age=3600, must-revalidate', // 1 hour
+      'cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=1800, durable', // 1 hour + 30min stale
+      // from https://github.com/TanStack/tanstack.com/blob/5ee97b505d0f9ef3fdbff12a5f70cfaad60a795a/app/routes/%24libraryId/%24version.docs.tsx#L37
+      // 'cache-control': 'public, max-age=0, must-revalidate',
+      // 'cdn-cache-control': 'max-age=300, stale-while-revalidate=300, durable',
+    };
+  },
 });
 
 // Gradient Item component
@@ -105,7 +114,6 @@ function CollectionsDisplay() {
   const scrollContainerRef = useRef<HTMLUListElement>(null);
   const activeElementRef = useRef<HTMLDivElement | null>(null);
   const resizeInProgressRef = useRef<boolean>(false);
-
   const activeItemPositionRef = useRef<{
     // Position of the element relative to the top of the viewport
     viewportRelativePosition: number;
@@ -193,7 +201,6 @@ function CollectionsDisplay() {
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
     const parsed = v.safeParse(itemHeightValidator, truncatedValue);
-
     let finalHeight = truncatedValue;
 
     if (!parsed.success && parsed.issues && parsed.issues.length > 0) {

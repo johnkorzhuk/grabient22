@@ -4,8 +4,8 @@ import type { AppCollection } from '~/types';
 
 // Create a server function without static prerendering
 export const fetchCollections = createServerFn({
-  // Set to undefined to run as a regular server function.
-  type: import.meta.env.PROD ? 'static' : undefined,
+  method: 'GET',
+  response: 'data',
 }).handler(async () => {
   const CONVEX_SITE_URL = import.meta.env.VITE_CONVEX_SITE_URL;
 

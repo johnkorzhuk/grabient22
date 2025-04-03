@@ -7,10 +7,10 @@ export default defineConfig({
   },
   server: {
     preset: 'netlify',
-    prerender: {
-      routes: ['/'],
-      crawlLinks: false,
-    },
+    // prerender: {
+    //   routes: ['/'],
+    //   crawlLinks: false,
+    // },
   },
   vite: {
     plugins: [
