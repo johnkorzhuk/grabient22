@@ -151,3 +151,50 @@ export function getCollectionStyle(
       return {};
   }
 }
+
+// Add this to your lib/cosineGradient.ts file
+
+// Constants
+const TAU = Math.PI * 2;
+
+/**
+ * Optimized cosine gradient generator that directly produces color arrays
+ * without the overhead of the @thi.ng/color implementation.
+ *
+ * @param numStops Number of color stops to generate
+ * @param coeffs Cosine gradient coefficients (from applyGlobals)
+ * @returns Array of color arrays (RGB or RGBA)
+ */
+export function optimizedCosineGradient(numStops: number, coeffs: number[][]): number[][] {
+  const result: number[][] = [];
+
+  // Use a single array allocation for temporary values
+  const tempColor = new Array(coeffs[0].length);
+
+  // Pre-extract coefficient arrays for better performance
+  const offsets = coeffs[0];
+  const amplitudes = coeffs[1];
+  const frequencies = coeffs[2];
+  const phases = coeffs[3];
+
+  // Calculate the colors evenly spaced from 0 to 1
+  for (let i = 0; i < numStops; i++) {
+    const t = numStops > 1 ? i / (numStops - 1) : 0;
+
+    // Calculate each color channel
+    for (let channel = 0; channel < offsets.length; channel++) {
+      // Cosine gradient formula: offset + amplitude * cos(2π * (frequency * t + phase))
+      const value =
+        offsets[channel] +
+        amplitudes[channel] * Math.cos(TAU * (frequencies[channel] * t + phases[channel]));
+
+      // Clamp the value between 0 and 1
+      tempColor[channel] = Math.max(0, Math.min(1, value));
+    }
+
+    // Create a new array for each color to ensure no shared references
+    result.push([...tempColor]);
+  }
+
+  return result;
+}

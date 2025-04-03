@@ -6,7 +6,12 @@ import {
   useSearch,
 } from '@tanstack/react-router';
 import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import { applyGlobals, getCoeffs, getCollectionStyle } from '~/lib/cosineGradient';
+import {
+  applyGlobals,
+  getCoeffs,
+  getCollectionStyle,
+  optimizedCosineGradient,
+} from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
@@ -74,73 +79,55 @@ export const Route = createFileRoute('/')({
   },
 });
 
-// Memoized version of the component to prevent unnecessary recalculations
-const CollectionRow = memo(
-  function CollectionRow({
-    collection,
-    itemHeight,
-    onAnchorStateChange,
-    index,
-  }: {
-    collection: AppCollection;
-    itemHeight: number;
-    onAnchorStateChange: (
-      centerY: number | null,
-      index: number,
-      element: HTMLDivElement | null,
-    ) => void;
-    index: number;
-  }) {
-    const searchData = useSearch({ from: '/' });
-    const { hovered, ref } = useHover<HTMLDivElement>();
+function CollectionRow({
+  collection,
+  itemHeight,
+  onAnchorStateChange,
+  index,
+}: {
+  collection: AppCollection;
+  itemHeight: number;
+  onAnchorStateChange: (
+    centerY: number | null,
+    index: number,
+    element: HTMLDivElement | null,
+  ) => void;
+  index: number;
+}) {
+  const searchData = useSearch({ from: '/' });
+  const { hovered, ref } = useHover<HTMLDivElement>();
 
-    // Use useMemo to prevent recalculating the gradient on every render
-    const gradientColors = useMemo(() => {
-      // Process coefficients only when needed
-      const processedCoeffs = applyGlobals(
-        getCoeffs(collection.coeffs),
-        collection.globals,
-      ) as CosGradientSpec;
+  // Process coefficients
+  const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
 
-      // Generate colors directly using cosineGradient to avoid unnecessary steps
-      const numStops = collection.numStops || processedCoeffs.length;
+  // Use our custom gradient generator directly
+  const numStops = collection.numStops || processedCoeffs.length;
+  const gradientColors = optimizedCosineGradient(numStops, processedCoeffs);
 
-      // Generate the colors directly with one step instead of two
-      return cosineGradient(numStops, processedCoeffs, srgb).map((vec) => [...vec]);
-    }, [collection.coeffs, collection.globals, collection.numStops]);
+  // Effect for hover state
+  useEffect(() => {
+    if (hovered && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const centerY = rect.top + rect.height / 2;
 
-    useEffect(() => {
-      if (hovered && ref.current) {
-        const rect = ref.current.getBoundingClientRect();
-        const centerY = rect.top + rect.height / 2;
+      onAnchorStateChange(centerY, index, ref.current);
+    } else if (!hovered) {
+      onAnchorStateChange(null, index, null);
+    }
+  }, [hovered, index, onAnchorStateChange]);
 
-        onAnchorStateChange(centerY, index, ref.current);
-      } else if (!hovered) {
-        onAnchorStateChange(null, index, null);
-      }
-    }, [hovered, index, onAnchorStateChange]);
-
-    return (
-      <li
-        className="relative"
-        style={{
-          height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-          ...getCollectionStyle(searchData.type, gradientColors),
-        }}
-      >
-        <Separator ref={ref} />
-      </li>
-    );
-  },
-  // Custom comparison function for memo to prevent unnecessary rerenders
-  (prevProps, nextProps) => {
-    return (
-      prevProps.itemHeight === nextProps.itemHeight &&
-      prevProps.index === nextProps.index &&
-      prevProps.collection._id === nextProps.collection._id
-    );
-  },
-);
+  return (
+    <li
+      className="relative"
+      style={{
+        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
+        ...getCollectionStyle(searchData.type, gradientColors),
+      }}
+    >
+      <Separator ref={ref} />
+    </li>
+  );
+}
 
 function CollectionsDisplay() {
   const collections = useLoaderData({ from: '/' }) as AppCollection[];
