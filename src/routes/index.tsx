@@ -97,16 +97,16 @@ function CollectionRow({
 
   // Generate the colors using cosineGradient
   const numStops = collection.numStops || processedCoeffs.length;
-  const swatches = cosineGradient(numStops, processedCoeffs);
+  // const swatches = cosineGradient(numStops, processedCoeffs);
 
-  const vecColors = multiCosineGradient({
-    num: numStops - 1,
-    stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
-    tx: srgb,
-  });
+  // const vecColors = multiCosineGradient({
+  //   num: numStops - 1,
+  //   stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
+  //   tx: srgb,
+  // });
 
-  // Convert Vec objects to regular number arrays
-  const gradientColors = vecColors.map((vec) => Array.from(vec));
+  // // Convert Vec objects to regular number arrays
+  // const gradientColors = vecColors.map((vec) => Array.from(vec));
 
   useEffect(() => {
     if (hovered && ref.current) {
@@ -118,8 +118,9 @@ function CollectionRow({
       onAnchorStateChange(null, index, null);
     }
   }, [hovered, index, onAnchorStateChange]);
+  console.log('yo');
 
-  console.log({ gradientColors });
+  // console.log({ gradientColors });
   return null;
   // return (
   //   <li
