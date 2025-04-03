@@ -6,7 +6,7 @@ import {
   useSearch,
 } from '@tanstack/react-router';
 import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import { applyGlobals, getCoeffs } from '~/lib/cosineGradient';
+import { applyGlobals, getCoeffs, getCollectionStyle } from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
@@ -14,27 +14,39 @@ import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
 import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { cosineGradient, multiCosineGradient, srgb, type CosGradientSpec } from '@thi.ng/color';
+import { validateItemHeight } from '~/lib/utils';
 
 // Constants
 const SEARCH_DEFAULTS = {
   itemHeight: 25,
+  type: 'linearGradient' as const,
 };
 
 const MIN_ITEM_HEIGHT = 20;
 const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
 
 // Validators
-const itemHeightValidator = v.pipe(
+export const itemHeightValidator = v.pipe(
   v.number(),
   v.minValue(MIN_ITEM_HEIGHT),
   v.maxValue(MAX_ITEM_HEIGHT),
 );
 
+export const COLLECTION_TYPES = [
+  'linearGradient',
+  'linearSwatches',
+  'angularGradient',
+  'angularSwatches',
+] as const;
+
+export const collectionTypeValidator = v.union(COLLECTION_TYPES.map((t) => v.literal(t)));
+
+export type CollectionType = v.InferOutput<typeof collectionTypeValidator>;
+
 const searchValidatorSchema = v.object({
-  itemHeight: v.optional(
-    v.fallback(itemHeightValidator, SEARCH_DEFAULTS.itemHeight),
-    SEARCH_DEFAULTS.itemHeight,
-  ),
+  itemHeight: v.pipe(v.number(), v.transform(validateItemHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT))),
+  type: v.optional(v.fallback(collectionTypeValidator, SEARCH_DEFAULTS.type), SEARCH_DEFAULTS.type),
 });
 
 // Route definition
@@ -58,8 +70,7 @@ export const Route = createFileRoute('/')({
   },
 });
 
-// Gradient Item component
-function GradientItem({
+function CollectionRow({
   collection,
   itemHeight,
   onAnchorStateChange,
@@ -74,8 +85,25 @@ function GradientItem({
   ) => void;
   index: number;
 }) {
-  const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
+  const searchData = useSearch({ from: '/' });
+  const processedCoeffs = applyGlobals(
+    getCoeffs(collection.coeffs),
+    collection.globals,
+  ) as CosGradientSpec;
   const { hovered, ref } = useHover<HTMLDivElement>();
+
+  // Generate the colors using cosineGradient
+  const numStops = collection.numStops || processedCoeffs.length;
+  const swatches = cosineGradient(numStops, processedCoeffs);
+
+  const vecColors = multiCosineGradient({
+    num: numStops - 1,
+    stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
+    tx: srgb,
+  });
+
+  // Convert Vec objects to regular number arrays
+  const gradientColors = vecColors.map((vec) => Array.from(vec));
 
   useEffect(() => {
     if (hovered && ref.current) {
@@ -93,10 +121,7 @@ function GradientItem({
       className="relative"
       style={{
         height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-        background: `linear-gradient(90deg, 
-        rgb(${processedCoeffs[0][0] * 255}, ${processedCoeffs[0][1] * 255}, ${processedCoeffs[0][2] * 255}),
-        rgb(${processedCoeffs[1][0] * 255}, ${processedCoeffs[1][1] * 255}, ${processedCoeffs[1][2] * 255})
-      )`,
+        ...getCollectionStyle(searchData.type, gradientColors),
       }}
     >
       <Separator ref={ref} />
@@ -199,18 +224,7 @@ function CollectionsDisplay() {
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
-    const parsed = v.safeParse(itemHeightValidator, truncatedValue);
-    let finalHeight = truncatedValue;
-
-    if (!parsed.success && parsed.issues && parsed.issues.length > 0) {
-      const rangeIssue = parsed.issues.find(
-        (issue) => issue.type === 'min_value' || issue.type === 'max_value',
-      );
-
-      if (rangeIssue) {
-        finalHeight = rangeIssue.requirement;
-      }
-    }
+    const finalHeight = validateItemHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT)(truncatedValue);
 
     // Mark resize as in progress
     resizeInProgressRef.current = true;
@@ -311,7 +325,7 @@ function CollectionsDisplay() {
       >
         <ul className="h-full w-full overflow-auto" ref={scrollContainerRef}>
           {collections.map((collection, index) => (
-            <GradientItem
+            <CollectionRow
               key={collection._id}
               collection={collection}
               itemHeight={localItemHeight}
