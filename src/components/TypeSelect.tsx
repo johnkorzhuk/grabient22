@@ -9,6 +9,13 @@ import {
 } from '~/components/ui/select';
 import { COLLECTION_TYPES, uiStore$, type CollectionType } from '~/stores/ui';
 
+const TYPE_LABELS: Record<CollectionType, string> = {
+  linearGradient: 'Linear Gradient',
+  linearSwatches: 'Linear Swatches',
+  angularGradient: 'Angular Gradient',
+  angularSwatches: 'Angular Swatches',
+};
+
 export const TypeSelect = observer(function TypeSelect({
   value,
   onValueChange,
@@ -21,7 +28,7 @@ export const TypeSelect = observer(function TypeSelect({
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue>{value}</SelectValue>
+        <SelectValue>{TYPE_LABELS[value]}</SelectValue>
       </SelectTrigger>
       <SelectContent
         onMouseLeave={() => {
@@ -38,7 +45,7 @@ export const TypeSelect = observer(function TypeSelect({
               uiStore$.previewType.set(type);
             }}
           >
-            {type}
+            {TYPE_LABELS[type]}
           </SelectItem>
         ))}
       </SelectContent>
