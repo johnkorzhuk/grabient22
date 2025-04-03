@@ -1,8 +1,8 @@
 import { ThemeToggle } from './theme/ThemeToggle';
 import { forwardRef } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { COLLECTION_TYPES, type CollectionType } from '~/routes';
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { type CollectionType } from '~/stores/ui';
+import { TypeSelect } from './TypeSelect';
 
 /** be sure to update this if content is changed in AppHeader */
 export const APP_HEADER_HEIGHT = 60.67;
@@ -20,7 +20,6 @@ export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
       replace: true,
     });
   };
-  console.log(searchData.type);
 
   return (
     <header
@@ -38,18 +37,7 @@ export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
           >
             About
           </a>
-          <Select value={searchData.type} onValueChange={handleTypeChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue>{searchData.type}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {COLLECTION_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <TypeSelect value={searchData.type} onValueChange={handleTypeChange} />
         </div>
         <ThemeToggle />
       </div>

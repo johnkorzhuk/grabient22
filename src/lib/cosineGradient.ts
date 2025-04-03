@@ -1,4 +1,4 @@
-import type { CollectionType } from '~/routes';
+import type { CollectionType } from '~/stores/ui';
 import type { CoeffsRanges, CollectionPreset } from '~/types';
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
@@ -158,14 +158,14 @@ export function getCollectionStyle(
 const TAU = Math.PI * 2;
 
 /**
- * Optimized cosine gradient generator that directly produces color arrays
- * without the overhead of the @thi.ng/color implementation.
+ * Cosine gradient generator that directly produces color arrays
+ * See https://github.com/thi-ng/umbrella/blob/38ecd7cd02564594ab21dbf0d84a44222fd7e4ef/packages/color/src/cosine-gradients.ts#L246
  *
  * @param numStops Number of color stops to generate
  * @param coeffs Cosine gradient coefficients (from applyGlobals)
  * @returns Array of color arrays (RGB or RGBA)
  */
-export function optimizedCosineGradient(numStops: number, coeffs: number[][]): number[][] {
+export function cosineGradient(numStops: number, coeffs: number[][]): number[][] {
   const result: number[][] = [];
 
   // Use a single array allocation for temporary values

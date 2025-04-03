@@ -6,22 +6,17 @@ import {
   useSearch,
 } from '@tanstack/react-router';
 import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import {
-  applyGlobals,
-  getCoeffs,
-  getCollectionStyle,
-  optimizedCosineGradient,
-} from '~/lib/cosineGradient';
+import { applyGlobals, getCoeffs, getCollectionStyle, cosineGradient } from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
 import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { cosineGradient, srgb, type CosGradientSpec } from '@thi.ng/color';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateItemHeight } from '~/lib/utils';
-import { memo } from 'react';
+import { collectionTypeValidator, uiStore$ } from '~/stores/ui';
+import { observer, use$ } from '@legendapp/state/react';
 
 // Constants
 const SEARCH_DEFAULTS = {
@@ -29,26 +24,14 @@ const SEARCH_DEFAULTS = {
   type: 'linearGradient' as const,
 };
 
-const MIN_ITEM_HEIGHT = 20;
-const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
+export const MIN_ITEM_HEIGHT = 20;
+export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
 
-// Validators
 export const itemHeightValidator = v.pipe(
   v.number(),
   v.minValue(MIN_ITEM_HEIGHT),
   v.maxValue(MAX_ITEM_HEIGHT),
 );
-
-export const COLLECTION_TYPES = [
-  'linearGradient',
-  'linearSwatches',
-  'angularGradient',
-  'angularSwatches',
-] as const;
-
-export const collectionTypeValidator = v.union(COLLECTION_TYPES.map((t) => v.literal(t)));
-
-export type CollectionType = v.InferOutput<typeof collectionTypeValidator>;
 
 const searchValidatorSchema = v.object({
   itemHeight: v.optional(
@@ -79,7 +62,7 @@ export const Route = createFileRoute('/')({
   },
 });
 
-function CollectionRow({
+const CollectionRow = observer(function CollectionRow({
   collection,
   itemHeight,
   onAnchorStateChange,
@@ -96,13 +79,14 @@ function CollectionRow({
 }) {
   const searchData = useSearch({ from: '/' });
   const { hovered, ref } = useHover<HTMLDivElement>();
+  const previewType = use$(uiStore$.previewType);
 
   // Process coefficients
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
 
   // Use our custom gradient generator directly
   const numStops = collection.numStops || processedCoeffs.length;
-  const gradientColors = optimizedCosineGradient(numStops, processedCoeffs);
+  const gradientColors = cosineGradient(numStops, processedCoeffs);
 
   // Effect for hover state
   useEffect(() => {
@@ -121,13 +105,13 @@ function CollectionRow({
       className="relative"
       style={{
         height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-        ...getCollectionStyle(searchData.type, gradientColors),
+        ...getCollectionStyle(previewType || searchData.type, gradientColors),
       }}
     >
       <Separator ref={ref} />
     </li>
   );
-}
+});
 
 function CollectionsDisplay() {
   const collections = useLoaderData({ from: '/' }) as AppCollection[];
