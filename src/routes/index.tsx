@@ -95,10 +95,11 @@ function CollectionRow({
   ) as CosGradientSpec;
   const { hovered, ref } = useHover<HTMLDivElement>();
 
-  // Generate the colors using cosineGradient
+  // Generate the colors using cosineGradient - this creates the correct base swatches
   const numStops = collection.numStops || processedCoeffs.length;
   const swatches = cosineGradient(numStops, processedCoeffs);
 
+  // Use multiCosineGradient to create the final gradient colors
   const vecColors = multiCosineGradient({
     num: numStops - 1,
     stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
@@ -106,9 +107,10 @@ function CollectionRow({
   });
 
   // Convert Vec objects to regular number arrays
-  const gradientColors = vecColors.map((vec) => Array.from(vec));
+  const gradientColors = vecColors.map((vec) => [...vec]);
 
-  console.log(gradientColors);
+  // No need to use Array.from - directly use the colors as they are
+  // The getCollectionStyle function will handle the conversion to RGB strings
 
   useEffect(() => {
     if (hovered && ref.current) {
