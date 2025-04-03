@@ -13,9 +13,10 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/componen
 import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
 import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { cosineGradient, multiCosineGradient, srgb, type CosGradientSpec } from '@thi.ng/color';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { cosineGradient, srgb, type CosGradientSpec } from '@thi.ng/color';
 import { validateItemHeight } from '~/lib/utils';
+import { memo } from 'react';
 
 // Constants
 const SEARCH_DEFAULTS = {
@@ -73,68 +74,73 @@ export const Route = createFileRoute('/')({
   },
 });
 
-function CollectionRow({
-  collection,
-  itemHeight,
-  onAnchorStateChange,
-  index,
-}: {
-  collection: AppCollection;
-  itemHeight: number;
-  onAnchorStateChange: (
-    centerY: number | null,
-    index: number,
-    element: HTMLDivElement | null,
-  ) => void;
-  index: number;
-}) {
-  const searchData = useSearch({ from: '/' });
-  const processedCoeffs = applyGlobals(
-    getCoeffs(collection.coeffs),
-    collection.globals,
-  ) as CosGradientSpec;
-  const { hovered, ref } = useHover<HTMLDivElement>();
+// Memoized version of the component to prevent unnecessary recalculations
+const CollectionRow = memo(
+  function CollectionRow({
+    collection,
+    itemHeight,
+    onAnchorStateChange,
+    index,
+  }: {
+    collection: AppCollection;
+    itemHeight: number;
+    onAnchorStateChange: (
+      centerY: number | null,
+      index: number,
+      element: HTMLDivElement | null,
+    ) => void;
+    index: number;
+  }) {
+    const searchData = useSearch({ from: '/' });
+    const { hovered, ref } = useHover<HTMLDivElement>();
 
-  // Generate the colors using cosineGradient - this creates the correct base swatches
-  const numStops = collection.numStops || processedCoeffs.length;
-  const swatches = cosineGradient(numStops, processedCoeffs);
+    // Use useMemo to prevent recalculating the gradient on every render
+    const gradientColors = useMemo(() => {
+      // Process coefficients only when needed
+      const processedCoeffs = applyGlobals(
+        getCoeffs(collection.coeffs),
+        collection.globals,
+      ) as CosGradientSpec;
 
-  // Use multiCosineGradient to create the final gradient colors
-  const vecColors = multiCosineGradient({
-    num: numStops - 1,
-    stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
-    tx: srgb,
-  });
+      // Generate colors directly using cosineGradient to avoid unnecessary steps
+      const numStops = collection.numStops || processedCoeffs.length;
 
-  // Convert Vec objects to regular number arrays
-  const gradientColors = vecColors.map((vec) => [...vec]);
+      // Generate the colors directly with one step instead of two
+      return cosineGradient(numStops, processedCoeffs, srgb).map((vec) => [...vec]);
+    }, [collection.coeffs, collection.globals, collection.numStops]);
 
-  // No need to use Array.from - directly use the colors as they are
-  // The getCollectionStyle function will handle the conversion to RGB strings
+    useEffect(() => {
+      if (hovered && ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
 
-  useEffect(() => {
-    if (hovered && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      const centerY = rect.top + rect.height / 2;
+        onAnchorStateChange(centerY, index, ref.current);
+      } else if (!hovered) {
+        onAnchorStateChange(null, index, null);
+      }
+    }, [hovered, index, onAnchorStateChange]);
 
-      onAnchorStateChange(centerY, index, ref.current);
-    } else if (!hovered) {
-      onAnchorStateChange(null, index, null);
-    }
-  }, [hovered, index, onAnchorStateChange]);
-
-  return (
-    <li
-      className="relative"
-      style={{
-        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
-        ...getCollectionStyle(searchData.type, gradientColors),
-      }}
-    >
-      <Separator ref={ref} />
-    </li>
-  );
-}
+    return (
+      <li
+        className="relative"
+        style={{
+          height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${itemHeight} / 100)`,
+          ...getCollectionStyle(searchData.type, gradientColors),
+        }}
+      >
+        <Separator ref={ref} />
+      </li>
+    );
+  },
+  // Custom comparison function for memo to prevent unnecessary rerenders
+  (prevProps, nextProps) => {
+    return (
+      prevProps.itemHeight === nextProps.itemHeight &&
+      prevProps.index === nextProps.index &&
+      prevProps.collection._id === nextProps.collection._id
+    );
+  },
+);
 
 function CollectionsDisplay() {
   const collections = useLoaderData({ from: '/' }) as AppCollection[];
