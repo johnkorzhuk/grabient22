@@ -6,7 +6,7 @@ export default defineConfig({
     appDirectory: 'src',
   },
   server: {
-    preset: 'netlify',
+    preset: 'vercel',
     // prerender: {
     //   routes: ['/'],
     //   crawlLinks: false,

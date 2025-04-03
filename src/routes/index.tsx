@@ -99,28 +99,14 @@ function CollectionRow({
   const numStops = collection.numStops || processedCoeffs.length;
   const swatches = cosineGradient(numStops, processedCoeffs);
 
-  // Add safety checks and clamping for color values
   const vecColors = multiCosineGradient({
     num: numStops - 1,
     stops: swatches.map((color, i) => [i / (swatches.length - 1), color]),
     tx: srgb,
   });
 
-  // Add validation when converting Vec objects to arrays
-  const gradientColors = vecColors.map((vec) => {
-    const array = Array.from(vec);
-    // Clamp values between 0 and 1
-    return array.map((value) =>
-      Math.min(
-        1,
-        Math.max(
-          0,
-          // Handle NaN and Infinity
-          Number.isFinite(value) ? value : 0,
-        ),
-      ),
-    );
-  });
+  // Convert Vec objects to regular number arrays
+  const gradientColors = vecColors.map((vec) => Array.from(vec));
 
   console.log(gradientColors);
 
