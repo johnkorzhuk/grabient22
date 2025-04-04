@@ -17,14 +17,20 @@ export const stepsValidator = v.pipe(
   v.maxValue(MAX_NUM_STEPS),
 );
 
+export const MIN_ANGLE = 0;
+export const MAX_ANGLE = 360;
+export const angleValidator = v.pipe(v.number(), v.minValue(MIN_ANGLE), v.maxValue(MAX_ANGLE));
+
 export interface UIStore {
   previewStyle: v.InferOutput<typeof collectionStyleValidator> | null;
   previewSteps: v.InferOutput<typeof stepsValidator> | null;
+  previewAngle: v.InferOutput<typeof angleValidator> | null;
 }
 
 export const INITIAL_UI_STATE: UIStore = {
   previewStyle: null,
   previewSteps: null,
+  previewAngle: null,
 };
 
 export const uiStore$ = observable<UIStore>(INITIAL_UI_STATE);

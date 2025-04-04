@@ -6,19 +6,18 @@ import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
-import { uiStore$ } from '~/stores/ui';
-import { MIN_STEPS, MAX_STEPS } from '~/routes';
+import { uiStore$, MIN_ANGLE, MAX_ANGLE } from '~/stores/ui';
 
 // Default values
-const defaultNumber = 5;
-const presets = [3, 5, 8, 13, 21, 34];
-const step = 1;
+const defaultAngle = 90.0;
+const presets = [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0];
+const step = 1.0; // Increment/decrement step for arrow keys
 
-export const StepsInput = observer(function NumberInputWithPresets() {
+export const AngleInput = observer(function AngleInput() {
   const navigate = useNavigate({ from: '/' });
-  const { steps: value } = useSearch({ from: '/' });
+  const { angle: value } = useSearch({ from: '/' });
   const previousValue = usePrevious(value);
-  const previewValue = use$(uiStore$.previewSteps);
+  const previewAngle = use$(uiStore$.previewAngle);
 
   // UI state
   const [open, setOpen] = useState(false);
@@ -27,9 +26,9 @@ export const StepsInput = observer(function NumberInputWithPresets() {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
-  // Validate number value
-  const validateNumber = (num: number): boolean => {
-    return num >= MIN_STEPS && num <= MAX_STEPS;
+  // Validate angle value
+  const validateAngle = (num: number): boolean => {
+    return num >= MIN_ANGLE && num <= MAX_ANGLE;
   };
 
   // Effect to handle open state based on focus
@@ -47,7 +46,7 @@ export const StepsInput = observer(function NumberInputWithPresets() {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: 'auto',
+          angle: 'auto',
         }),
         replace: true,
       });
@@ -55,14 +54,10 @@ export const StepsInput = observer(function NumberInputWithPresets() {
       const numValue = Number.parseFloat(newValue);
       if (!isNaN(numValue)) {
         // Only apply if valid
-        if (validateNumber(numValue)) {
-          navigate({
-            search: (prev) => ({
-              ...prev,
-              steps: numValue,
-            }),
-            replace: true,
-          });
+        if (validateAngle(numValue)) {
+          // Format to exactly one decimal place
+          const formattedAngle = parseFloat(numValue.toFixed(1));
+          uiStore$.previewAngle.set(formattedAngle);
         }
       }
     }
@@ -91,7 +86,7 @@ export const StepsInput = observer(function NumberInputWithPresets() {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: 'auto',
+          angle: 'auto',
         }),
         replace: true,
       });
@@ -106,21 +101,24 @@ export const StepsInput = observer(function NumberInputWithPresets() {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: previousValue || 'auto',
+          angle: previousValue || 'auto',
         }),
         replace: true,
       });
-    } else if (!validateNumber(numValue)) {
+    } else if (!validateAngle(numValue)) {
       // Number out of range, revert to previous value
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: previousValue || 'auto',
+          angle: previousValue || 'auto',
         }),
         replace: true,
       });
     }
     // If valid, no need to change anything
+
+    // Clear the preview
+    uiStore$.previewAngle.set(null);
   };
 
   // Handle input key down
@@ -129,17 +127,20 @@ export const StepsInput = observer(function NumberInputWithPresets() {
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
 
-      let currentValue = value === 'auto' ? defaultNumber : Number(value);
-      if (isNaN(currentValue)) currentValue = defaultNumber;
+      let currentValue = value === 'auto' ? defaultAngle : Number(value);
+      if (isNaN(currentValue)) currentValue = defaultAngle;
 
       const newValue = e.key === 'ArrowUp' ? currentValue + step : currentValue - step;
 
       // Only apply if valid
-      if (validateNumber(newValue)) {
+      if (validateAngle(newValue)) {
+        // Format to one decimal place
+        const formattedAngle = parseFloat(newValue.toFixed(1));
+
         navigate({
           search: (prev) => ({
             ...prev,
-            steps: newValue,
+            angle: formattedAngle,
           }),
           replace: true,
         });
@@ -150,12 +151,12 @@ export const StepsInput = observer(function NumberInputWithPresets() {
     if (e.key === 'Enter') {
       e.preventDefault();
 
-      // If we're in auto mode, set the value to the defaultNumber
+      // If we're in auto mode, set the value to the defaultAngle
       if (value === 'auto') {
         navigate({
           search: (prev) => ({
             ...prev,
-            steps: defaultNumber,
+            angle: defaultAngle,
           }),
           replace: true,
         });
@@ -164,12 +165,23 @@ export const StepsInput = observer(function NumberInputWithPresets() {
         const currentInputValue = inputRef.current?.value || '';
         const numValue = Number.parseFloat(currentInputValue);
 
-        if (isNaN(numValue) || !validateNumber(numValue)) {
+        if (isNaN(numValue) || !validateAngle(numValue)) {
           // Invalid value, revert to previous value
           navigate({
             search: (prev) => ({
               ...prev,
-              steps: previousValue || 'auto',
+              angle: previousValue || 'auto',
+            }),
+            replace: true,
+          });
+        } else {
+          // Format to one decimal place
+          const formattedAngle = parseFloat(numValue.toFixed(1));
+
+          navigate({
+            search: (prev) => ({
+              ...prev,
+              angle: formattedAngle,
             }),
             replace: true,
           });
@@ -186,7 +198,7 @@ export const StepsInput = observer(function NumberInputWithPresets() {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: previousValue || 'auto',
+          angle: previousValue || 'auto',
         }),
         replace: true,
       });
@@ -204,23 +216,23 @@ export const StepsInput = observer(function NumberInputWithPresets() {
   };
 
   // Handle value selection from dropdown
-  const handleValueClick = (clickedValue: number) => {
-    // If clicking the already selected value, toggle to auto
-    if (clickedValue === value) {
+  const handleValueClick = (clickedAngle: number) => {
+    // If clicking the already selected angle, toggle to auto
+    if (clickedAngle === value) {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: 'auto',
+          angle: 'auto',
         }),
         replace: true,
       });
-      uiStore$.previewSteps.set(null);
+      uiStore$.previewAngle.set(null);
     } else {
       // Otherwise set to the new value
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: clickedValue,
+          angle: clickedAngle,
         }),
         replace: true,
       });
@@ -230,10 +242,10 @@ export const StepsInput = observer(function NumberInputWithPresets() {
   // Determine the display value
   const displayValue = () => {
     if (isFocused) {
-      return value === 'auto' ? defaultNumber.toString() : value.toString();
+      return value === 'auto' ? defaultAngle.toString() : value.toString();
     } else {
       if (value === 'auto') {
-        return previewValue !== null ? previewValue.toString() : 'auto';
+        return previewAngle !== null ? previewAngle.toString() : 'auto';
       }
       return value.toString();
     }
@@ -271,11 +283,11 @@ export const StepsInput = observer(function NumberInputWithPresets() {
               'bg-transparent',
               'focus-visible:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              'pr-10',
-              value === 'auto' && !isFocused && !previewValue ? 'text-muted-foreground' : '',
+              'pr-10', // Space for the dropdown icon
+              value === 'auto' && !isFocused && !previewAngle ? 'text-muted-foreground' : '',
               'disable-animation-on-theme-change',
-              'border-0',
-              'font-medium',
+              'border-0', // Remove input border since we're using a parent border
+              'font-medium', // Match StyleSelect's text weight
             )}
           />
           <div
@@ -284,7 +296,7 @@ export const StepsInput = observer(function NumberInputWithPresets() {
               'absolute inset-y-0 right-0 flex items-center justify-center',
               'text-muted-foreground hover:text-foreground',
               'focus:outline-none',
-              'ml-2 pr-3',
+              'ml-2 pr-3', // Match StyleSelect's icon spacing
             )}
             onClick={handleButtonClick}
           >
@@ -300,8 +312,8 @@ export const StepsInput = observer(function NumberInputWithPresets() {
         alignOffset={0}
         avoidCollisions={false}
         onMouseLeave={() => {
-          if (previewValue !== null) {
-            uiStore$.previewSteps.set(null);
+          if (previewAngle !== null) {
+            uiStore$.previewAngle.set(null);
           }
         }}
       >
@@ -314,11 +326,11 @@ export const StepsInput = observer(function NumberInputWithPresets() {
                   value={preset.toString()}
                   onSelect={() => handleValueClick(preset)}
                   onMouseEnter={() => {
-                    uiStore$.previewSteps.set(preset);
+                    uiStore$.previewAngle.set(preset);
                   }}
                   className="cursor-pointer pl-3 relative w-full"
                 >
-                  {preset.toString()}
+                  {`${preset}°`}
                   <CheckIcon
                     className={cn(
                       'mr-2 h-4 w-4 absolute right-0',

@@ -2,6 +2,7 @@ import { ThemeToggle } from './theme/ThemeToggle';
 import { forwardRef } from 'react';
 import { StyleSelect } from './StyleSelect';
 import { StepsInput } from './StepsInput';
+import { AngleInput } from './AngleInput';
 
 /** be sure to update this if content is changed in AppHeader
  * using the ref for the height doesnt work with SSR
@@ -27,6 +28,7 @@ export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
           </a>
           <StyleSelect />
           <StepsInput />
+          <AngleInput />
         </div>
         <ThemeToggle />
       </div>

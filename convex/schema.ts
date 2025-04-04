@@ -7,7 +7,7 @@ import { COLLECTION_STYLES } from '../src/stores/ui';
 
 const numberTuple4Schema = z
   .tuple([z.number(), z.number(), z.number(), z.number()])
-  .describe('Represents a 4-component numerical tuple (e.g., RGBA or coefficient parameters).');
+  .describe('RGBA coefficient parameters.');
 
 const gradientCoeffsSchema = z.tuple([
   numberTuple4Schema.describe("Parameter 'a': Bias/Exposure vector."),
@@ -17,22 +17,25 @@ const gradientCoeffsSchema = z.tuple([
 ]);
 
 const styleSchema = z.enum(COLLECTION_STYLES);
+const stepsSchema = z.number().min(2).max(50);
+const angleSchema = z.number().min(0).max(360);
 
 export const collectionSchema = z.object({
   coeffs: gradientCoeffsSchema.describe(
     'Defines the structure for the four coefficient vectors [a, b, c, d] of the cosine palette formula.',
   ),
   globals: numberTuple4Schema.describe('Global modifier parameters [a, b, c, d].'),
-  style: styleSchema.describe('The type of gradient collection to generate.'),
-  steps: z.number().describe('Number of color stops generated.'),
+  style: styleSchema.describe('Style of gradient.'),
+  steps: stepsSchema.describe('Number of color stops.'),
+  angle: angleSchema.describe('Angle of gradient in degrees.'),
 });
 
-// Define the Collections table with individual field validators
 export const Collections = Table('collections', {
   coeffs: zodToConvex(gradientCoeffsSchema),
   globals: zodToConvex(numberTuple4Schema),
-  steps: v.number(),
+  steps: zodToConvex(stepsSchema),
   style: zodToConvex(styleSchema),
+  angle: zodToConvex(angleSchema),
 });
 
 export default defineSchema({

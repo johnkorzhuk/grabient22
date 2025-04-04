@@ -20,14 +20,17 @@ import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateRowHeight } from '~/lib/utils';
-import { collectionStyleValidator, uiStore$ } from '~/stores/ui';
+import { angleValidator, collectionStyleValidator, uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 
 const SEARCH_DEFAULTS = {
   rowHeight: 25,
   style: 'auto' as const,
   steps: 'auto' as const,
+  angle: 'auto' as const,
 };
+
+export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
 
 export const MIN_STEPS = 2;
 export const MAX_STEPS = 50;
@@ -54,6 +57,10 @@ const searchValidatorSchema = v.object({
   steps: v.optional(
     v.fallback(stepsWithAutoValidator, SEARCH_DEFAULTS.steps),
     SEARCH_DEFAULTS.steps,
+  ),
+  angle: v.optional(
+    v.fallback(angleWithAutoValidator, SEARCH_DEFAULTS.angle),
+    SEARCH_DEFAULTS.angle,
   ),
 });
 
@@ -99,6 +106,7 @@ const CollectionRow = observer(function CollectionRow({
   const { hovered, ref } = useHover<HTMLDivElement>();
   const previewStyle = use$(uiStore$.previewStyle);
   const previewSteps = use$(uiStore$.previewSteps);
+  const previewAngle = use$(uiStore$.previewAngle);
 
   // Process coefficients
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
@@ -112,6 +120,15 @@ const CollectionRow = observer(function CollectionRow({
   // Use our custom gradient generator with the determined number of steps
   const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
   const gradientColors = cosineGradient(numStops, processedCoeffs);
+
+  // Determine angle to use (collection's native angle or from URL/preview)
+  const angleToUse =
+    previewAngle !== null || searchData.angle !== 'auto'
+      ? (previewAngle ??
+        (typeof searchData.angle === 'number'
+          ? parseFloat(searchData.angle.toFixed(1))
+          : collection.angle || 90.0))
+      : collection.angle || 90.0; // Fallback to 90.0 if collection doesn't have angle
 
   // Effect for hover state
   useEffect(() => {
@@ -137,6 +154,7 @@ const CollectionRow = observer(function CollectionRow({
             ? collection.style // Use collection's style with fallback
             : previewStyle || (searchData.style as CollectionStyle),
           gradientColors,
+          angleToUse, // Pass the angle to the gradient CSS generator
         ),
       }}
     >
