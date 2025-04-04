@@ -13,7 +13,7 @@ import {
   cosineGradient,
 } from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
-import type { AppCollection } from '~/types';
+import type { AppCollection, CollectionStyle } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
 import * as v from 'valibot';
@@ -23,11 +23,16 @@ import { validateRowHeight } from '~/lib/utils';
 import { collectionStyleValidator, uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 
-// Constants
 const SEARCH_DEFAULTS = {
   rowHeight: 25,
-  style: 'linearGradient' as const,
+  style: 'auto' as const,
+  steps: 'auto' as const,
 };
+
+export const MIN_STEPS = 2;
+export const MAX_STEPS = 50;
+export const stepsValidator = v.pipe(v.number(), v.minValue(MIN_STEPS), v.maxValue(MAX_STEPS));
+export const stepsWithAutoValidator = v.union([v.literal('auto'), stepsValidator]);
 
 export const MIN_ITEM_HEIGHT = 10;
 export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
@@ -37,14 +42,18 @@ export const rowHeightValidator = v.pipe(
   v.maxValue(MAX_ITEM_HEIGHT),
 );
 
+// Updated validator that accepts 'auto' or a CollectionStyle
+export const styleValidator = v.union([v.literal('auto'), collectionStyleValidator]);
+
 const searchValidatorSchema = v.object({
   rowHeight: v.optional(
     v.fallback(rowHeightValidator, SEARCH_DEFAULTS.rowHeight),
     SEARCH_DEFAULTS.rowHeight,
   ),
-  style: v.optional(
-    v.fallback(collectionStyleValidator, SEARCH_DEFAULTS.style),
-    SEARCH_DEFAULTS.style,
+  style: v.optional(v.fallback(styleValidator, SEARCH_DEFAULTS.style), SEARCH_DEFAULTS.style),
+  steps: v.optional(
+    v.fallback(stepsWithAutoValidator, SEARCH_DEFAULTS.steps),
+    SEARCH_DEFAULTS.steps,
   ),
 });
 
@@ -56,7 +65,9 @@ export const Route = createFileRoute('/')({
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
   loader: async () => {
-    return await fetchCollections();
+    const data = await fetchCollections();
+    return data;
+    // return data.slice(0, 5);
   },
   headers: () => {
     return {
@@ -87,12 +98,19 @@ const CollectionRow = observer(function CollectionRow({
   const searchData = useSearch({ from: '/' });
   const { hovered, ref } = useHover<HTMLDivElement>();
   const previewStyle = use$(uiStore$.previewStyle);
+  const previewSteps = use$(uiStore$.previewSteps);
 
   // Process coefficients
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
 
-  // Use our custom gradient generator directly
-  const numStops = collection.steps;
+  // Determine steps to use (collection's native steps or from URL/preview)
+  const stepsToUse =
+    previewSteps !== null || searchData.steps !== 'auto'
+      ? (previewSteps ?? searchData.steps)
+      : collection.steps;
+
+  // Use our custom gradient generator with the determined number of steps
+  const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
   const gradientColors = cosineGradient(numStops, processedCoeffs);
 
   // Effect for hover state
@@ -112,7 +130,14 @@ const CollectionRow = observer(function CollectionRow({
       className="relative"
       style={{
         height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${rowHeight} / 100)`,
-        ...getCollectionStyleCSS(previewStyle || searchData.style, gradientColors),
+        ...getCollectionStyleCSS(
+          // If preview style is 'auto', use the collection's native style
+          // Otherwise use the selected style (preview or from search data)
+          (previewStyle || searchData.style) === 'auto'
+            ? collection.style // Use collection's style with fallback
+            : previewStyle || (searchData.style as CollectionStyle),
+          gradientColors,
+        ),
       }}
     >
       <Separator ref={ref} />

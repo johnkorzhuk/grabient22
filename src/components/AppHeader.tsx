@@ -1,26 +1,14 @@
 import { ThemeToggle } from './theme/ThemeToggle';
 import { forwardRef } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
 import { StyleSelect } from './StyleSelect';
-import type { CollectionStyle } from '~/types';
+import { StepsInput } from './StepsInput';
 
-/** be sure to update this if content is changed in AppHeader */
+/** be sure to update this if content is changed in AppHeader
+ * using the ref for the height doesnt work with SSR
+ */
 export const APP_HEADER_HEIGHT = 60.67;
 
 export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
-  const navigate = useNavigate({ from: '/' });
-  const searchData = useSearch({ from: '/' });
-
-  const handleTypeChange = (value: CollectionStyle) => {
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        type: value,
-      }),
-      replace: true,
-    });
-  };
-
   return (
     <header
       ref={ref}
@@ -37,7 +25,8 @@ export const AppHeader = forwardRef<HTMLElement>((_, ref) => {
           >
             About
           </a>
-          <StyleSelect value={searchData.style} onValueChange={handleTypeChange} />
+          <StyleSelect />
+          <StepsInput />
         </div>
         <ThemeToggle />
       </div>
