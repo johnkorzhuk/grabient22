@@ -10,12 +10,7 @@ export function serializeCoeffs(
   coeffs: CosineCoeffs,
   globals: [number, number, number, number],
 ): string {
-  const result = v.parse(coeffsSchema, coeffs) as [
-    [number, number, number, number],
-    [number, number, number, number],
-    [number, number, number, number],
-    [number, number, number, number],
-  ];
+  const result = v.parse(coeffsSchema, coeffs);
 
   // Format to 4 decimals and combine coeffs (dropping alpha) and globals
   const format = (n: number) => Number(n.toFixed(4));

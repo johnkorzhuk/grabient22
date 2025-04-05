@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 # Grabient Project Instructions
 
 Note: The project structure and routing information can be found in the project knowledge file `routeTree.gen.ts`.

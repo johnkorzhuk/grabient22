@@ -6,7 +6,8 @@ import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
-import { uiStore$, MIN_ANGLE, MAX_ANGLE } from '~/stores/ui';
+import { uiStore$ } from '~/stores/ui';
+import { MIN_ANGLE, MAX_ANGLE } from '~/lib/validators';
 
 // Default values
 const defaultAngle = 90.0;

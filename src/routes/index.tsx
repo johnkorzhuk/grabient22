@@ -20,9 +20,10 @@ import * as v from 'valibot';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateRowHeight } from '~/lib/utils';
-import { angleValidator, collectionStyleValidator, uiStore$ } from '~/stores/ui';
+import { uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { deserializeCoeffs } from '~/lib/serialization';
+import { angleValidator, collectionStyleValidator } from '~/lib/validators';
 
 const SEARCH_DEFAULTS = {
   rowHeight: 25,
@@ -64,7 +65,7 @@ const searchValidatorSchema = v.object({
     SEARCH_DEFAULTS.angle,
   ),
 });
-
+// new route: _layout.$grabient.tsx
 // Route definition
 export const Route = createFileRoute('/')({
   component: Home,

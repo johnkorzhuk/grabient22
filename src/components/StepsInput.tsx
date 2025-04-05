@@ -7,7 +7,7 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiStore$ } from '~/stores/ui';
-import { MIN_STEPS, MAX_STEPS } from '~/routes';
+import { MIN_STEPS, MAX_STEPS } from '~/routes/index';
 
 // Default values
 const defaultNumber = 5;

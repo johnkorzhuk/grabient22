@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { Table } from 'convex-helpers/server';
 import { z } from 'zod';
 import { zodToConvex } from 'convex-helpers/server/zod';
-import { COLLECTION_STYLES } from '../src/stores/ui';
+import { COLLECTION_STYLES } from '../src/lib/validators';
 
 // Define the exact type for a 4-element number tuple
 export const numberTuple4Schema = z

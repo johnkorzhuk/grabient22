@@ -6,8 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover
 import { Button } from '~/components/ui/button';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import type { styleValidator } from '~/routes';
-import { COLLECTION_STYLES, uiStore$ } from '~/stores/ui';
+import type { styleValidator } from '~/routes/index';
+import { uiStore$ } from '~/stores/ui';
+import { COLLECTION_STYLES } from '~/lib/validators';
 import type { CollectionStyle } from '~/types';
 
 type SelectCollectionStyle = v.InferOutput<typeof styleValidator>;
