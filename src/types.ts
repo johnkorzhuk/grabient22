@@ -8,8 +8,10 @@ export type SystemFields = '_id' | '_creationTime';
 
 export type CollectionPreset = Omit<Doc<'collections'>, SystemFields>;
 
+// Serialized collection type
 export type AppCollection = CollectionPreset & {
   _id: string;
+  serialized: string;
 };
 
 export type CoeffsRanges = [Tuple<number, 2>, Tuple<number, 2>, Tuple<number, 2>, Tuple<number, 2>];

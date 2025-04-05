@@ -22,6 +22,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateRowHeight } from '~/lib/utils';
 import { angleValidator, collectionStyleValidator, uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
+import { deserializeCoeffs } from '~/lib/serialization';
 
 const SEARCH_DEFAULTS = {
   rowHeight: 25,
@@ -345,6 +346,10 @@ function CollectionsDisplay() {
       return () => clearTimeout(resetTimer);
     }
   }, [resizeInProgressRef.current]);
+
+  console.log(collections);
+
+  console.log(deserializeCoeffs(collections[0].serialized));
 
   return (
     <>

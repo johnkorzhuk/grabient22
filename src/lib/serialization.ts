@@ -1,40 +1,55 @@
-import type { CosineCoeffs } from '~/types';
 import { coeffsSchema } from './cosineGradient';
-import SuperJSON from 'superjson';
 import * as v from 'valibot';
+import LZString from 'lz-string';
 
+type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
 /**
- * Serializes coefficient data to a URL-friendly string
+ * Serializes coefficient data to a URL-friendly string using Valibot validation
  */
-export function serializeCoeffs(coeffs: CosineCoeffs): string {
-  const result = v.parse(coeffsSchema, coeffs);
+export function serializeCoeffs(
+  coeffs: CosineCoeffs,
+  globals: [number, number, number, number],
+): string {
+  const result = v.parse(coeffsSchema, coeffs) as [
+    [number, number, number, number],
+    [number, number, number, number],
+    [number, number, number, number],
+    [number, number, number, number],
+  ];
 
-  // Convert to SuperJSON and encode to base64
-  const jsonString = SuperJSON.stringify(result);
-  return btoa(jsonString)
-    .replace(/\+/g, '-') // Make URL-safe
-    .replace(/\//g, '_')
-    .replace(/=+$/, ''); // Remove padding
+  // Format to 4 decimals and combine coeffs (dropping alpha) and globals
+  const format = (n: number) => Number(n.toFixed(4));
+  const data = [...result.map((vec) => [vec[0], vec[1], vec[2]]).flat(), ...globals];
+
+  // Convert to string and compress
+  const compressed = data.map(format).join(',');
+  return LZString.compressToEncodedURIComponent(compressed);
 }
 
 /**
  * Deserializes a URL string back to coefficient vectors
  */
-export function deserializeCoeffs(serialized: string): CosineCoeffs | null {
+export function deserializeCoeffs(
+  serialized: string,
+): { coeffs: CosineCoeffs; globals: [number, number, number, number] } | null {
   try {
-    // Restore URL-safe characters
-    const base64 = serialized.replace(/-/g, '+').replace(/_/g, '/');
+    const decompressed = LZString.decompressFromEncodedURIComponent(serialized);
+    const numbers = decompressed.split(',').map(Number);
 
-    // Add back padding if needed
-    const padding = '='.repeat((4 - (base64.length % 4)) % 4);
-    const paddedBase64 = base64 + padding;
+    // First 12 numbers are coeffs (4 vectors × 3 values), rest are globals
+    const coeffsData = numbers.slice(0, 12);
+    const globalsData = numbers.slice(12, 16) as [number, number, number, number];
 
-    // Decode and parse with SuperJSON
-    const jsonString = atob(paddedBase64);
-    const parsedData = SuperJSON.parse(jsonString);
+    // Reconstruct coeffs with alpha channel
+    const coeffsWithAlpha = [];
+    for (let i = 0; i < 12; i += 3) {
+      coeffsWithAlpha.push([coeffsData[i], coeffsData[i + 1], coeffsData[i + 2], 1]);
+    }
 
-    // Validate and transform
-    return v.parse(coeffsSchema, parsedData);
+    return {
+      coeffs: v.parse(coeffsSchema, coeffsWithAlpha),
+      globals: globalsData,
+    };
   } catch (error) {
     console.error('Failed to deserialize coefficients:', error);
     return null;

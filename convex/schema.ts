@@ -5,20 +5,38 @@ import { z } from 'zod';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { COLLECTION_STYLES } from '../src/stores/ui';
 
-const numberTuple4Schema = z
-  .tuple([z.number(), z.number(), z.number(), z.number()])
+// Define the exact type for a 4-element number tuple
+export const numberTuple4Schema = z
+  .array(z.number())
+  .length(4)
+  .transform((arr): [number, number, number, number] => arr as [number, number, number, number])
   .describe('RGBA coefficient parameters.');
 
-const gradientCoeffsSchema = z.tuple([
-  numberTuple4Schema.describe("Parameter 'a': Bias/Exposure vector."),
-  numberTuple4Schema.describe("Parameter 'b': Amplitude/Contrast vector."),
-  numberTuple4Schema.describe("Parameter 'c': Frequency vector."),
-  numberTuple4Schema.describe("Parameter 'd': Phase vector."),
-]);
+// Define the gradient coefficients schema
+export const gradientCoeffsSchema = z
+  .array(numberTuple4Schema)
+  .length(4)
+  .transform(
+    (
+      arr,
+    ): [
+      [number, number, number, number],
+      [number, number, number, number],
+      [number, number, number, number],
+      [number, number, number, number],
+    ] =>
+      arr as [
+        [number, number, number, number],
+        [number, number, number, number],
+        [number, number, number, number],
+        [number, number, number, number],
+      ],
+  )
+  .describe('The four coefficient vectors [a, b, c, d] of the cosine palette formula.');
 
-const styleSchema = z.enum(COLLECTION_STYLES);
-const stepsSchema = z.number().min(2).max(50);
-const angleSchema = z.number().min(0).max(360);
+export const styleSchema = z.enum(COLLECTION_STYLES);
+export const stepsSchema = z.number().min(2).max(50);
+export const angleSchema = z.number().min(0).max(360);
 
 export const collectionSchema = z.object({
   coeffs: gradientCoeffsSchema.describe(

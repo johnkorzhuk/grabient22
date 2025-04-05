@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
-import type { Doc } from '../../convex/_generated/dataModel';
 import type { AppCollection } from '~/types';
+import SuperJSON from 'superjson';
 
 // Create a server function without static prerendering
 export const fetchCollections = createServerFn({
@@ -27,17 +27,8 @@ export const fetchCollections = createServerFn({
       throw new Error(`Failed to fetch collections: ${response.status}`);
     }
 
-    const convexData: Doc<'collections'>[] = await response.json();
-
-    const serializableData: AppCollection[] = convexData.map((doc) => {
-      const { _id, _creationTime, ...rest } = doc;
-      return {
-        _id: _id.toString(),
-        ...rest,
-      };
-    });
-
-    return serializableData;
+    const text = await response.text();
+    return SuperJSON.parse(text) as AppCollection[];
   } catch (error) {
     console.error('Error inside fetchCollections handler:', error);
     throw error;
