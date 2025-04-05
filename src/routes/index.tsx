@@ -348,10 +348,6 @@ function CollectionsDisplay() {
     }
   }, [resizeInProgressRef.current]);
 
-  console.log(collections);
-
-  console.log(deserializeCoeffs(collections[0].serialized));
-
   return (
     <>
       <AppHeader />
