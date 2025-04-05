@@ -1,23 +1,45 @@
-import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '~/types';
+import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
+import * as v from 'valibot';
+import type { Tuple } from '@thi.ng/api';
+
+// Validation schemas
+const fiveDecimalSchema = v.pipe(
+  v.number(),
+  v.transform((input) => Number(input.toFixed(5))),
+);
+
+const rgbaVectorSchema = v.tuple([
+  fiveDecimalSchema,
+  fiveDecimalSchema,
+  fiveDecimalSchema,
+  fiveDecimalSchema,
+]);
+
+export const coeffsSchema = v.tuple([
+  rgbaVectorSchema, // a: bias/exposure
+  rgbaVectorSchema, // b: amplitude/contrast
+  rgbaVectorSchema, // c: frequency
+  rgbaVectorSchema, // d: phase
+]);
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
-  return withAlpha ? coeffs : coeffs.map((channels) => channels.slice(0, 3));
+  return withAlpha ? coeffs : coeffs.map((channels: number[]) => channels.slice(0, 3));
 };
 
 export const applyGlobals = (
   cosCoeffs: CollectionPreset['coeffs'],
   globals: CollectionPreset['globals'],
 ) => {
-  return cosCoeffs.map((coeff, i) => {
+  return cosCoeffs.map((coeff: number[], i: number) => {
     switch (i) {
       case 0:
-        return coeff.map((v) => v + globals[0]!);
+        return coeff.map((v: number) => v + globals[0]!);
       case 1:
-        return coeff.map((v) => v * globals[1]!);
+        return coeff.map((v: number) => v * globals[1]!);
       case 2:
-        return coeff.map((v) => v * globals[2]!);
+        return coeff.map((v: number) => v * globals[2]!);
       case 3:
-        return coeff.map((v) => v + globals[3]!);
+        return coeff.map((v: number) => v + globals[3]!);
       default:
         return coeff;
     }
@@ -25,7 +47,7 @@ export const applyGlobals = (
 };
 
 export const getRandomCoeffsFromRanges = (ranges: CoeffsRanges, showAlpha: boolean = false) => {
-  return ranges.map((range) =>
+  return ranges.map((range: Tuple<number, 2>) =>
     Array.from({ length: showAlpha ? 4 : 3 }).map(
       () => Math.random() * (range[1] - range[0]) + range[0],
     ),
