@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 import { observable } from '@legendapp/state';
 import type { AppCollection } from '~/types';
-import { collectionStyleValidator, stepsValidator, angleValidator } from '~/lib/validators';
+import { collectionStyleValidator, stepsValidator, angleValidator } from '~/validators';
 
 export interface UIStore {
   previewStyle: v.InferOutput<typeof collectionStyleValidator> | null;

@@ -1,26 +1,5 @@
 import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
-import * as v from 'valibot';
 import type { Tuple } from '@thi.ng/api';
-
-// Validation schemas
-const fiveDecimalSchema = v.pipe(
-  v.number(),
-  v.transform((input) => Number(input.toFixed(5))),
-);
-
-const rgbaVectorSchema = v.tuple([
-  fiveDecimalSchema,
-  fiveDecimalSchema,
-  fiveDecimalSchema,
-  fiveDecimalSchema,
-]);
-
-export const coeffsSchema = v.tuple([
-  rgbaVectorSchema, // a: bias/exposure
-  rgbaVectorSchema, // b: amplitude/contrast
-  rgbaVectorSchema, // c: frequency
-  rgbaVectorSchema, // d: phase
-]);
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
   return withAlpha ? coeffs : coeffs.map((channels: number[]) => channels.slice(0, 3));

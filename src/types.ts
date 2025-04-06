@@ -1,8 +1,7 @@
 import type { Doc } from '../convex/_generated/dataModel';
 import type { Tuple } from '@thi.ng/api';
-import type { collectionStyleValidator } from './lib/validators';
+import type { coeffsSchema, collectionStyleValidator } from './validators';
 import * as v from 'valibot';
-import { coeffsSchema } from './lib/cosineGradient';
 
 export type SystemFields = '_id' | '_creationTime';
 

@@ -6,12 +6,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover
 import { Button } from '~/components/ui/button';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import type { styleValidator } from '~/routes/index';
 import { uiStore$ } from '~/stores/ui';
-import { COLLECTION_STYLES } from '~/lib/validators';
+import { COLLECTION_STYLES, styleWithAutoValidator } from '~/validators';
 import type { CollectionStyle } from '~/types';
 
-type SelectCollectionStyle = v.InferOutput<typeof styleValidator>;
+type SelectCollectionStyle = v.InferOutput<typeof styleWithAutoValidator>;
 
 const STYLE_LABELS: Record<CollectionStyle, string> = {
   linearGradient: 'Linear Gradient',

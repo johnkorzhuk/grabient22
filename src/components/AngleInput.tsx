@@ -7,7 +7,7 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiStore$ } from '~/stores/ui';
-import { MIN_ANGLE, MAX_ANGLE } from '~/lib/validators';
+import { MIN_ANGLE, MAX_ANGLE } from '~/validators';
 
 // Default values
 const defaultAngle = 90.0;

@@ -1,28 +1,39 @@
-import { mutation } from './_generated/server';
-import { v } from 'convex/values';
-import type { CollectionPreset } from '../src/types';
+import { internalMutation } from './_generated/server';
+import { v as convexV } from 'convex/values';
+import seedData from '../seed.json';
+import * as v from 'valibot';
+import { collectionSchema, componentSchema } from '../src/validators';
 
-/**
- * Seed the collections table with CosGradientPresets data.
- * This function will add all the gradient presets from seedData.ts to the collections table.
- */
-// export const seedCollections = mutation({
-//   args: {},
-//   returns: v.number(),
-//   handler: async (ctx) => {
-//     let count = 0;
+export const seed = internalMutation({
+  args: {},
+  returns: convexV.null(),
+  handler: async (ctx) => {
+    // Process and insert each collection from seed data
+    for (const collection of seedData) {
+      try {
+        // Transform coefficients - just ensure precision and alpha=1
+        const transformedCoeffs = collection.coeffs.map((vec) => [
+          // First 3 components - just ensure precision
+          ...vec.slice(0, 3).map((component) => v.parse(componentSchema, component)),
+          // Always set alpha to 1
+          1,
+        ]);
 
-//     // Iterate through all gradient presets and add them to the collections table
-//     for (const [key, preset] of Object.entries(cosGradientsPresets)) {
-//       await ctx.db.insert('collections', {
-//         coeffs: preset.coeffs,
-//         numStops: preset.numStops,
-//         globals: preset.globals,
-//       });
-//       count++;
-//     }
+        // Validate the entire collection at once
+        const validatedCollection = v.parse(collectionSchema, {
+          ...collection,
+          coeffs: transformedCoeffs,
+        });
 
-//     console.log(`Successfully seeded ${count} gradient presets to the collections table.`);
-//     return count;
-//   },
-// });
+        // Insert the validated collection
+        await ctx.db.insert('collections', validatedCollection);
+      } catch (error) {
+        // Log validation errors but continue processing other collections
+        console.error(`Failed to validate collection:`, error);
+        console.error('Problematic collection:', collection);
+      }
+    }
+
+    return null;
+  },
+});

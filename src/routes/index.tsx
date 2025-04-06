@@ -6,67 +6,20 @@ import {
   useSearch,
 } from '@tanstack/react-router';
 import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import {
-  applyGlobals,
-  getCoeffs,
-  getCollectionStyleCSS,
-  cosineGradient,
-} from '~/lib/cosineGradient';
 import { fetchCollections } from '~/lib/fetchCollections';
-import type { AppCollection, CollectionStyle } from '~/types';
+import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useHover, usePrevious, useThrottledCallback } from '@mantine/hooks';
-import * as v from 'valibot';
-import { Separator } from '~/components/ui/serpator';
+import { usePrevious, useThrottledCallback } from '@mantine/hooks';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateRowHeight } from '~/lib/utils';
-import { uiStore$ } from '~/stores/ui';
-import { observer, use$ } from '@legendapp/state/react';
-import { deserializeCoeffs } from '~/lib/serialization';
-import { angleValidator, collectionStyleValidator } from '~/lib/validators';
+import {
+  MAX_ITEM_HEIGHT,
+  MIN_ITEM_HEIGHT,
+  SEARCH_DEFAULTS,
+  searchValidatorSchema,
+} from '~/validators';
+import { CollectionRow } from '~/components/CollectionRow';
 
-const SEARCH_DEFAULTS = {
-  rowHeight: 25,
-  style: 'auto' as const,
-  steps: 'auto' as const,
-  angle: 'auto' as const,
-};
-
-export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
-
-export const MIN_STEPS = 2;
-export const MAX_STEPS = 50;
-export const stepsValidator = v.pipe(v.number(), v.minValue(MIN_STEPS), v.maxValue(MAX_STEPS));
-export const stepsWithAutoValidator = v.union([v.literal('auto'), stepsValidator]);
-
-export const MIN_ITEM_HEIGHT = 10;
-export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
-export const rowHeightValidator = v.pipe(
-  v.number(),
-  v.minValue(MIN_ITEM_HEIGHT),
-  v.maxValue(MAX_ITEM_HEIGHT),
-);
-
-// Updated validator that accepts 'auto' or a CollectionStyle
-export const styleValidator = v.union([v.literal('auto'), collectionStyleValidator]);
-
-const searchValidatorSchema = v.object({
-  rowHeight: v.optional(
-    v.fallback(rowHeightValidator, SEARCH_DEFAULTS.rowHeight),
-    SEARCH_DEFAULTS.rowHeight,
-  ),
-  style: v.optional(v.fallback(styleValidator, SEARCH_DEFAULTS.style), SEARCH_DEFAULTS.style),
-  steps: v.optional(
-    v.fallback(stepsWithAutoValidator, SEARCH_DEFAULTS.steps),
-    SEARCH_DEFAULTS.steps,
-  ),
-  angle: v.optional(
-    v.fallback(angleWithAutoValidator, SEARCH_DEFAULTS.angle),
-    SEARCH_DEFAULTS.angle,
-  ),
-});
-// new route: _layout.$grabient.tsx
-// Route definition
 export const Route = createFileRoute('/')({
   component: Home,
   validateSearch: searchValidatorSchema,
@@ -87,82 +40,6 @@ export const Route = createFileRoute('/')({
       // 'cdn-cache-control': 'max-age=300, stale-while-revalidate=300, durable',
     };
   },
-});
-
-const CollectionRow = observer(function CollectionRow({
-  collection,
-  rowHeight,
-  onAnchorStateChange,
-  index,
-}: {
-  collection: AppCollection;
-  rowHeight: number;
-  onAnchorStateChange: (
-    centerY: number | null,
-    index: number,
-    element: HTMLDivElement | null,
-  ) => void;
-  index: number;
-}) {
-  const searchData = useSearch({ from: '/' });
-  const { hovered, ref } = useHover<HTMLDivElement>();
-  const previewStyle = use$(uiStore$.previewStyle);
-  const previewSteps = use$(uiStore$.previewSteps);
-  const previewAngle = use$(uiStore$.previewAngle);
-
-  // Process coefficients
-  const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
-
-  // Determine steps to use (collection's native steps or from URL/preview)
-  const stepsToUse =
-    previewSteps !== null || searchData.steps !== 'auto'
-      ? (previewSteps ?? searchData.steps)
-      : collection.steps;
-
-  // Use our custom gradient generator with the determined number of steps
-  const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
-  const gradientColors = cosineGradient(numStops, processedCoeffs);
-
-  // Determine angle to use (collection's native angle or from URL/preview)
-  const angleToUse =
-    previewAngle !== null || searchData.angle !== 'auto'
-      ? (previewAngle ??
-        (typeof searchData.angle === 'number'
-          ? parseFloat(searchData.angle.toFixed(1))
-          : collection.angle || 90.0))
-      : collection.angle || 90.0; // Fallback to 90.0 if collection doesn't have angle
-
-  // Effect for hover state
-  useEffect(() => {
-    if (hovered && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      const centerY = rect.top + rect.height / 2;
-
-      onAnchorStateChange(centerY, index, ref.current);
-    } else if (!hovered) {
-      onAnchorStateChange(null, index, null);
-    }
-  }, [hovered, index, onAnchorStateChange]);
-
-  return (
-    <li
-      className="relative"
-      style={{
-        height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${rowHeight} / 100)`,
-        ...getCollectionStyleCSS(
-          // If preview style is 'auto', use the collection's native style
-          // Otherwise use the selected style (preview or from search data)
-          (previewStyle || searchData.style) === 'auto'
-            ? collection.style // Use collection's style with fallback
-            : previewStyle || (searchData.style as CollectionStyle),
-          gradientColors,
-          angleToUse, // Pass the angle to the gradient CSS generator
-        ),
-      }}
-    >
-      <Separator ref={ref} />
-    </li>
-  );
 });
 
 function CollectionsDisplay() {

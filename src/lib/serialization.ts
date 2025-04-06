@@ -1,24 +1,25 @@
-import { coeffsSchema } from './cosineGradient';
 import * as v from 'valibot';
 import LZString from 'lz-string';
+import { coeffsSchema, globalsSchema } from '../validators';
 
 type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
+type GlobalModifiers = v.InferOutput<typeof globalsSchema>;
+
 /**
  * Serializes coefficient data to a URL-friendly string using Valibot validation
  */
-export function serializeCoeffs(
-  coeffs: CosineCoeffs,
-  globals: [number, number, number, number],
-): string {
-  const result = v.parse(coeffsSchema, coeffs);
+export function serializeCoeffs(coeffs: CosineCoeffs, globals: GlobalModifiers): string {
+  const validatedCoeffs = v.parse(coeffsSchema, coeffs);
+  const validatedGlobals = v.parse(globalsSchema, globals);
 
-  // Format to 4 decimals and combine coeffs (dropping alpha) and globals
-  const format = (n: number) => Number(n.toFixed(4));
-  const data = [...result.map((vec) => [vec[0], vec[1], vec[2]]).flat(), ...globals];
+  // Combine coeffs (dropping alpha) and globals
+  const data = [
+    ...validatedCoeffs.map((vec) => [vec[0], vec[1], vec[2]]).flat(),
+    ...validatedGlobals,
+  ];
 
   // Convert to string and compress
-  const compressed = data.map(format).join(',');
-  return LZString.compressToEncodedURIComponent(compressed);
+  return LZString.compressToEncodedURIComponent(data.join(','));
 }
 
 /**
@@ -26,27 +27,22 @@ export function serializeCoeffs(
  */
 export function deserializeCoeffs(
   serialized: string,
-): { coeffs: CosineCoeffs; globals: [number, number, number, number] } | null {
-  try {
-    const decompressed = LZString.decompressFromEncodedURIComponent(serialized);
-    const numbers = decompressed.split(',').map(Number);
+): { coeffs: CosineCoeffs; globals: GlobalModifiers } | null {
+  const decompressed = LZString.decompressFromEncodedURIComponent(serialized);
+  const numbers = decompressed.split(',').map(Number);
 
-    // First 12 numbers are coeffs (4 vectors × 3 values), rest are globals
-    const coeffsData = numbers.slice(0, 12);
-    const globalsData = numbers.slice(12, 16) as [number, number, number, number];
+  // First 12 numbers are coeffs (4 vectors × 3 values), rest are globals
+  const coeffsData = numbers.slice(0, 12);
+  const globalsData = numbers.slice(12, 16);
 
-    // Reconstruct coeffs with alpha channel
-    const coeffsWithAlpha = [];
-    for (let i = 0; i < 12; i += 3) {
-      coeffsWithAlpha.push([coeffsData[i], coeffsData[i + 1], coeffsData[i + 2], 1]);
-    }
-
-    return {
-      coeffs: v.parse(coeffsSchema, coeffsWithAlpha),
-      globals: globalsData,
-    };
-  } catch (error) {
-    console.error('Failed to deserialize coefficients:', error);
-    return null;
+  // Reconstruct coeffs with alpha channel
+  const coeffsWithAlpha = [];
+  for (let i = 0; i < 12; i += 3) {
+    coeffsWithAlpha.push([coeffsData[i], coeffsData[i + 1], coeffsData[i + 2], 1]);
   }
+
+  return {
+    coeffs: v.parse(coeffsSchema, coeffsWithAlpha),
+    globals: v.parse(globalsSchema, globalsData),
+  };
 }
