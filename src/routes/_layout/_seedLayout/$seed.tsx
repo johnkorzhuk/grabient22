@@ -12,7 +12,14 @@ import {
   generateContrastVariations,
   generateFrequencyVariations,
   generatePhaseVariations,
+  applyGlobals,
+  getCoeffs,
+  cosineGradient,
+  getCollectionStyleCSS,
 } from '~/lib/cosineGradient';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
+import { CollectionRow } from '~/components/CollectionRow';
+import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
 
 export const Route = createFileRoute('/_layout/_seedLayout/$seed')({
   component: Home,
@@ -44,8 +51,7 @@ function Home() {
   // We know this will succeed because we validated it in beforeLoad
   const { coeffs, globals } = deserializeCoeffs(encodedSeedData);
 
-  // Create base collection
-  const baseCollection: AppCollection = {
+  const seedCollection: AppCollection = {
     coeffs,
     globals,
     style: style === 'auto' ? initialSearchDataRef.current.style : style,
@@ -57,11 +63,36 @@ function Home() {
 
   // Generate variations for each modifier separately
   const collections = [
-    ...generateExposureVariations(baseCollection, { stepSize: 0.5, steps: 6 }),
-    ...generateContrastVariations(baseCollection, { stepSize: 0.15, steps: 6 }),
-    ...generateFrequencyVariations(baseCollection, { stepSize: 0.15, steps: 6 }),
-    ...generatePhaseVariations(baseCollection, { stepSize: 0.05, steps: 6 }),
+    ...generateExposureVariations(seedCollection, { stepSize: 0.5, steps: 6 }),
+    ...generateContrastVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
+    ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
+    ...generatePhaseVariations(seedCollection, { stepSize: 0.05, steps: 6 }),
   ];
 
-  return <CollectionsDisplay collections={collections} isSeedRoute />;
+  const processedCoeffs = applyGlobals(getCoeffs(seedCollection.coeffs), seedCollection.globals);
+  const gradientColors = cosineGradient(seedCollection.steps, processedCoeffs);
+
+  return (
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel>
+        <CollectionsDisplay collections={collections} isSeedRoute />
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel>
+        <div
+          className="relative"
+          style={{
+            height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${33} / 100)`,
+            ...getCollectionStyleCSS(
+              // If preview style is 'auto', use the collection's native style
+              // Otherwise use the selected style (preview or from search data)
+              style === 'auto' ? defaultStyle : style,
+              gradientColors,
+              angle === 'auto' ? defaultAngle : angle, // Pass the angle to the gradient CSS generator
+            ),
+          }}
+        />
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  );
 }
