@@ -22,7 +22,7 @@ export const AngleInput = observer(function AngleInput({
   value: v.InferOutput<typeof angleWithAutoValidator>;
   isDataRoute: boolean;
 }) {
-  const navigate = useNavigate({ from: isDataRoute ? '/$data' : '/' });
+  const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
   const previousValue = usePrevious(value);
   const previewAngle = use$(uiStore$.previewAngle);
 

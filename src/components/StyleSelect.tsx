@@ -28,7 +28,7 @@ export const StyleSelect = observer(function TypeSelect({
   value: SelectCollectionStyle;
   isDataRoute: boolean;
 }) {
-  const navigate = useNavigate({ from: isDataRoute ? '/$data' : '/' });
+  const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
   // const { style: value } = useSearch({ from: !isRootRoute ? '/_layout/$data' : '/_layout/' });
   const previewValue = use$(uiStore$.previewStyle);
 

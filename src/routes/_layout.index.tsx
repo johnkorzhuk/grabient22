@@ -238,9 +238,9 @@ function CollectionsDisplay() {
           {collections.map((collection, index) => (
             <Link
               key={collection._id}
-              to="/$data"
+              to="/$seed"
               params={{
-                data: collection.serialized,
+                seed: collection.seed,
               }}
               search={(search) => ({
                 ...search,

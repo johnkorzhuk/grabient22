@@ -13,7 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout.index'
-import { Route as LayoutDataImport } from './routes/_layout.$data'
+import { Route as LayoutSeedImport } from './routes/_layout.$seed'
 
 // Create/Update Routes
 
@@ -28,9 +28,9 @@ const LayoutIndexRoute = LayoutIndexImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutDataRoute = LayoutDataImport.update({
-  id: '/$data',
-  path: '/$data',
+const LayoutSeedRoute = LayoutSeedImport.update({
+  id: '/$seed',
+  path: '/$seed',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -45,11 +45,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/$data': {
-      id: '/_layout/$data'
-      path: '/$data'
-      fullPath: '/$data'
-      preLoaderRoute: typeof LayoutDataImport
+    '/_layout/$seed': {
+      id: '/_layout/$seed'
+      path: '/$seed'
+      fullPath: '/$seed'
+      preLoaderRoute: typeof LayoutSeedImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/': {
@@ -65,12 +65,12 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface LayoutRouteChildren {
-  LayoutDataRoute: typeof LayoutDataRoute
+  LayoutSeedRoute: typeof LayoutSeedRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutDataRoute: LayoutDataRoute,
+  LayoutSeedRoute: LayoutSeedRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 
@@ -79,28 +79,28 @@ const LayoutRouteWithChildren =
 
 export interface FileRoutesByFullPath {
   '': typeof LayoutRouteWithChildren
-  '/$data': typeof LayoutDataRoute
+  '/$seed': typeof LayoutSeedRoute
   '/': typeof LayoutIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/$data': typeof LayoutDataRoute
+  '/$seed': typeof LayoutSeedRoute
   '/': typeof LayoutIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_layout': typeof LayoutRouteWithChildren
-  '/_layout/$data': typeof LayoutDataRoute
+  '/_layout/$seed': typeof LayoutSeedRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/$data' | '/'
+  fullPaths: '' | '/$seed' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$data' | '/'
-  id: '__root__' | '/_layout' | '/_layout/$data' | '/_layout/'
+  to: '/$seed' | '/'
+  id: '__root__' | '/_layout' | '/_layout/$seed' | '/_layout/'
   fileRoutesById: FileRoutesById
 }
 
@@ -128,12 +128,12 @@ export const routeTree = rootRoute
     "/_layout": {
       "filePath": "_layout.tsx",
       "children": [
-        "/_layout/$data",
+        "/_layout/$seed",
         "/_layout/"
       ]
     },
-    "/_layout/$data": {
-      "filePath": "_layout.$data.tsx",
+    "/_layout/$seed": {
+      "filePath": "_layout.$seed.tsx",
       "parent": "/_layout"
     },
     "/_layout/": {

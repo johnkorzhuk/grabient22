@@ -58,8 +58,8 @@ function parseNumber(str: string): number {
 /**
  * Deserializes a URL string back to coefficient vectors
  */
-export function deserializeCoeffs(serialized: string) {
-  const decompressed = LZString.decompressFromEncodedURIComponent(serialized);
+export function deserializeCoeffs(seed: string) {
+  const decompressed = LZString.decompressFromEncodedURIComponent(seed);
 
   // Split by commas and parse numbers
   const numbers = decompressed.split(',').map(parseNumber);

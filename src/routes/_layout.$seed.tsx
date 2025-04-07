@@ -23,7 +23,7 @@ import { defaultSteps } from '~/components/StepsInput';
 import { defaultStyle } from '~/components/StyleSelect';
 import { defaultAngle } from '~/components/AngleInput';
 
-export const Route = createFileRoute('/_layout/$data')({
+export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
   validateSearch: searchValidatorSchema,
   search: {
@@ -32,7 +32,7 @@ export const Route = createFileRoute('/_layout/$data')({
   beforeLoad: ({ params, search }) => {
     try {
       // Try to deserialize the data - if it fails, redirect to home
-      deserializeCoeffs(params.data);
+      deserializeCoeffs(params.seed);
     } catch (error) {
       throw redirect({ to: '/', search });
     }
@@ -40,11 +40,11 @@ export const Route = createFileRoute('/_layout/$data')({
 });
 
 function CollectionsDisplay() {
-  const { style, steps, angle } = useSearch({ from: '/_layout/$data' });
+  const { style, steps, angle } = useSearch({ from: '/_layout/$seed' });
 
   const { rowHeight } = useSearch({ from: '/_layout' });
-  const { data: encodedData } = useParams({
-    from: '/_layout/$data',
+  const { seed: encodedSeedData } = useParams({
+    from: '/_layout/$seed',
   });
 
   // TODO: we should do something similar in StepsInput, AngleInput instead of hard coded defaults
@@ -56,7 +56,7 @@ function CollectionsDisplay() {
   });
 
   // // We know this will succeed because we validated it in beforeLoad
-  const { coeffs, globals } = deserializeCoeffs(encodedData);
+  const { coeffs, globals } = deserializeCoeffs(encodedSeedData);
   const collections = [
     {
       coeffs,
@@ -65,11 +65,11 @@ function CollectionsDisplay() {
       steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
       angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
       _id: 'param',
-      serialized: encodedData,
+      seed: encodedSeedData,
     },
   ] as AppCollection[];
 
-  const navigate = useNavigate({ from: '/$data' });
+  const navigate = useNavigate({ from: '/$seed' });
   const [resizeAnchorYPos, setResizeAnchorYPos] = useState<null | number>(null);
   const [activeItemIndex, setActiveItemIndex] = useState<null | number>(null);
   const scrollContainerRef = useRef<HTMLUListElement>(null);

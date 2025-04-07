@@ -19,7 +19,7 @@ http.route({
         ...rest,
         _id: _id.toString(),
         // @ts-ignore-next-line
-        serialized: serializeCoeffs(rest.coeffs, rest.globals),
+        seed: serializeCoeffs(rest.coeffs, rest.globals),
       };
     });
 
