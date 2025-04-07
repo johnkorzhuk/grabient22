@@ -18,7 +18,6 @@ import {
   getCollectionStyleCSS,
 } from '~/lib/cosineGradient';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { CollectionRow } from '~/components/CollectionRow';
 import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
 
 export const Route = createFileRoute('/_layout/_seedLayout/$seed')({
@@ -62,12 +61,12 @@ function Home() {
   };
 
   // Generate variations for each modifier separately
-  // const collections = [
-  //   ...generateExposureVariations(seedCollection, { stepSize: 0.5, steps: 6 }),
-  //   ...generateContrastVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
-  //   ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
-  //   ...generatePhaseVariations(seedCollection, { stepSize: 0.05, steps: 6 }),
-  // ];
+  const collections = [
+    ...generateExposureVariations(seedCollection, { stepSize: 0.5, steps: 6 }),
+    ...generateContrastVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
+    ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
+    ...generatePhaseVariations(seedCollection, { stepSize: 0.05, steps: 6 }),
+  ];
 
   const processedCoeffs = applyGlobals(getCoeffs(seedCollection.coeffs), seedCollection.globals);
   const gradientColors = cosineGradient(seedCollection.steps, processedCoeffs);
@@ -75,7 +74,7 @@ function Home() {
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel>
-        {/* <CollectionsDisplay collections={collections} isSeedRoute /> */}
+        <CollectionsDisplay collections={collections} isSeedRoute />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel>
