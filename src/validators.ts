@@ -1,5 +1,4 @@
 import * as v from 'valibot';
-import { SEARCH_DEFAULTS as LAYOUT_SEARCH_DEFAULTS, COMMON_SEARCH_DEFAULTS } from './constants';
 
 export const COLLECTION_STYLES = [
   'linearGradient',
@@ -93,10 +92,11 @@ export const globalsSchema = v.tuple([
   globalPhaseSchema, // phase [-π, π]
 ]);
 
-export const rowHeightSearchValidatorSchema = v.optional(
-  v.fallback(rowHeightValidator, LAYOUT_SEARCH_DEFAULTS.rowHeight),
-  LAYOUT_SEARCH_DEFAULTS.rowHeight,
-);
+export const COMMON_SEARCH_DEFAULTS = {
+  style: 'auto' as const,
+  steps: 'auto' as const,
+  angle: 'auto' as const,
+};
 
 export const searchValidatorSchema = v.object({
   // rowHeight: rowHeightSearchValidatorSchema,

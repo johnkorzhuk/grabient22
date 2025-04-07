@@ -11,25 +11,14 @@ import { Separator } from '~/components/ui/serpator';
 import { useEffect } from 'react';
 import { uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
-import type { InferOutput } from 'valibot';
-import {
-  styleWithAutoValidator,
-  stepsWithAutoValidator,
-  angleWithAutoValidator,
-} from '~/validators';
-
-type SearchParams = {
-  style: InferOutput<typeof styleWithAutoValidator>;
-  steps: InferOutput<typeof stepsWithAutoValidator>;
-  angle: InferOutput<typeof angleWithAutoValidator>;
-};
+import { useSearch } from '@tanstack/react-router';
 
 export const CollectionRow = observer(function CollectionRow({
   collection,
   rowHeight,
   onAnchorStateChange,
   index,
-  searchParams,
+  isDataRoute = false,
 }: {
   collection: AppCollection;
   rowHeight: number;
@@ -39,12 +28,13 @@ export const CollectionRow = observer(function CollectionRow({
     element: HTMLDivElement | null,
   ) => void;
   index: number;
-  searchParams: SearchParams;
+  isDataRoute?: boolean;
 }) {
   const { hovered, ref } = useHover<HTMLDivElement>();
   const previewStyle = use$(uiStore$.previewStyle);
   const previewSteps = use$(uiStore$.previewSteps);
   const previewAngle = use$(uiStore$.previewAngle);
+  const searchParams = useSearch({ from: isDataRoute ? '/_layout/$seed' : '/_layout/' });
 
   // Process coefficients
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);

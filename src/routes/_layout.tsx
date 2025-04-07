@@ -4,9 +4,17 @@ import {
   retainSearchParams,
   stripSearchParams,
 } from '@tanstack/react-router';
-import { LAYOUT_SEARCH_DEFUALTS } from '~/constants';
-import { rowHeightSearchValidatorSchema } from '~/validators';
 import * as v from 'valibot';
+import { rowHeightValidator } from '~/validators';
+
+export const LAYOUT_SEARCH_DEFAULTS = {
+  rowHeight: 25,
+};
+
+export const rowHeightSearchValidatorSchema = v.optional(
+  v.fallback(rowHeightValidator, LAYOUT_SEARCH_DEFAULTS.rowHeight),
+  LAYOUT_SEARCH_DEFAULTS.rowHeight,
+);
 
 export const Route = createFileRoute('/_layout')({
   component: RouteComponent,
@@ -14,7 +22,7 @@ export const Route = createFileRoute('/_layout')({
     rowHeight: rowHeightSearchValidatorSchema,
   }),
   search: {
-    middlewares: [stripSearchParams(LAYOUT_SEARCH_DEFUALTS), retainSearchParams(['rowHeight'])],
+    middlewares: [stripSearchParams(LAYOUT_SEARCH_DEFAULTS), retainSearchParams(['rowHeight'])],
   },
 });
 
