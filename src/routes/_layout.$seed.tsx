@@ -1,4 +1,10 @@
-import { createFileRoute, stripSearchParams, useParams, useSearch } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  retainSearchParams,
+  stripSearchParams,
+  useParams,
+  useSearch,
+} from '@tanstack/react-router';
 import type { AppCollection } from '~/types';
 import { useRef } from 'react';
 import { COMMON_SEARCH_DEFAULTS, searchValidatorSchema } from '~/validators';
@@ -19,7 +25,7 @@ export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
   validateSearch: searchValidatorSchema,
   search: {
-    middlewares: [stripSearchParams(COMMON_SEARCH_DEFAULTS)],
+    middlewares: [stripSearchParams(COMMON_SEARCH_DEFAULTS), retainSearchParams(['rowHeight'])],
   },
   beforeLoad: ({ params, search }) => {
     try {

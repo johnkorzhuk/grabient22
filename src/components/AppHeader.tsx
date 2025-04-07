@@ -15,9 +15,6 @@ type AppHeaderProps = {
 };
 
 export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isDataRoute = false }, ref) => {
-  const layoutSearch = useSearch({
-    from: '/_layout',
-  });
   const { style, steps, angle } = useSearch({ from: isDataRoute ? '/_layout/$seed' : '/_layout/' });
 
   return (
@@ -29,9 +26,8 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isDataRoute 
         <div className="flex items-center gap-4">
           <Link
             to="/"
-            search={(search) => ({
+            search={({ rowHeight, ...search }) => ({
               ...search,
-              ...layoutSearch,
             })}
           >
             <h1 className="text-xl font-bold">Grabient</h1>

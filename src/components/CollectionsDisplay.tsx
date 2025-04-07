@@ -14,9 +14,10 @@ type CollectionsDisplayProps = {
 };
 
 export function CollectionsDisplay({ collections, isDataRoute = false }: CollectionsDisplayProps) {
-  const { rowHeight } = useSearch({ from: '/_layout' });
   const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
-  const { style, steps, angle } = useSearch({ from: isDataRoute ? '/_layout/$seed' : '/_layout/' });
+  const { style, steps, angle, rowHeight } = useSearch({
+    from: isDataRoute ? '/_layout/$seed' : '/_layout/',
+  });
 
   const [resizeAnchorYPos, setResizeAnchorYPos] = useState<null | number>(null);
   const [activeItemIndex, setActiveItemIndex] = useState<null | number>(null);
@@ -215,12 +216,12 @@ export function CollectionsDisplay({ collections, isDataRoute = false }: Collect
               params={{
                 seed: collection.seed,
               }}
-              search={(search) => ({
-                ...search,
+              search={() => ({
                 angle: angle === 'auto' ? collection.angle : angle,
                 steps: steps === 'auto' ? collection.steps : steps,
                 style: style === 'auto' ? collection.style : style,
               })}
+              replace={isDataRoute}
             >
               <CollectionRow
                 collection={collection}

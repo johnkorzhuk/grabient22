@@ -96,10 +96,16 @@ export const COMMON_SEARCH_DEFAULTS = {
   style: 'auto' as const,
   steps: 'auto' as const,
   angle: 'auto' as const,
+  rowHeight: 25,
 };
 
+export const rowHeightSearchValidatorSchema = v.optional(
+  v.fallback(rowHeightValidator, COMMON_SEARCH_DEFAULTS.rowHeight),
+  COMMON_SEARCH_DEFAULTS.rowHeight,
+);
+
 export const searchValidatorSchema = v.object({
-  // rowHeight: rowHeightSearchValidatorSchema,
+  rowHeight: rowHeightSearchValidatorSchema,
   style: v.optional(
     v.fallback(styleWithAutoValidator, COMMON_SEARCH_DEFAULTS.style),
     COMMON_SEARCH_DEFAULTS.style,

@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
