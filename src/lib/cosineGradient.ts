@@ -152,8 +152,6 @@ export function getCollectionStyleCSS(
   }
 }
 
-// Add this to your lib/cosineGradient.ts file
-
 // Constants
 const TAU = Math.PI * 2;
 
@@ -170,8 +168,6 @@ export function cosineGradient(numStops: number, coeffs: number[][]): number[][]
 
   // Use a single array allocation for temporary values
   const tempColor = new Array(coeffs[0].length);
-
-  // Pre-extract coefficient arrays for better performance
   const offsets = coeffs[0];
   const amplitudes = coeffs[1];
   const frequencies = coeffs[2];
@@ -192,7 +188,6 @@ export function cosineGradient(numStops: number, coeffs: number[][]): number[][]
       tempColor[channel] = Math.max(0, Math.min(1, value));
     }
 
-    // Create a new array for each color to ensure no shared references
     result.push([...tempColor]);
   }
 

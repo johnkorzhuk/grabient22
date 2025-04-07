@@ -1,12 +1,31 @@
 import * as v from 'valibot';
 import LZString from 'lz-string';
-import { coeffsSchema, globalsSchema } from '../validators';
+import { coeffsSchema, globalsSchema, COEFF_PRECISION } from '../validators';
 
 type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
 type GlobalModifiers = v.InferOutput<typeof globalsSchema>;
 
 /**
- * Serializes coefficient data to a URL-friendly string using Valibot validation
+ * Formats a number to string with minimal characters by removing leading zeros
+ * Maintains consistent decimal precision based on COEFF_PRECISION
+ */
+function formatNumber(num: number): string {
+  // Format to specified precision
+  const formattedStr = num.toFixed(COEFF_PRECISION);
+
+  // If it's a decimal starting with 0, remove the leading zero
+  if (num > -1 && num < 1 && num !== 0) {
+    return formattedStr.replace(/^0\./, '.');
+  } else if (num === 0) {
+    // Special case for zero to avoid ".0000"
+    return '0';
+  }
+
+  return formattedStr;
+}
+
+/**
+ * Serializes coefficient data to a URL-friendly string using Valibot validation and LZ-String compression
  */
 export function serializeCoeffs(coeffs: CosineCoeffs, globals: GlobalModifiers): string {
   const validatedCoeffs = v.parse(coeffsSchema, coeffs);
@@ -18,18 +37,37 @@ export function serializeCoeffs(coeffs: CosineCoeffs, globals: GlobalModifiers):
     ...validatedGlobals,
   ];
 
-  // Convert to string and compress
-  return LZString.compressToEncodedURIComponent(data.join(','));
+  // Convert to minimal string format with commas
+  const packed = data.map(formatNumber).join(',');
+
+  // Compress the resulting string
+  return LZString.compressToEncodedURIComponent(packed);
+}
+
+/**
+ * Parse a number from the minimal string format
+ */
+function parseNumber(str: string): number {
+  // If it starts with a dot, add a leading zero
+  if (str.startsWith('.')) {
+    return parseFloat('0' + str);
+  }
+  return parseFloat(str);
 }
 
 /**
  * Deserializes a URL string back to coefficient vectors
  */
-export function deserializeCoeffs(
-  serialized: string,
-): { coeffs: CosineCoeffs; globals: GlobalModifiers } | null {
+export function deserializeCoeffs(serialized: string) {
   const decompressed = LZString.decompressFromEncodedURIComponent(serialized);
-  const numbers = decompressed.split(',').map(Number);
+
+  // Split by commas and parse numbers
+  const numbers = decompressed.split(',').map(parseNumber);
+
+  // We expect exactly 16 values (12 from coeffs RGB + 4 from globals)
+  if (numbers.length !== 16) {
+    throw new Error(`Expected 16 values, got ${numbers.length}`);
+  }
 
   // First 12 numbers are coeffs (4 vectors × 3 values), rest are globals
   const coeffsData = numbers.slice(0, 12);

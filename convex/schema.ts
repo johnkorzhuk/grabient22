@@ -7,31 +7,12 @@ import { COLLECTION_STYLES } from '../src/validators';
 
 // Define the exact type for a 4-element number tuple
 export const numberTuple4Schema = z
-  .array(z.number())
-  .length(4)
-  .transform((arr): [number, number, number, number] => arr as [number, number, number, number])
+  .tuple([z.number(), z.number(), z.number(), z.number()])
   .describe('RGB components (any number) + alpha (always 1)');
 
 // Define the gradient coefficients schema
 export const gradientCoeffsSchema = z
-  .array(numberTuple4Schema)
-  .length(4)
-  .transform(
-    (
-      arr,
-    ): [
-      [number, number, number, number],
-      [number, number, number, number],
-      [number, number, number, number],
-      [number, number, number, number],
-    ] =>
-      arr as [
-        [number, number, number, number],
-        [number, number, number, number],
-        [number, number, number, number],
-        [number, number, number, number],
-      ],
-  )
+  .tuple([numberTuple4Schema, numberTuple4Schema, numberTuple4Schema, numberTuple4Schema])
   .describe('Cosine gradient formula: color(t) = a + b * cos(2π * (c*t + d))');
 
 export const styleSchema = z.enum(COLLECTION_STYLES);

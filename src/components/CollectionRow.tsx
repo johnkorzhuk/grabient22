@@ -1,4 +1,3 @@
-import { useSearch } from '@tanstack/react-router';
 import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
 import {
   applyGlobals,
@@ -12,12 +11,25 @@ import { Separator } from '~/components/ui/serpator';
 import { useEffect } from 'react';
 import { uiStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
+import type { InferOutput } from 'valibot';
+import {
+  styleWithAutoValidator,
+  stepsWithAutoValidator,
+  angleWithAutoValidator,
+} from '~/validators';
+
+type SearchParams = {
+  style: InferOutput<typeof styleWithAutoValidator>;
+  steps: InferOutput<typeof stepsWithAutoValidator>;
+  angle: InferOutput<typeof angleWithAutoValidator>;
+};
 
 export const CollectionRow = observer(function CollectionRow({
   collection,
   rowHeight,
   onAnchorStateChange,
   index,
+  searchParams,
 }: {
   collection: AppCollection;
   rowHeight: number;
@@ -27,8 +39,8 @@ export const CollectionRow = observer(function CollectionRow({
     element: HTMLDivElement | null,
   ) => void;
   index: number;
+  searchParams: SearchParams;
 }) {
-  const searchData = useSearch({ from: '/' });
   const { hovered, ref } = useHover<HTMLDivElement>();
   const previewStyle = use$(uiStore$.previewStyle);
   const previewSteps = use$(uiStore$.previewSteps);
@@ -39,8 +51,8 @@ export const CollectionRow = observer(function CollectionRow({
 
   // Determine steps to use (collection's native steps or from URL/preview)
   const stepsToUse =
-    previewSteps !== null || searchData.steps !== 'auto'
-      ? (previewSteps ?? searchData.steps)
+    previewSteps !== null || searchParams.steps !== 'auto'
+      ? (previewSteps ?? searchParams.steps)
       : collection.steps;
 
   // Use our custom gradient generator with the determined number of steps
@@ -49,10 +61,10 @@ export const CollectionRow = observer(function CollectionRow({
 
   // Determine angle to use (collection's native angle or from URL/preview)
   const angleToUse =
-    previewAngle !== null || searchData.angle !== 'auto'
+    previewAngle !== null || searchParams.angle !== 'auto'
       ? (previewAngle ??
-        (typeof searchData.angle === 'number'
-          ? parseFloat(searchData.angle.toFixed(1))
+        (typeof searchParams.angle === 'number'
+          ? parseFloat(searchParams.angle.toFixed(1))
           : collection.angle || 90.0))
       : collection.angle || 90.0; // Fallback to 90.0 if collection doesn't have angle
 
@@ -76,9 +88,9 @@ export const CollectionRow = observer(function CollectionRow({
         ...getCollectionStyleCSS(
           // If preview style is 'auto', use the collection's native style
           // Otherwise use the selected style (preview or from search data)
-          (previewStyle || searchData.style) === 'auto'
+          (previewStyle || searchParams.style) === 'auto'
             ? collection.style // Use collection's style with fallback
-            : previewStyle || (searchData.style as CollectionStyle),
+            : previewStyle || (searchParams.style as CollectionStyle),
           gradientColors,
           angleToUse, // Pass the angle to the gradient CSS generator
         ),

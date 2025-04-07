@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { SEARCH_DEFAULTS as LAYOUT_SEARCH_DEFAULTS, COMMON_SEARCH_DEFAULTS } from './constants';
 
 export const COLLECTION_STYLES = [
   'linearGradient',
@@ -20,16 +21,18 @@ export const MAX_ANGLE = 360;
 export const angleValidator = v.pipe(v.number(), v.minValue(MIN_ANGLE), v.maxValue(MAX_ANGLE));
 export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
 
+export const DEFAULT_ITEM_HEIGHT = 25;
 export const MIN_ITEM_HEIGHT = 10;
 export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
 export const rowHeightValidator = v.pipe(
   v.number(),
   v.minValue(MIN_ITEM_HEIGHT),
   v.maxValue(MAX_ITEM_HEIGHT),
+  v.transform((input) => Number(input.toFixed(1))),
 );
 
 export const PI = Math.PI;
-export const COEFF_PRECISION = 4;
+export const COEFF_PRECISION = 4 as const;
 
 /**
  * Cosine gradient formula: color(t) = a + b * cos(2π * (c*t + d))
@@ -90,31 +93,24 @@ export const globalsSchema = v.tuple([
   globalPhaseSchema, // phase [-π, π]
 ]);
 
-export const SEARCH_DEFAULTS = {
-  rowHeight: 25,
-  style: 'auto' as const,
-  steps: 'auto' as const,
-  angle: 'auto' as const,
-};
-
 export const rowHeightSearchValidatorSchema = v.optional(
-  v.fallback(rowHeightValidator, SEARCH_DEFAULTS.rowHeight),
-  SEARCH_DEFAULTS.rowHeight,
+  v.fallback(rowHeightValidator, LAYOUT_SEARCH_DEFAULTS.rowHeight),
+  LAYOUT_SEARCH_DEFAULTS.rowHeight,
 );
 
 export const searchValidatorSchema = v.object({
-  rowHeight: rowHeightSearchValidatorSchema,
+  // rowHeight: rowHeightSearchValidatorSchema,
   style: v.optional(
-    v.fallback(styleWithAutoValidator, SEARCH_DEFAULTS.style),
-    SEARCH_DEFAULTS.style,
+    v.fallback(styleWithAutoValidator, COMMON_SEARCH_DEFAULTS.style),
+    COMMON_SEARCH_DEFAULTS.style,
   ),
   steps: v.optional(
-    v.fallback(stepsWithAutoValidator, SEARCH_DEFAULTS.steps),
-    SEARCH_DEFAULTS.steps,
+    v.fallback(stepsWithAutoValidator, COMMON_SEARCH_DEFAULTS.steps),
+    COMMON_SEARCH_DEFAULTS.steps,
   ),
   angle: v.optional(
-    v.fallback(angleWithAutoValidator, SEARCH_DEFAULTS.angle),
-    SEARCH_DEFAULTS.angle,
+    v.fallback(angleWithAutoValidator, COMMON_SEARCH_DEFAULTS.angle),
+    COMMON_SEARCH_DEFAULTS.angle,
   ),
 });
 

@@ -1,8 +1,10 @@
 import {
   createFileRoute,
+  retainSearchParams,
   stripSearchParams,
   useLoaderData,
   useNavigate,
+  useParams,
   useSearch,
 } from '@tanstack/react-router';
 import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
@@ -12,40 +14,62 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/componen
 import { usePrevious, useThrottledCallback } from '@mantine/hooks';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateRowHeight } from '~/lib/utils';
-import {
-  MAX_ITEM_HEIGHT,
-  MIN_ITEM_HEIGHT,
-  SEARCH_DEFAULTS,
-  searchValidatorSchema,
-} from '~/validators';
+import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, searchValidatorSchema } from '~/validators';
 import { CollectionRow } from '~/components/CollectionRow';
+import { SEARCH_DEFAULTS } from '~/constants';
+import { deserializeCoeffs } from '~/lib/serialization';
+import { redirect } from '@tanstack/react-router';
+import { defaultSteps } from '~/components/StepsInput';
+import { defaultStyle } from '~/components/StyleSelect';
+import { defaultAngle } from '~/components/AngleInput';
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_layout/$data')({
   component: Home,
   validateSearch: searchValidatorSchema,
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
-  loader: async () => {
-    const data = await fetchCollections();
-    return data;
-    // return data.slice(0, 5);
-  },
-  headers: () => {
-    return {
-      'cache-control': 'public, max-age=3600, must-revalidate', // 1 hour
-      'cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=1800, durable', // 1 hour + 30min stale
-      // from https://github.com/TanStack/tanstack.com/blob/5ee97b505d0f9ef3fdbff12a5f70cfaad60a795a/app/routes/%24libraryId/%24version.docs.tsx#L37
-      // 'cache-control': 'public, max-age=0, must-revalidate',
-      // 'cdn-cache-control': 'max-age=300, stale-while-revalidate=300, durable',
-    };
+  beforeLoad: ({ params, search }) => {
+    try {
+      // Try to deserialize the data - if it fails, redirect to home
+      deserializeCoeffs(params.data);
+    } catch (error) {
+      throw redirect({ to: '/', search });
+    }
   },
 });
 
 function CollectionsDisplay() {
-  const collections = useLoaderData({ from: '/' }) as AppCollection[];
-  const searchData = useSearch({ from: '/' });
-  const navigate = useNavigate({ from: '/' });
+  const { style, steps, angle } = useSearch({ from: '/_layout/$data' });
+
+  const { rowHeight } = useSearch({ from: '/_layout' });
+  const { data: encodedData } = useParams({
+    from: '/_layout/$data',
+  });
+
+  // TODO: we should do something similar in StepsInput, AngleInput instead of hard coded defaults
+  // so the value rendered in the input is the actual default value when select === 'auto'
+  const initialSearchDataRef = useRef({
+    style: style === 'auto' ? defaultStyle : style,
+    steps: steps === 'auto' ? defaultSteps : steps,
+    angle: angle === 'auto' ? defaultAngle : angle,
+  });
+
+  // // We know this will succeed because we validated it in beforeLoad
+  const { coeffs, globals } = deserializeCoeffs(encodedData);
+  const collections = [
+    {
+      coeffs,
+      globals,
+      style: style === 'auto' ? initialSearchDataRef.current.style : style,
+      steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
+      angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
+      _id: 'param',
+      serialized: encodedData,
+    },
+  ] as AppCollection[];
+
+  const navigate = useNavigate({ from: '/$data' });
   const [resizeAnchorYPos, setResizeAnchorYPos] = useState<null | number>(null);
   const [activeItemIndex, setActiveItemIndex] = useState<null | number>(null);
   const scrollContainerRef = useRef<HTMLUListElement>(null);
@@ -68,7 +92,7 @@ function CollectionsDisplay() {
 
   // Add local state for immediate updates
   // Initialize with URL state as source of truth
-  const [localRowHeight, setLocalRowHeight] = useState<number>(searchData.rowHeight);
+  const [localRowHeight, setLocalRowHeight] = useState<number>(rowHeight);
   const prevRowHeight = usePrevious(localRowHeight);
   const viewPortHeight = typeof window !== 'undefined' ? window.innerHeight - APP_HEADER_HEIGHT : 0;
   const rowHeightPx = viewPortHeight * (localRowHeight / 100);
@@ -81,8 +105,8 @@ function CollectionsDisplay() {
 
   // Effect to sync URL state to local state when URL changes
   useEffect(() => {
-    setLocalRowHeight(searchData.rowHeight);
-  }, [searchData.rowHeight]);
+    setLocalRowHeight(rowHeight);
+  }, [rowHeight]);
 
   const handleAnchorStateChange = (
     centerY: number | null,
@@ -227,7 +251,7 @@ function CollectionsDisplay() {
 
   return (
     <>
-      <AppHeader />
+      <AppHeader style={style} steps={steps} angle={angle} isDataRoute />
       <main
         className="mx-auto w-full relative overflow-hidden"
         style={{
@@ -243,6 +267,7 @@ function CollectionsDisplay() {
               rowHeight={localRowHeight}
               onAnchorStateChange={handleAnchorStateChange}
               index={index}
+              searchParams={{ style, steps, angle }}
             />
           ))}
         </ul>

@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
@@ -7,16 +7,22 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiStore$ } from '~/stores/ui';
-import { MAX_STEPS, MIN_STEPS } from '~/validators';
+import { MAX_STEPS, MIN_STEPS, stepsWithAutoValidator } from '~/validators';
+import * as v from 'valibot';
 
 // Default values
-const defaultNumber = 5;
+export const defaultSteps = 7;
 const presets = [3, 5, 8, 13, 21, 34];
 const step = 1;
 
-export const StepsInput = observer(function NumberInputWithPresets() {
-  const navigate = useNavigate({ from: '/' });
-  const { steps: value } = useSearch({ from: '/' });
+export const StepsInput = observer(function NumberInputWithPresets({
+  value,
+  isDataRoute = false,
+}: {
+  value: v.InferOutput<typeof stepsWithAutoValidator>;
+  isDataRoute: boolean;
+}) {
+  const navigate = useNavigate({ from: isDataRoute ? '/$data' : '/' });
   const previousValue = usePrevious(value);
   const previewValue = use$(uiStore$.previewSteps);
 
@@ -129,8 +135,8 @@ export const StepsInput = observer(function NumberInputWithPresets() {
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
 
-      let currentValue = value === 'auto' ? defaultNumber : Number(value);
-      if (isNaN(currentValue)) currentValue = defaultNumber;
+      let currentValue = value === 'auto' ? defaultSteps : Number(value);
+      if (isNaN(currentValue)) currentValue = defaultSteps;
 
       const newValue = e.key === 'ArrowUp' ? currentValue + step : currentValue - step;
 
@@ -155,7 +161,7 @@ export const StepsInput = observer(function NumberInputWithPresets() {
         navigate({
           search: (prev) => ({
             ...prev,
-            steps: defaultNumber,
+            steps: defaultSteps,
           }),
           replace: true,
         });
@@ -230,7 +236,7 @@ export const StepsInput = observer(function NumberInputWithPresets() {
   // Determine the display value
   const displayValue = () => {
     if (isFocused) {
-      return value === 'auto' ? defaultNumber.toString() : value.toString();
+      return value === 'auto' ? defaultSteps.toString() : value.toString();
     } else {
       if (value === 'auto') {
         return previewValue !== null ? previewValue.toString() : 'auto';

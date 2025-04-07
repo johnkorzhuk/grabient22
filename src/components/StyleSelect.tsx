@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
 import * as v from 'valibot';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
@@ -19,9 +19,17 @@ const STYLE_LABELS: Record<CollectionStyle, string> = {
   angularSwatches: 'Angular Swatches',
 };
 
-export const StyleSelect = observer(function TypeSelect() {
-  const navigate = useNavigate({ from: '/' });
-  const { style: value } = useSearch({ from: '/' });
+export const defaultStyle: CollectionStyle = 'linearGradient';
+
+export const StyleSelect = observer(function TypeSelect({
+  value,
+  isDataRoute = false,
+}: {
+  value: SelectCollectionStyle;
+  isDataRoute: boolean;
+}) {
+  const navigate = useNavigate({ from: isDataRoute ? '/$data' : '/' });
+  // const { style: value } = useSearch({ from: !isRootRoute ? '/_layout/$data' : '/_layout/' });
   const previewValue = use$(uiStore$.previewStyle);
 
   const handleValueClick = (clickedStyle: SelectCollectionStyle) => {

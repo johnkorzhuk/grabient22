@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
@@ -7,16 +7,22 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiStore$ } from '~/stores/ui';
-import { MIN_ANGLE, MAX_ANGLE } from '~/validators';
+import { MIN_ANGLE, MAX_ANGLE, angleWithAutoValidator } from '~/validators';
+import * as v from 'valibot';
 
 // Default values
-const defaultAngle = 90.0;
+export const defaultAngle = 90.0;
 const presets = [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0];
 const step = 1.0; // Increment/decrement step for arrow keys
 
-export const AngleInput = observer(function AngleInput() {
-  const navigate = useNavigate({ from: '/' });
-  const { angle: value } = useSearch({ from: '/' });
+export const AngleInput = observer(function AngleInput({
+  value,
+  isDataRoute = false,
+}: {
+  value: v.InferOutput<typeof angleWithAutoValidator>;
+  isDataRoute: boolean;
+}) {
+  const navigate = useNavigate({ from: isDataRoute ? '/$data' : '/' });
   const previousValue = usePrevious(value);
   const previewAngle = use$(uiStore$.previewAngle);
 
