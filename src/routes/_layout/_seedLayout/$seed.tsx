@@ -73,26 +73,23 @@ function Home() {
   const gradientColors = cosineGradient(seedCollection.steps, processedCoeffs);
 
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel>
+    <div className="w-full h-full flex">
+      <div className="w-1/2">
         <CollectionsDisplay collections={collections} isSeedRoute />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel>
+      </div>
+      <div className="w-1/2">
         <div
           className="relative"
           style={{
             height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${33} / 100)`,
             ...getCollectionStyleCSS(
-              // If preview style is 'auto', use the collection's native style
-              // Otherwise use the selected style (preview or from search data)
               style === 'auto' ? defaultStyle : style,
               gradientColors,
-              angle === 'auto' ? defaultAngle : angle, // Pass the angle to the gradient CSS generator
+              angle === 'auto' ? defaultAngle : angle,
             ),
           }}
         />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+      </div>
+    </div>
   );
 }
