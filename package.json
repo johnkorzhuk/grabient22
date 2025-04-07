@@ -41,6 +41,7 @@
     "convex-helpers": "^0.1.76",
     "lucide-react": "^0.475.0",
     "lz-string": "^1.5.0",
+    "nanoid": "^5.1.5",
     "outdent": "^0.8.0",
     "postcss": "^8.5.2",
     "react": "^19.1.0",
