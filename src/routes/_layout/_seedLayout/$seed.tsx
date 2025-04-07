@@ -1,13 +1,6 @@
-import {
-  createFileRoute,
-  retainSearchParams,
-  stripSearchParams,
-  useParams,
-  useSearch,
-} from '@tanstack/react-router';
+import { createFileRoute, useParams, useSearch } from '@tanstack/react-router';
 import type { AppCollection } from '~/types';
 import { useRef } from 'react';
-import { COMMON_SEARCH_DEFAULTS, searchValidatorSchema } from '~/validators';
 import { deserializeCoeffs } from '~/lib/serialization';
 import { redirect } from '@tanstack/react-router';
 import { defaultSteps } from '~/components/StepsInput';
@@ -21,27 +14,23 @@ import {
   generatePhaseVariations,
 } from '~/lib/cosineGradient';
 
-export const Route = createFileRoute('/_layout/$seed')({
+export const Route = createFileRoute('/_layout/_seedLayout/$seed')({
   component: Home,
-  validateSearch: searchValidatorSchema,
-  search: {
-    middlewares: [stripSearchParams(COMMON_SEARCH_DEFAULTS), retainSearchParams(['rowHeight'])],
-  },
-  beforeLoad: ({ params, search }) => {
+  beforeLoad: ({ params }) => {
     try {
       // Try to deserialize the data - if it fails, redirect to home
       deserializeCoeffs(params.seed);
     } catch (error) {
-      throw redirect({ to: '/', search });
+      throw redirect({ to: '/' });
     }
   },
 });
 
 function Home() {
-  const { style, steps, angle } = useSearch({ from: '/_layout/$seed' });
+  const { style, steps, angle } = useSearch({ from: '/_layout/_seedLayout' });
 
   const { seed: encodedSeedData } = useParams({
-    from: '/_layout/$seed',
+    from: '/_layout/_seedLayout/$seed',
   });
 
   // TODO: we should do something similar in StepsInput, AngleInput instead of hard coded defaults
@@ -62,7 +51,7 @@ function Home() {
     style: style === 'auto' ? initialSearchDataRef.current.style : style,
     steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
     angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
-    _id: 'seed',
+    _id: 'seed-_tN8YaBv4LmFsqR2',
     seed: encodedSeedData,
   };
 
@@ -74,5 +63,5 @@ function Home() {
     ...generatePhaseVariations(baseCollection, { stepSize: 0.05, steps: 6 }),
   ];
 
-  return <CollectionsDisplay collections={collections} isDataRoute />;
+  return <CollectionsDisplay collections={collections} isSeedRoute />;
 }

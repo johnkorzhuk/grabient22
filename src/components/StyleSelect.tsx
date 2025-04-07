@@ -23,12 +23,12 @@ export const defaultStyle: CollectionStyle = 'linearGradient';
 
 export const StyleSelect = observer(function TypeSelect({
   value,
-  isDataRoute = false,
+  isSeedRoute = false,
 }: {
   value: SelectCollectionStyle;
-  isDataRoute: boolean;
+  isSeedRoute: boolean;
 }) {
-  const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   // const { style: value } = useSearch({ from: !isRootRoute ? '/_layout/$data' : '/_layout/' });
   const previewValue = use$(uiStore$.previewStyle);
 

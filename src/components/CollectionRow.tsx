@@ -18,7 +18,7 @@ export const CollectionRow = observer(function CollectionRow({
   rowHeight,
   onAnchorStateChange,
   index,
-  isDataRoute = false,
+  isSeedRoute = false,
 }: {
   collection: AppCollection;
   rowHeight: number;
@@ -28,13 +28,15 @@ export const CollectionRow = observer(function CollectionRow({
     element: HTMLDivElement | null,
   ) => void;
   index: number;
-  isDataRoute?: boolean;
+  isSeedRoute?: boolean;
 }) {
   const { hovered, ref } = useHover<HTMLDivElement>();
   const previewStyle = use$(uiStore$.previewStyle);
   const previewSteps = use$(uiStore$.previewSteps);
   const previewAngle = use$(uiStore$.previewAngle);
-  const searchParams = useSearch({ from: isDataRoute ? '/_layout/$seed' : '/_layout/' });
+  const searchParams = useSearch({
+    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
+  });
 
   // Process coefficients
   const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);

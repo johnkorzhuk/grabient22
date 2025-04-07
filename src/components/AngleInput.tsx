@@ -17,12 +17,12 @@ const step = 1.0; // Increment/decrement step for arrow keys
 
 export const AngleInput = observer(function AngleInput({
   value,
-  isDataRoute = false,
+  isSeedRoute = false,
 }: {
   value: v.InferOutput<typeof angleWithAutoValidator>;
-  isDataRoute: boolean;
+  isSeedRoute: boolean;
 }) {
-  const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const previousValue = usePrevious(value);
   const previewAngle = use$(uiStore$.previewAngle);
 

@@ -17,12 +17,12 @@ const step = 1;
 
 export const StepsInput = observer(function NumberInputWithPresets({
   value,
-  isDataRoute = false,
+  isSeedRoute = false,
 }: {
   value: v.InferOutput<typeof stepsWithAutoValidator>;
-  isDataRoute: boolean;
+  isSeedRoute: boolean;
 }) {
-  const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const previousValue = usePrevious(value);
   const previewValue = use$(uiStore$.previewSteps);
 

@@ -1,22 +1,29 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
-import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import type { AppCollection } from '~/types';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { usePrevious, useThrottledCallback } from '@mantine/hooks';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { validateRowHeight } from '~/lib/utils';
-import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT } from '~/validators';
 import { CollectionRow } from '~/components/CollectionRow';
+import type { AppCollection } from '~/types';
+import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
+import {
+  MIN_ITEM_HEIGHT as SEED_MIN_ITEM_HEIGHT,
+  MAX_ITEM_HEIGHT as SEED_MAX_ITEM_HEIGHT,
+} from '~/routes/_layout/_seedLayout';
+import {
+  MIN_ITEM_HEIGHT as ROOT_MIN_ITEM_HEIGHT,
+  MAX_ITEM_HEIGHT as ROOT_MAX_ITEM_HEIGHT,
+} from '~/routes/_layout/index';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
-  isDataRoute?: boolean;
+  isSeedRoute?: boolean;
 };
 
-export function CollectionsDisplay({ collections, isDataRoute = false }: CollectionsDisplayProps) {
-  const navigate = useNavigate({ from: isDataRoute ? '/$seed' : '/' });
+export function CollectionsDisplay({ collections, isSeedRoute = false }: CollectionsDisplayProps) {
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const { style, steps, angle, rowHeight } = useSearch({
-    from: isDataRoute ? '/_layout/$seed' : '/_layout/',
+    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
   });
 
   const [resizeAnchorYPos, setResizeAnchorYPos] = useState<null | number>(null);
@@ -38,6 +45,8 @@ export function CollectionsDisplay({ collections, isDataRoute = false }: Collect
   } | null>(null);
   const isScrollingRef = useRef<boolean>(false);
   const resizeRequestIdRef = useRef<number | null>(null);
+  const minHeight = isSeedRoute ? SEED_MIN_ITEM_HEIGHT : ROOT_MIN_ITEM_HEIGHT;
+  const maxHeight = isSeedRoute ? SEED_MAX_ITEM_HEIGHT : ROOT_MAX_ITEM_HEIGHT;
 
   // Add local state for immediate updates
   // Initialize with URL state as source of truth
@@ -110,7 +119,7 @@ export function CollectionsDisplay({ collections, isDataRoute = false }: Collect
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
-    const finalHeight = validateRowHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT)(truncatedValue);
+    const finalHeight = validateRowHeight(minHeight, maxHeight)(truncatedValue);
 
     // Mark resize as in progress
     resizeInProgressRef.current = true;
@@ -199,75 +208,66 @@ export function CollectionsDisplay({ collections, isDataRoute = false }: Collect
   }, [resizeInProgressRef.current]);
 
   return (
-    <>
-      <AppHeader isDataRoute={isDataRoute} />
-      <main
-        className="mx-auto w-full relative overflow-hidden"
+    <ul className="h-full w-full overflow-auto" ref={scrollContainerRef}>
+      {collections.map((collection, index) => (
+        <Link
+          key={collection._id}
+          to="/$seed"
+          params={{
+            seed: collection.seed,
+          }}
+          search={(s) => {
+            return {
+              ...s,
+              angle: angle === 'auto' ? collection.angle : angle,
+              steps: steps === 'auto' ? collection.steps : steps,
+              style: style === 'auto' ? collection.style : style,
+            };
+          }}
+          replace={isSeedRoute}
+        >
+          <CollectionRow
+            collection={collection}
+            rowHeight={localRowHeight}
+            onAnchorStateChange={handleAnchorStateChange}
+            index={index}
+            isSeedRoute={isSeedRoute}
+          />
+        </Link>
+      ))}
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          marginTop: `${APP_HEADER_HEIGHT}px`,
+          top: `${resizableContainerTop}px`,
+          left: 0,
+          right: 0,
           height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
+          overflow: 'hidden',
         }}
       >
-        <ul className="h-full w-full overflow-auto" ref={scrollContainerRef}>
-          {collections.map((collection, index) => (
-            <Link
-              key={collection._id}
-              to="/$seed"
-              params={{
-                seed: collection.seed,
-              }}
-              search={() => ({
-                angle: angle === 'auto' ? collection.angle : angle,
-                steps: steps === 'auto' ? collection.steps : steps,
-                style: style === 'auto' ? collection.style : style,
-              })}
-              replace={isDataRoute}
-            >
-              <CollectionRow
-                collection={collection}
-                rowHeight={localRowHeight}
-                onAnchorStateChange={handleAnchorStateChange}
-                index={index}
-                isDataRoute={isDataRoute}
-              />
-            </Link>
-          ))}
-        </ul>
+        <ResizablePanelGroup direction="vertical" className="h-full">
+          <ResizablePanel
+            defaultSize={localRowHeight}
+            minSize={minHeight}
+            maxSize={maxHeight}
+            onResize={handleResize}
+            className="pointer-events-none"
+          >
+            <div className="h-full relative"></div>
+          </ResizablePanel>
 
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            top: `${resizableContainerTop}px`,
-            left: 0,
-            right: 0,
-            height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
-            overflow: 'hidden',
-          }}
-        >
-          <ResizablePanelGroup direction="vertical" className="h-full">
-            <ResizablePanel
-              defaultSize={localRowHeight}
-              minSize={MIN_ITEM_HEIGHT}
-              maxSize={MAX_ITEM_HEIGHT}
-              onResize={handleResize}
-              className="pointer-events-none"
-            >
-              <div className="h-full relative"></div>
-            </ResizablePanel>
+          <ResizableHandle className="cursor-ns-resize h-2 pointer-events-auto invisible" />
 
-            <ResizableHandle className="cursor-ns-resize h-2 pointer-events-auto invisible" />
-
-            <ResizablePanel
-              defaultSize={100 - localRowHeight}
-              minSize={MIN_ITEM_HEIGHT}
-              maxSize={MAX_ITEM_HEIGHT}
-              className="pointer-events-none"
-            >
-              <div className="h-full"></div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </main>
-    </>
+          <ResizablePanel
+            defaultSize={100 - localRowHeight}
+            minSize={minHeight}
+            maxSize={maxHeight}
+            className="pointer-events-none"
+          >
+            <div className="h-full"></div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </ul>
   );
 }

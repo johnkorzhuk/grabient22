@@ -20,16 +20,6 @@ export const MAX_ANGLE = 360;
 export const angleValidator = v.pipe(v.number(), v.minValue(MIN_ANGLE), v.maxValue(MAX_ANGLE));
 export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
 
-export const DEFAULT_ITEM_HEIGHT = 25;
-export const MIN_ITEM_HEIGHT = 10;
-export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
-export const rowHeightValidator = v.pipe(
-  v.number(),
-  v.minValue(MIN_ITEM_HEIGHT),
-  v.maxValue(MAX_ITEM_HEIGHT),
-  v.transform((input) => Number(input.toFixed(1))),
-);
-
 export const PI = Math.PI;
 export const COEFF_PRECISION = 4 as const;
 
@@ -98,27 +88,6 @@ export const COMMON_SEARCH_DEFAULTS = {
   angle: 'auto' as const,
   rowHeight: 25,
 };
-
-export const rowHeightSearchValidatorSchema = v.optional(
-  v.fallback(rowHeightValidator, COMMON_SEARCH_DEFAULTS.rowHeight),
-  COMMON_SEARCH_DEFAULTS.rowHeight,
-);
-
-export const searchValidatorSchema = v.object({
-  rowHeight: rowHeightSearchValidatorSchema,
-  style: v.optional(
-    v.fallback(styleWithAutoValidator, COMMON_SEARCH_DEFAULTS.style),
-    COMMON_SEARCH_DEFAULTS.style,
-  ),
-  steps: v.optional(
-    v.fallback(stepsWithAutoValidator, COMMON_SEARCH_DEFAULTS.steps),
-    COMMON_SEARCH_DEFAULTS.steps,
-  ),
-  angle: v.optional(
-    v.fallback(angleWithAutoValidator, COMMON_SEARCH_DEFAULTS.angle),
-    COMMON_SEARCH_DEFAULTS.angle,
-  ),
-});
 
 /**
  * Cosine gradient collection validator

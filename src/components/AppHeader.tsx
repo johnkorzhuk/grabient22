@@ -11,11 +11,15 @@ import { Link, useSearch } from '@tanstack/react-router';
 export const APP_HEADER_HEIGHT = 60.67;
 
 type AppHeaderProps = {
-  isDataRoute?: boolean;
+  isSeedRoute?: boolean;
 };
 
-export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isDataRoute = false }, ref) => {
-  const { style, steps, angle } = useSearch({ from: isDataRoute ? '/_layout/$seed' : '/_layout/' });
+export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isSeedRoute = false }, ref) => {
+  // Get search params from the current route only
+  const currentRouteSearch = useSearch({
+    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
+  });
+  const { style, steps, angle, rowHeight } = currentRouteSearch;
 
   return (
     <header
@@ -26,7 +30,7 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isDataRoute 
         <div className="flex items-center gap-4">
           <Link
             to="/"
-            search={({ rowHeight, ...search }) => ({
+            search={({ rowHeight: _, ...search }) => ({
               ...search,
             })}
           >
@@ -41,9 +45,9 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isDataRoute 
             About
           </a>
 
-          <StyleSelect value={style} isDataRoute={isDataRoute} />
-          <StepsInput value={steps} isDataRoute={isDataRoute} />
-          <AngleInput value={angle} isDataRoute={isDataRoute} />
+          <StyleSelect value={style} isSeedRoute={isSeedRoute} />
+          <StepsInput value={steps} isSeedRoute={isSeedRoute} />
+          <AngleInput value={angle} isSeedRoute={isSeedRoute} />
         </div>
         <ThemeToggle />
       </div>
