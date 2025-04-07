@@ -1,9 +1,8 @@
 import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
 import type { Tuple } from '@thi.ng/api';
 import type { AppCollection } from '../types';
-import { PI } from '../validators';
 import { nanoid } from 'nanoid';
-import { COEFF_PRECISION } from '../validators';
+import { COEFF_PRECISION, PI } from '../validators';
 import { serializeCoeffs } from './serialization';
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {

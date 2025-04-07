@@ -12,10 +12,10 @@ import {
   generateContrastVariations,
   generateFrequencyVariations,
   generatePhaseVariations,
-  applyGlobals,
-  getCoeffs,
-  cosineGradient,
-  getCollectionStyleCSS,
+  // applyGlobals,
+  // getCoeffs,
+  // cosineGradient,
+  // getCollectionStyleCSS,
 } from '~/lib/cosineGradient';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { CollectionRow } from '~/components/CollectionRow';
@@ -69,27 +69,30 @@ function Home() {
     ...generatePhaseVariations(seedCollection, { stepSize: 0.05, steps: 6 }),
   ];
 
-  const processedCoeffs = applyGlobals(getCoeffs(seedCollection.coeffs), seedCollection.globals);
-  const gradientColors = cosineGradient(seedCollection.steps, processedCoeffs);
+  // const processedCoeffs = applyGlobals(getCoeffs(seedCollection.coeffs), seedCollection.globals);
+  // const gradientColors = cosineGradient(seedCollection.steps, processedCoeffs);
 
   return (
-    <div className="w-full h-full flex">
-      <div className="w-1/2">
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel>
         <CollectionsDisplay collections={collections} isSeedRoute />
-      </div>
-      <div className="w-1/2">
-        <div
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel>
+        {/* <div
           className="relative"
           style={{
             height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${33} / 100)`,
             ...getCollectionStyleCSS(
+              // If preview style is 'auto', use the collection's native style
+              // Otherwise use the selected style (preview or from search data)
               style === 'auto' ? defaultStyle : style,
               gradientColors,
-              angle === 'auto' ? defaultAngle : angle,
+              angle === 'auto' ? defaultAngle : angle, // Pass the angle to the gradient CSS generator
             ),
           }}
-        />
-      </div>
-    </div>
+        /> */}
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
