@@ -8,6 +8,12 @@ import { defaultSteps } from '~/components/StepsInput';
 import { defaultStyle } from '~/components/StyleSelect';
 import { defaultAngle } from '~/components/AngleInput';
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
+import {
+  generateExposureVariations,
+  generateContrastVariations,
+  generateFrequencyVariations,
+  generatePhaseVariations,
+} from '~/lib/cosineGradient';
 
 export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
@@ -40,19 +46,27 @@ function Home() {
     angle: angle === 'auto' ? defaultAngle : angle,
   });
 
-  // // We know this will succeed because we validated it in beforeLoad
+  // We know this will succeed because we validated it in beforeLoad
   const { coeffs, globals } = deserializeCoeffs(encodedSeedData);
+
+  // Create base collection
+  const baseCollection: AppCollection = {
+    coeffs,
+    globals,
+    style: style === 'auto' ? initialSearchDataRef.current.style : style,
+    steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
+    angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
+    _id: 'seed',
+    seed: encodedSeedData,
+  };
+
+  // Generate variations for each modifier separately
   const collections = [
-    {
-      coeffs,
-      globals,
-      style: style === 'auto' ? initialSearchDataRef.current.style : style,
-      steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
-      angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
-      _id: 'param',
-      seed: encodedSeedData,
-    },
-  ] as AppCollection[];
+    ...generateExposureVariations(baseCollection, { stepSize: 0.5, steps: 6 }),
+    ...generateContrastVariations(baseCollection, { stepSize: 0.15, steps: 6 }),
+    ...generateFrequencyVariations(baseCollection, { stepSize: 0.15, steps: 6 }),
+    ...generatePhaseVariations(baseCollection, { stepSize: 0.05, steps: 6 }),
+  ];
 
   return <CollectionsDisplay collections={collections} isDataRoute />;
 }

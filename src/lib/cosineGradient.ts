@@ -1,5 +1,10 @@
 import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
 import type { Tuple } from '@thi.ng/api';
+import type { AppCollection } from '../types';
+import { PI } from '../validators';
+import { nanoid } from 'nanoid';
+import { COEFF_PRECISION } from '../validators';
+import { serializeCoeffs } from './serialization';
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
   return withAlpha ? coeffs : coeffs.map((channels: number[]) => channels.slice(0, 3));
@@ -192,4 +197,160 @@ export function cosineGradient(numStops: number, coeffs: number[][]): number[][]
   }
 
   return result;
+}
+
+// Define a window by step size and number of steps
+export type ModifierWindow = {
+  stepSize: number; // Size of each step (e.g., 0.05)
+  steps: number; // Number of steps each direction from original
+};
+
+// Helper function to generate values within a window around the original value
+function generateWindowValues(
+  originalValue: number,
+  window: ModifierWindow,
+  min: number,
+  max: number,
+): number[] {
+  const { stepSize, steps } = window;
+  const values = [originalValue];
+
+  for (let i = 1; i <= steps; i++) {
+    values.push(Math.min(max, originalValue + stepSize * i));
+    values.unshift(Math.max(min, originalValue - stepSize * i));
+  }
+
+  return values.map((v) => Number(v.toFixed(COEFF_PRECISION)));
+}
+
+function hasDistinctColors(colors: number[][]): boolean {
+  if (colors.length <= 1) return false;
+
+  // Compare each color with every other color
+  for (let i = 0; i < colors.length; i++) {
+    for (let j = i + 1; j < colors.length; j++) {
+      const isDifferent = colors[i].some(
+        (component, k) => Math.abs(component - colors[j][k]) > 0.001, // Small threshold for floating point comparison
+      );
+      if (!isDifferent) return false; // Found identical colors
+    }
+  }
+  return true;
+}
+
+function generateModifierVariationsRecursive(
+  baseCollection: AppCollection,
+  modifierIndex: number,
+  name: string,
+  min: number,
+  max: number,
+  window: ModifierWindow,
+  attempt: number = 1,
+  direction: 'increase' | 'decrease' = 'increase',
+): AppCollection[] {
+  const { coeffs, globals, style, steps } = baseCollection;
+  const originalValue = globals[modifierIndex];
+
+  // Adjust step size based on attempt and direction
+  const adjustedStepSize =
+    direction === 'increase'
+      ? window.stepSize * (1 + attempt * 0.5) // Increase by 50% each attempt
+      : window.stepSize / (1 + attempt * 0.5); // Decrease by similar ratio
+
+  const values = generateWindowValues(
+    originalValue,
+    { ...window, stepSize: adjustedStepSize },
+    min,
+    max,
+  );
+
+  // Generate collections and their colors
+  const collections = values.map((value) => {
+    const newGlobals = [...globals];
+    newGlobals[modifierIndex] = value;
+    const collection = {
+      ...baseCollection,
+      globals: newGlobals,
+      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}`,
+    };
+    const colors = cosineGradient(steps, applyGlobals(coeffs, newGlobals));
+    return { collection, colors };
+  });
+
+  // Check if all colors are unique
+  const allUnique = collections.every(({ colors }) => hasDistinctColors(colors));
+
+  // If not all unique, try again with adjusted step size
+  if (!allUnique) {
+    if (attempt >= 10) {
+      // If we've tried increasing 10 times, try decreasing instead
+      if (direction === 'increase') {
+        return generateModifierVariationsRecursive(
+          baseCollection,
+          modifierIndex,
+          name,
+          min,
+          max,
+          window,
+          1,
+          'decrease',
+        );
+      }
+      // If we've tried both directions 10 times, return best effort
+      return collections.map(({ collection }) => ({
+        ...collection,
+        // @ts-ignore-next-line
+        seed: serializeCoeffs(collection.coeffs, collection.globals),
+        style,
+        steps,
+      }));
+    }
+
+    return generateModifierVariationsRecursive(
+      baseCollection,
+      modifierIndex,
+      name,
+      min,
+      max,
+      window,
+      attempt + 1,
+      direction,
+    );
+  }
+
+  return collections.map(({ collection }) => ({
+    ...collection,
+    // @ts-ignore-next-line
+    seed: serializeCoeffs(collection.coeffs, collection.globals),
+    style,
+    steps,
+  }));
+}
+
+export function generateExposureVariations(
+  baseCollection: AppCollection,
+  window: ModifierWindow,
+): AppCollection[] {
+  return generateModifierVariationsRecursive(baseCollection, 0, 'exposure', -1, 1, window);
+}
+
+export function generateContrastVariations(
+  baseCollection: AppCollection,
+  window: ModifierWindow,
+): AppCollection[] {
+  return generateModifierVariationsRecursive(baseCollection, 1, 'contrast', 0, 2, window);
+}
+
+export function generateFrequencyVariations(
+  baseCollection: AppCollection,
+  window: ModifierWindow,
+): AppCollection[] {
+  return generateModifierVariationsRecursive(baseCollection, 2, 'frequency', 0, 2, window);
+}
+
+export function generatePhaseVariations(
+  baseCollection: AppCollection,
+  window: ModifierWindow,
+): AppCollection[] {
+  return generateModifierVariationsRecursive(baseCollection, 3, 'phase', -PI, PI, window);
 }
