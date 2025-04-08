@@ -1,11 +1,8 @@
-import type { Doc } from '../convex/_generated/dataModel';
 import type { Tuple } from '@thi.ng/api';
-import type { coeffsSchema, collectionStyleValidator } from './validators';
+import type { coeffsSchema, collectionSchema, collectionStyleValidator } from './validators';
 import * as v from 'valibot';
 
-export type SystemFields = '_id' | '_creationTime';
-
-export type CollectionPreset = Omit<Doc<'collections'>, SystemFields>;
+export type CollectionPreset = v.InferOutput<typeof collectionSchema>;
 
 // Serialized collection type
 export type AppCollection = CollectionPreset & {

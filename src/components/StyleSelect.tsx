@@ -1,12 +1,12 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import * as v from 'valibot';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Button } from '~/components/ui/button';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import { uiStore$ } from '~/stores/ui';
+import { uiTempStore$ } from '~/stores/ui';
 import { COLLECTION_STYLES, styleWithAutoValidator } from '~/validators';
 import type { CollectionStyle } from '~/types';
 
@@ -30,7 +30,7 @@ export const StyleSelect = observer(function TypeSelect({
 }) {
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   // const { style: value } = useSearch({ from: !isRootRoute ? '/_layout/$data' : '/_layout/' });
-  const previewValue = use$(uiStore$.previewStyle);
+  const previewValue = use$(uiTempStore$.previewStyle);
 
   const handleValueClick = (clickedStyle: SelectCollectionStyle) => {
     // If clicking the already selected style, toggle to auto
@@ -42,7 +42,7 @@ export const StyleSelect = observer(function TypeSelect({
         }),
         replace: true,
       });
-      uiStore$.previewStyle.set(null);
+      uiTempStore$.previewStyle.set(null);
     } else {
       // Otherwise set to the new style
       navigate({
@@ -77,7 +77,7 @@ export const StyleSelect = observer(function TypeSelect({
         className="w-[180px] p-0"
         onMouseLeave={() => {
           if (previewValue) {
-            uiStore$.previewStyle.set(null);
+            uiTempStore$.previewStyle.set(null);
           }
         }}
       >
@@ -90,7 +90,7 @@ export const StyleSelect = observer(function TypeSelect({
                   value={style}
                   onSelect={() => handleValueClick(style)}
                   onMouseEnter={() => {
-                    uiStore$.previewStyle.set(style);
+                    uiTempStore$.previewStyle.set(style);
                   }}
                   className="cursor-pointer pl-3 relative"
                 >

@@ -224,7 +224,7 @@ export function CollectionsDisplay({ collections, isSeedRoute = false }: Collect
               style: style === 'auto' ? collection.style : style,
             };
           }}
-          replace={isSeedRoute}
+          // replace={isSeedRoute}
         >
           <CollectionRow
             collection={collection}

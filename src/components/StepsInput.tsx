@@ -6,7 +6,7 @@ import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
-import { uiStore$ } from '~/stores/ui';
+import { uiTempStore$ } from '~/stores/ui';
 import { MAX_STEPS, MIN_STEPS, stepsWithAutoValidator } from '~/validators';
 import * as v from 'valibot';
 
@@ -24,7 +24,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
 }) {
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const previousValue = usePrevious(value);
-  const previewValue = use$(uiStore$.previewSteps);
+  const previewValue = use$(uiTempStore$.previewSteps);
 
   // UI state
   const [open, setOpen] = useState(false);
@@ -220,7 +220,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
-      uiStore$.previewSteps.set(null);
+      uiTempStore$.previewSteps.set(null);
     } else {
       // Otherwise set to the new value
       navigate({
@@ -307,7 +307,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         avoidCollisions={false}
         onMouseLeave={() => {
           if (previewValue !== null) {
-            uiStore$.previewSteps.set(null);
+            uiTempStore$.previewSteps.set(null);
           }
         }}
       >
@@ -320,7 +320,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
                   value={preset.toString()}
                   onSelect={() => handleValueClick(preset)}
                   onMouseEnter={() => {
-                    uiStore$.previewSteps.set(preset);
+                    uiTempStore$.previewSteps.set(preset);
                   }}
                   className="cursor-pointer pl-3 relative w-full"
                 >

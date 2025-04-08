@@ -13,12 +13,13 @@ import {
   generateFrequencyVariations,
   generatePhaseVariations,
   applyGlobals,
-  getCoeffs,
   cosineGradient,
   getCollectionStyleCSS,
 } from '~/lib/cosineGradient';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
+import { GradientChannelsChart } from '~/components/GradientChannelsChart';
+import * as v from 'valibot';
+import { coeffsSchema } from '~/validators';
 
 export const Route = createFileRoute('/_layout/_seedLayout/$seed')({
   component: Home,
@@ -60,37 +61,50 @@ function Home() {
     seed: encodedSeedData,
   };
 
-  // Generate variations for each modifier separately
   const collections = [
-    ...generateExposureVariations(seedCollection, { stepSize: 0.5, steps: 6 }),
-    ...generateContrastVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
-    ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 6 }),
-    ...generatePhaseVariations(seedCollection, { stepSize: 0.05, steps: 6 }),
+    ...generateExposureVariations(seedCollection, { stepSize: 0.5, steps: 5 }).reverse(),
+    ...generateContrastVariations(seedCollection, { stepSize: 0.15, steps: 5 }).reverse(),
+    ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 5 }).reverse(),
+    ...generatePhaseVariations(seedCollection, { stepSize: 0.02, steps: 5 }).reverse(),
   ];
 
-  const processedCoeffs = applyGlobals(getCoeffs(seedCollection.coeffs), seedCollection.globals);
+  // redundant validation. w/e fixes a ts error
+  const processedCoeffs = v.parse(
+    coeffsSchema,
+    applyGlobals(seedCollection.coeffs, seedCollection.globals),
+  );
   const gradientColors = cosineGradient(seedCollection.steps, processedCoeffs);
 
   return (
     <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel>
+      <ResizablePanel minSize={25} maxSize={60}>
         <CollectionsDisplay collections={collections} isSeedRoute />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel>
-        <div
-          className="relative"
-          style={{
-            height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${33} / 100)`,
-            ...getCollectionStyleCSS(
-              // If preview style is 'auto', use the collection's native style
-              // Otherwise use the selected style (preview or from search data)
-              style === 'auto' ? defaultStyle : style,
-              gradientColors,
-              angle === 'auto' ? defaultAngle : angle, // Pass the angle to the gradient CSS generator
-            ),
-          }}
-        />
+        <ResizablePanelGroup direction="vertical">
+          <ResizablePanel defaultSize={66.7} minSize={50} maxSize={85}>
+            <div className="flex h-full flex-col">
+              <GradientChannelsChart
+                gradientColors={gradientColors}
+                processedCoeffs={processedCoeffs}
+              />
+            </div>
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={33.3} minSize={15} maxSize={50}>
+            <div
+              className="relative h-full"
+              style={{
+                ...getCollectionStyleCSS(
+                  style === 'auto' ? defaultStyle : style,
+                  gradientColors,
+                  angle === 'auto' ? defaultAngle : angle,
+                ),
+              }}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </ResizablePanel>
     </ResizablePanelGroup>
   );

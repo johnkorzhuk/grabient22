@@ -11,6 +11,7 @@ import {
 import { NotFound } from '~/components/NotFound';
 import { ThemeProvider } from '~/components/theme/ThemeProvider';
 import { wrapCreateRootRouteWithSentry } from '@sentry/tanstackstart-react';
+import { TooltipProvider } from '~/components/ui/tooltip';
 
 export const Route = wrapCreateRootRouteWithSentry(
   createRootRoute({
@@ -83,8 +84,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          {/* <ConvexClientProvider>{children}</ConvexClientProvider> */}
-          {children}
+          <TooltipProvider>
+            {/* <ConvexClientProvider>{children}</ConvexClientProvider> */}
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
         <Scripts />
       </body>

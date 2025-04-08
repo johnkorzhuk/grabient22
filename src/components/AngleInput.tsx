@@ -1,12 +1,12 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
-import { uiStore$ } from '~/stores/ui';
+import { uiTempStore$ } from '~/stores/ui';
 import { MIN_ANGLE, MAX_ANGLE, angleWithAutoValidator } from '~/validators';
 import * as v from 'valibot';
 
@@ -24,7 +24,7 @@ export const AngleInput = observer(function AngleInput({
 }) {
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const previousValue = usePrevious(value);
-  const previewAngle = use$(uiStore$.previewAngle);
+  const previewAngle = use$(uiTempStore$.previewAngle);
 
   // UI state
   const [open, setOpen] = useState(false);
@@ -64,7 +64,7 @@ export const AngleInput = observer(function AngleInput({
         if (validateAngle(numValue)) {
           // Format to exactly one decimal place
           const formattedAngle = parseFloat(numValue.toFixed(1));
-          uiStore$.previewAngle.set(formattedAngle);
+          uiTempStore$.previewAngle.set(formattedAngle);
         }
       }
     }
@@ -125,7 +125,7 @@ export const AngleInput = observer(function AngleInput({
     // If valid, no need to change anything
 
     // Clear the preview
-    uiStore$.previewAngle.set(null);
+    uiTempStore$.previewAngle.set(null);
   };
 
   // Handle input key down
@@ -233,7 +233,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
-      uiStore$.previewAngle.set(null);
+      uiTempStore$.previewAngle.set(null);
     } else {
       // Otherwise set to the new value
       navigate({
@@ -320,7 +320,7 @@ export const AngleInput = observer(function AngleInput({
         avoidCollisions={false}
         onMouseLeave={() => {
           if (previewAngle !== null) {
-            uiStore$.previewAngle.set(null);
+            uiTempStore$.previewAngle.set(null);
           }
         }}
       >
@@ -333,7 +333,7 @@ export const AngleInput = observer(function AngleInput({
                   value={preset.toString()}
                   onSelect={() => handleValueClick(preset)}
                   onMouseEnter={() => {
-                    uiStore$.previewAngle.set(preset);
+                    uiTempStore$.previewAngle.set(preset);
                   }}
                   className="cursor-pointer pl-3 relative w-full"
                 >

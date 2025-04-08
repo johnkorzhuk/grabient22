@@ -1,0 +1,14 @@
+@layer base {
+  :root {
+    --chart-1: 0 100% 50%; /* Red */
+    --chart-2: 120 100% 50%; /* Green */
+    --chart-3: 240 100% 50%; /* Blue */
+    --card-header-height: 5rem;
+  }
+
+  .dark {
+    --chart-1: 0 100% 60%; /* Red - slightly brighter in dark mode */
+    --chart-2: 120 100% 60%; /* Green - slightly brighter in dark mode */
+    --chart-3: 240 100% 60%; /* Blue - slightly brighter in dark mode */
+  }
+}

@@ -9,7 +9,7 @@ import type { AppCollection, CollectionStyle } from '~/types';
 import { useHover } from '@mantine/hooks';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect } from 'react';
-import { uiStore$ } from '~/stores/ui';
+import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { useSearch } from '@tanstack/react-router';
 
@@ -31,9 +31,9 @@ export const CollectionRow = observer(function CollectionRow({
   isSeedRoute?: boolean;
 }) {
   const { hovered, ref } = useHover<HTMLDivElement>();
-  const previewStyle = use$(uiStore$.previewStyle);
-  const previewSteps = use$(uiStore$.previewSteps);
-  const previewAngle = use$(uiStore$.previewAngle);
+  const previewStyle = use$(uiTempStore$.previewStyle);
+  const previewSteps = use$(uiTempStore$.previewSteps);
+  const previewAngle = use$(uiTempStore$.previewAngle);
   const searchParams = useSearch({
     from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
   });

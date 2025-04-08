@@ -2,8 +2,9 @@ import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
 import type { Tuple } from '@thi.ng/api';
 import type { AppCollection } from '../types';
 import { nanoid } from 'nanoid';
-import { COEFF_PRECISION, PI } from '../validators';
+import { COEFF_PRECISION, coeffsSchema, PI } from '../validators';
 import { serializeCoeffs } from './serialization';
+import * as v from 'valibot';
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
   return withAlpha ? coeffs : coeffs.map((channels: number[]) => channels.slice(0, 3));
@@ -14,15 +15,16 @@ export const applyGlobals = (
   globals: CollectionPreset['globals'],
 ) => {
   return cosCoeffs.map((coeff: number[], i: number) => {
+    const alpha = coeff[3] ?? 1;
     switch (i) {
       case 0:
-        return coeff.map((v: number) => v + globals[0]!);
+        return [...coeff.slice(0, 3).map((v: number) => v + globals[0]!), alpha];
       case 1:
-        return coeff.map((v: number) => v * globals[1]!);
+        return [...coeff.slice(0, 3).map((v: number) => v * globals[1]!), alpha];
       case 2:
-        return coeff.map((v: number) => v * globals[2]!);
+        return [...coeff.slice(0, 3).map((v: number) => v * globals[2]!), alpha];
       case 3:
-        return coeff.map((v: number) => v + globals[3]!);
+        return [...coeff.slice(0, 3).map((v: number) => v + globals[3]!), alpha];
       default:
         return coeff;
     }
@@ -237,6 +239,18 @@ function hasDistinctColors(colors: number[][]): boolean {
   return true;
 }
 
+// Add this helper function to normalize phase angles
+function normalizePhase(phase: number): number {
+  // Normalize phase to [-PI, PI]
+  phase = phase % (2 * Math.PI);
+  if (phase > Math.PI) {
+    phase -= 2 * Math.PI;
+  } else if (phase < -Math.PI) {
+    phase += 2 * Math.PI;
+  }
+  return Number(phase.toFixed(COEFF_PRECISION));
+}
+
 function generateModifierVariationsRecursive(
   baseCollection: AppCollection,
   modifierIndex: number,
@@ -246,6 +260,7 @@ function generateModifierVariationsRecursive(
   window: ModifierWindow,
   attempt: number = 1,
   direction: 'increase' | 'decrease' = 'increase',
+  customValueGenerator?: (originalValue: number, stepSize: number, steps: number) => number[],
 ): AppCollection[] {
   const { coeffs, globals, style, steps } = baseCollection;
   const originalValue = globals[modifierIndex];
@@ -253,19 +268,17 @@ function generateModifierVariationsRecursive(
   // Adjust step size based on attempt and direction
   const adjustedStepSize =
     direction === 'increase'
-      ? window.stepSize * (1 + attempt * 0.5) // Increase by 50% each attempt
-      : window.stepSize / (1 + attempt * 0.5); // Decrease by similar ratio
+      ? window.stepSize * (1 + attempt * 0.5)
+      : window.stepSize / (1 + attempt * 0.5);
 
-  const values = generateWindowValues(
-    originalValue,
-    { ...window, stepSize: adjustedStepSize },
-    min,
-    max,
-  );
+  // Use custom value generator if provided, otherwise use default
+  const values = customValueGenerator
+    ? customValueGenerator(originalValue, adjustedStepSize, window.steps)
+    : generateWindowValues(originalValue, { ...window, stepSize: adjustedStepSize }, min, max);
 
   // Generate collections and their colors
   const collections = values.map((value) => {
-    const newGlobals = [...globals];
+    const newGlobals = [...globals] as [number, number, number, number];
     newGlobals[modifierIndex] = value;
     const collection = {
       ...baseCollection,
@@ -293,6 +306,7 @@ function generateModifierVariationsRecursive(
           window,
           1,
           'decrease',
+          customValueGenerator,
         );
       }
       // If we've tried both directions 10 times, return best effort
@@ -314,6 +328,7 @@ function generateModifierVariationsRecursive(
       window,
       attempt + 1,
       direction,
+      customValueGenerator,
     );
   }
 
@@ -351,5 +366,27 @@ export function generatePhaseVariations(
   baseCollection: AppCollection,
   window: ModifierWindow,
 ): AppCollection[] {
-  return generateModifierVariationsRecursive(baseCollection, 3, 'phase', -PI, PI, window);
+  // Use a modified version of generateModifierVariationsRecursive that handles phase wrapping
+  return generateModifierVariationsRecursive(
+    baseCollection,
+    3,
+    'phase',
+    -PI,
+    PI,
+    window,
+    1,
+    'increase',
+    // Add a custom value generator for phase
+    (originalValue: number, stepSize: number, steps: number) => {
+      const values = [originalValue];
+
+      for (let i = 1; i <= steps; i++) {
+        // Add values in both directions, normalizing them
+        values.push(normalizePhase(originalValue + stepSize * i));
+        values.unshift(normalizePhase(originalValue - stepSize * i));
+      }
+
+      return values;
+    },
+  );
 }
