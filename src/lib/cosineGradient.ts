@@ -2,9 +2,8 @@ import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
 import type { Tuple } from '@thi.ng/api';
 import type { AppCollection } from '../types';
 import { nanoid } from 'nanoid';
-import { COEFF_PRECISION, coeffsSchema, PI } from '../validators';
+import { COEFF_PRECISION, PI } from '../validators';
 import { serializeCoeffs } from './serialization';
-import * as v from 'valibot';
 
 export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
   return withAlpha ? coeffs : coeffs.map((channels: number[]) => channels.slice(0, 3));
@@ -341,25 +340,62 @@ function generateModifierVariationsRecursive(
   }));
 }
 
+/**
+ * Helper function to generate variations and optionally filter out duplicates
+ */
+function generateVariations(
+  baseCollection: AppCollection,
+  modifierIndex: number,
+  name: string,
+  min: number,
+  max: number,
+  window: ModifierWindow,
+  deduplicate: boolean = false,
+  customValueGenerator?: (originalValue: number, stepSize: number, steps: number) => number[],
+): AppCollection[] {
+  const variations = generateModifierVariationsRecursive(
+    baseCollection,
+    modifierIndex,
+    name,
+    min,
+    max,
+    window,
+    1,
+    'increase',
+    customValueGenerator,
+  );
+
+  if (deduplicate) {
+    // Filter out duplicates based on the 'seed' property
+    const uniqueMap = new Map<string, AppCollection>();
+    variations.forEach((collection) => {
+      uniqueMap.set(collection.seed, collection);
+    });
+    return Array.from(uniqueMap.values());
+  }
+
+  return variations;
+}
+
 export function generateExposureVariations(
   baseCollection: AppCollection,
   window: ModifierWindow,
 ): AppCollection[] {
-  return generateModifierVariationsRecursive(baseCollection, 0, 'exposure', -1, 1, window);
+  return generateVariations(baseCollection, 0, 'exposure', -1, 1, window, true);
 }
 
 export function generateContrastVariations(
   baseCollection: AppCollection,
   window: ModifierWindow,
 ): AppCollection[] {
-  return generateModifierVariationsRecursive(baseCollection, 1, 'contrast', 0, 2, window);
+  return generateVariations(baseCollection, 1, 'contrast', 0, 2, window);
 }
 
 export function generateFrequencyVariations(
   baseCollection: AppCollection,
   window: ModifierWindow,
 ): AppCollection[] {
-  return generateModifierVariationsRecursive(baseCollection, 2, 'frequency', 0, 2, window);
+  return generateVariations(baseCollection, 2, 'frequency', 0, 2, window);
 }
 
 export function generatePhaseVariations(
@@ -367,15 +403,14 @@ export function generatePhaseVariations(
   window: ModifierWindow,
 ): AppCollection[] {
   // Use a modified version of generateModifierVariationsRecursive that handles phase wrapping
-  return generateModifierVariationsRecursive(
+  return generateVariations(
     baseCollection,
     3,
     'phase',
     -PI,
     PI,
     window,
-    1,
-    'increase',
+    false,
     // Add a custom value generator for phase
     (originalValue: number, stepSize: number, steps: number) => {
       const values = [originalValue];

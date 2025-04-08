@@ -70,13 +70,8 @@ function Home() {
     ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 5 }).reverse(),
     ...generatePhaseVariations(seedCollection, { stepSize: 0.02, steps: 5 }).reverse(),
   ];
-
-  // Filter out duplicates based on the 'seed' property
-  const uniqueCollectionsMap = new Map<string, AppCollection>();
-  allVariations.forEach((collection) => {
-    uniqueCollectionsMap.set(collection.seed, collection);
-  });
-  const collections = Array.from(uniqueCollectionsMap.values());
+  
+  const collections = allVariations;
 
   // redundant validation. w/e fixes a ts error
   const processedCoeffs = v.parse(
