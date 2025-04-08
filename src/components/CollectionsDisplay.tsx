@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { usePrevious, useThrottledCallback } from '@mantine/hooks';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -14,13 +14,23 @@ import {
   MIN_ITEM_HEIGHT as ROOT_MIN_ITEM_HEIGHT,
   MAX_ITEM_HEIGHT as ROOT_MAX_ITEM_HEIGHT,
 } from '~/routes/_layout/index';
+import { uiTempStore$ } from '~/stores/ui';
+import { observer, use$ } from '@legendapp/state/react';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
   isSeedRoute?: boolean;
 };
 
-export function CollectionsDisplay({ collections, isSeedRoute = false }: CollectionsDisplayProps) {
+export const CollectionsDisplay = observer(function CollectionsDisplay({
+  collections,
+  isSeedRoute,
+}: CollectionsDisplayProps) {
+  const paramsResult = useParams({
+    from: isSeedRoute ? '/_layout/_seedLayout/$seed' : '/_layout/',
+  });
+  const { seed } = paramsResult && 'seed' in paramsResult ? paramsResult : { seed: undefined };
+
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const { style, steps, angle, rowHeight } = useSearch({
     from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
@@ -47,7 +57,7 @@ export function CollectionsDisplay({ collections, isSeedRoute = false }: Collect
   const resizeRequestIdRef = useRef<number | null>(null);
   const minHeight = isSeedRoute ? SEED_MIN_ITEM_HEIGHT : ROOT_MIN_ITEM_HEIGHT;
   const maxHeight = isSeedRoute ? SEED_MAX_ITEM_HEIGHT : ROOT_MAX_ITEM_HEIGHT;
-
+  const previewCoillection = use$(uiTempStore$.previewCollection);
   // Add local state for immediate updates
   // Initialize with URL state as source of truth
   const [localRowHeight, setLocalRowHeight] = useState<number>(rowHeight);
@@ -208,33 +218,54 @@ export function CollectionsDisplay({ collections, isSeedRoute = false }: Collect
   }, [resizeInProgressRef.current]);
 
   return (
-    <ul className="h-full w-full overflow-auto" ref={scrollContainerRef}>
-      {collections.map((collection, index) => (
-        <Link
-          key={collection._id}
-          to="/$seed"
-          params={{
-            seed: collection.seed,
-          }}
-          search={(s) => {
-            return {
-              ...s,
-              angle: angle === 'auto' ? collection.angle : angle,
-              steps: steps === 'auto' ? collection.steps : steps,
-              style: style === 'auto' ? collection.style : style,
-            };
-          }}
-          // replace={isSeedRoute}
-        >
+    <ul
+      className="h-full w-full overflow-auto"
+      ref={scrollContainerRef}
+      onMouseLeave={() => {
+        if (!previewCoillection) return;
+        uiTempStore$.previewCollection.set(null);
+      }}
+    >
+      {collections.map((collection, index) => {
+        const isCurrentSeed = seed !== undefined && collection.seed === seed;
+
+        // Render CollectionRow directly if it's the current seed, otherwise wrap in Link
+        return isCurrentSeed ? (
           <CollectionRow
+            key={collection._id} // Still need a key for direct rendering in map
             collection={collection}
             rowHeight={localRowHeight}
             onAnchorStateChange={handleAnchorStateChange}
             index={index}
             isSeedRoute={isSeedRoute}
           />
-        </Link>
-      ))}
+        ) : (
+          <Link
+            key={collection._id}
+            to="/$seed"
+            params={{
+              seed: collection.seed,
+            }}
+            search={(s) => {
+              return {
+                ...s,
+                angle: angle === 'auto' ? collection.angle : angle,
+                steps: steps === 'auto' ? collection.steps : steps,
+                style: style === 'auto' ? collection.style : style,
+              };
+            }}
+            replace={isSeedRoute}
+          >
+            <CollectionRow
+              collection={collection}
+              rowHeight={localRowHeight}
+              onAnchorStateChange={handleAnchorStateChange}
+              index={index}
+              isSeedRoute={isSeedRoute}
+            />
+          </Link>
+        );
+      })}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -270,4 +301,4 @@ export function CollectionsDisplay({ collections, isSeedRoute = false }: Collect
       </div>
     </ul>
   );
-}
+});

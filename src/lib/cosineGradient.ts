@@ -248,7 +248,7 @@ function normalizePhase(phase: number): number {
   } else if (phase < -Math.PI) {
     phase += 2 * Math.PI;
   }
-  return Number(phase.toFixed(COEFF_PRECISION));
+  return phase;
 }
 
 function generateModifierVariationsRecursive(

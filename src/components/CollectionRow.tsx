@@ -1,17 +1,14 @@
 import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
-import {
-  applyGlobals,
-  getCoeffs,
-  getCollectionStyleCSS,
-  cosineGradient,
-} from '~/lib/cosineGradient';
-import type { AppCollection, CollectionStyle } from '~/types';
+import { applyGlobals } from '~/lib/cosineGradient';
+import type { AppCollection } from '~/types';
 import { useHover } from '@mantine/hooks';
 import { Separator } from '~/components/ui/serpator';
 import { useEffect } from 'react';
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
-import { useSearch } from '@tanstack/react-router';
+import { GradientPreview } from './GradientPreview';
+import * as v from 'valibot';
+import { coeffsSchema } from '~/validators';
 
 export const CollectionRow = observer(function CollectionRow({
   collection,
@@ -31,34 +28,12 @@ export const CollectionRow = observer(function CollectionRow({
   isSeedRoute?: boolean;
 }) {
   const { hovered, ref } = useHover<HTMLDivElement>();
-  const previewStyle = use$(uiTempStore$.previewStyle);
-  const previewSteps = use$(uiTempStore$.previewSteps);
-  const previewAngle = use$(uiTempStore$.previewAngle);
-  const searchParams = useSearch({
-    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
-  });
 
   // Process coefficients
-  const processedCoeffs = applyGlobals(getCoeffs(collection.coeffs), collection.globals);
-
-  // Determine steps to use (collection's native steps or from URL/preview)
-  const stepsToUse =
-    previewSteps !== null || searchParams.steps !== 'auto'
-      ? (previewSteps ?? searchParams.steps)
-      : collection.steps;
-
-  // Use our custom gradient generator with the determined number of steps
-  const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
-  const gradientColors = cosineGradient(numStops, processedCoeffs);
-
-  // Determine angle to use (collection's native angle or from URL/preview)
-  const angleToUse =
-    previewAngle !== null || searchParams.angle !== 'auto'
-      ? (previewAngle ??
-        (typeof searchParams.angle === 'number'
-          ? parseFloat(searchParams.angle.toFixed(1))
-          : collection.angle || 90.0))
-      : collection.angle || 90.0; // Fallback to 90.0 if collection doesn't have angle
+  const processedCoeffs = v.parse(
+    coeffsSchema,
+    applyGlobals(collection.coeffs, collection.globals),
+  );
 
   // Effect for hover state
   useEffect(() => {
@@ -77,17 +52,19 @@ export const CollectionRow = observer(function CollectionRow({
       className="relative"
       style={{
         height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${rowHeight} / 100)`,
-        ...getCollectionStyleCSS(
-          // If preview style is 'auto', use the collection's native style
-          // Otherwise use the selected style (preview or from search data)
-          (previewStyle || searchParams.style) === 'auto'
-            ? collection.style // Use collection's style with fallback
-            : previewStyle || (searchParams.style as CollectionStyle),
-          gradientColors,
-          angleToUse, // Pass the angle to the gradient CSS generator
-        ),
+      }}
+      onMouseEnter={() => {
+        uiTempStore$.previewCollection.set(processedCoeffs);
       }}
     >
+      <GradientPreview
+        initialStyle={collection.style}
+        initialSteps={collection.steps}
+        initialAngle={collection.angle || 90.0}
+        processedCoeffs={processedCoeffs}
+        routePrefix={isSeedRoute ? '/_layout/_seedLayout' : '/_layout'}
+        className="absolute inset-0"
+      />
       <Separator ref={ref} />
     </li>
   );
