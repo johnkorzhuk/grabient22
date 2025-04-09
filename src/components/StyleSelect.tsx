@@ -61,6 +61,9 @@ export const StyleSelect = observer(function TypeSelect({
         <Button
           variant="outline"
           role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={false}
+          aria-label="Select gradient style"
           className="w-[180px] justify-between disable-animation-on-theme-change group"
         >
           {value === 'auto' ? (

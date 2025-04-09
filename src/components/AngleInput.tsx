@@ -269,6 +269,10 @@ export const AngleInput = observer(function AngleInput({
     >
       <PopoverTrigger asChild>
         <div
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label="Angle input"
           className="flex items-center w-[90px] relative border border-input rounded-md h-9 bg-background hover:bg-accent hover:text-accent-foreground transition-colors disable-animation-on-theme-change shadow-sm"
           onClick={(e) => {
             // If clicking on the input area but not the button, don't toggle
@@ -285,6 +289,7 @@ export const AngleInput = observer(function AngleInput({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
+            aria-label="Angle value"
             className={cn(
               'h-full px-3 py-2 text-sm rounded-md w-full',
               'bg-transparent',
@@ -306,6 +311,7 @@ export const AngleInput = observer(function AngleInput({
               'ml-2 pr-3', // Match StyleSelect's icon spacing
             )}
             onClick={handleButtonClick}
+            aria-label="Toggle angle presets"
           >
             <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
           </div>

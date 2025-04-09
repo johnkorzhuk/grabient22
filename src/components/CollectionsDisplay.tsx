@@ -255,6 +255,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               };
             }}
             replace={isSeedRoute}
+            aria-label={`Gradient ${index + 1}`}
           >
             <CollectionRow
               collection={collection}

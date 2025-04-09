@@ -263,6 +263,10 @@ export const StepsInput = observer(function NumberInputWithPresets({
               e.preventDefault();
             }
           }}
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label="Steps input"
         >
           <input
             ref={inputRef}
@@ -272,6 +276,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
+            aria-label="Steps value"
             className={cn(
               'h-full px-3 py-2 text-sm rounded-md w-full',
               'bg-transparent',
@@ -293,6 +298,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
               'ml-2 pr-3',
             )}
             onClick={handleButtonClick}
+            aria-label="Toggle steps presets"
           >
             <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
           </div>
