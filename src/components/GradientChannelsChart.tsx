@@ -10,11 +10,7 @@ import {
 } from 'recharts';
 import { coeffsSchema } from '~/validators';
 import * as v from 'valibot';
-import { useState, useRef, lazy, Suspense } from 'react';
-import { Button } from '~/components/ui/button';
-import { Copy } from 'lucide-react';
-import { cn } from '~/lib/utils';
-import { usePrevious, useHotkeys } from '@mantine/hooks';
+import { useRef, lazy, Suspense } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
 import { cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
 import { uiTempStore$ } from '~/stores/ui';
@@ -137,7 +133,12 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 interface CustomXAxisTickProps {
   x: number;
   y: number;
-  payload: any;
+  payload: {
+    value: number;
+    coordinate: number;
+    index: number;
+    offset: number;
+  };
   gradientColors: number[][];
 }
 
@@ -149,7 +150,7 @@ const CustomXAxisTick: React.FC<CustomXAxisTickProps> = (props) => {
 
   return (
     <g>
-      <foreignObject x={0} y={barY} width="100%" height={barHeight}>
+      <foreignObject x={18} y={barY} width="calc(100% - 52px)" height={barHeight}>
         <div
           style={{
             width: '100%',
@@ -172,7 +173,7 @@ const Chart = lazy(() =>
           data={data}
           margin={{
             left: 18,
-            right: -28,
+            right: -26,
             top: 0,
             bottom: 40,
           }}
@@ -189,6 +190,7 @@ const Chart = lazy(() =>
                 : false
             }
             height={30}
+            padding={{ left: 0, right: 0 }}
           />
 
           <YAxis
