@@ -70,7 +70,7 @@ function Home() {
     ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 5 }).reverse(),
     ...generatePhaseVariations(seedCollection, { stepSize: 0.02, steps: 5 }).reverse(),
   ];
-  
+
   const collections = allVariations;
 
   // redundant validation. w/e fixes a ts error
@@ -88,7 +88,7 @@ function Home() {
       <SeedChartAndPreviewPanel
         seedCollection={seedCollection}
         processedCoeffs={processedCoeffs}
-        stepsSearchParam={steps} // Pass the URL search param
+        steps={steps} // Pass the URL search param
       />
     </ResizablePanelGroup>
   );
@@ -97,11 +97,11 @@ function Home() {
 const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   seedCollection,
   processedCoeffs,
-  stepsSearchParam,
+  steps,
 }: {
   seedCollection: AppCollection;
   processedCoeffs: CosineCoeffs;
-  stepsSearchParam: number | 'auto';
+  steps: number | 'auto';
 }) {
   // Get preview steps from store
   const previewSteps = use$(uiTempStore$.previewSteps);
@@ -109,70 +109,30 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
 
   // Determine steps to use (preview -> URL -> initial)
   const stepsToUse =
-    previewSteps !== null || stepsSearchParam !== 'auto'
-      ? (previewSteps ?? stepsSearchParam)
-      : seedCollection.steps;
-  const numStops = stepsToUse === 'auto' ? seedCollection.steps : stepsToUse;
-
-  // Generate gradient colors using the correct number of stops
-  const gradientColors = cosineGradient(numStops, processedCoeffs);
+    previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : seedCollection.steps;
 
   return (
     <ResizablePanel>
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel defaultSize={66.7} minSize={50} maxSize={85}>
           <div className="relative w-full h-full">
-            {/* Base chart with regular data */}
-            <div className="absolute inset-0 z-10">
-              <GradientChannelsChart gradientColors={gradientColors} />
-            </div>
-
-            {/* Preview chart with reduced opacity - only render if previewCoeffs exists */}
-            {previewCoeffs && (
-              <div className="absolute inset-0 z-20 opacity-40">
-                <GradientChannelsChart 
-                  gradientColors={cosineGradient(numStops, previewCoeffs)} 
-                  previewData={previewCoeffs} 
-                />
-              </div>
-            )}
+            <GradientChannelsChart
+              processedCoeffs={processedCoeffs}
+              steps={stepsToUse === 'auto' ? defaultSteps : stepsToUse}
+            />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={33.3} minSize={15}>
-          {/* SeedGradientPreview already handles its own state observation */}
-          <SeedGradientPreview
+          <GradientPreview
             initialStyle={seedCollection.style}
             initialSteps={seedCollection.steps}
             initialAngle={seedCollection.angle}
-            processedCoeffs={processedCoeffs}
+            processedCoeffs={previewCoeffs || processedCoeffs}
+            routePrefix="/_layout/_seedLayout"
           />
         </ResizablePanel>
       </ResizablePanelGroup>
     </ResizablePanel>
-  );
-});
-
-const SeedGradientPreview = observer(function SeedGradientPreview({
-  initialStyle,
-  initialSteps,
-  initialAngle,
-  processedCoeffs,
-}: {
-  initialStyle: CollectionStyle;
-  initialSteps: number;
-  initialAngle: number;
-  processedCoeffs: CosineCoeffs;
-}) {
-  const previewCoeffs = use$(uiTempStore$.previewCollection);
-
-  return (
-    <GradientPreview
-      initialStyle={initialStyle}
-      initialSteps={initialSteps}
-      initialAngle={initialAngle}
-      processedCoeffs={previewCoeffs || processedCoeffs}
-      routePrefix="/_layout/_seedLayout"
-    />
   );
 });
