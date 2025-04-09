@@ -19,6 +19,7 @@ import { observer } from '@legendapp/state/react';
 
 interface GradientChannelsChartProps {
   gradientColors: number[][];
+  previewData?: v.InferOutput<typeof coeffsSchema>;
 }
 
 const chartConfig = {
@@ -43,6 +44,7 @@ interface ChartProps {
     green: number;
     blue: number;
     rgb: string;
+    hex: string;
   }>;
   previewData?: v.InferOutput<typeof coeffsSchema>;
   onHover: () => void;
@@ -50,10 +52,74 @@ interface ChartProps {
   onLeave: () => void;
 }
 
+// Define proper types for the tooltip props
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    payload: {
+      t: number;
+      red: number;
+      green: number;
+      blue: number;
+      rgb: string;
+      hex: string;
+    };
+  }>;
+  label?: string;
+}
+
+// Custom tooltip component for the chart
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+  if (!active || !payload || !payload.length) return null;
+  
+  const data = payload[0].payload;
+  const r = Math.round(data.red * 255);
+  const g = Math.round(data.green * 255);
+  const b = Math.round(data.blue * 255);
+  
+  return (
+    <div className="rounded-lg border border-border/50 bg-background/85 shadow-xl p-2">
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs flex items-center">
+            rgb(
+            <span className="inline-flex items-center">
+              <span className="h-2 w-2 mx-0.5 rounded-sm" style={{ backgroundColor: chartConfig.red.color }}></span>
+              {r}
+            </span>, 
+            <span className="inline-flex items-center">
+              <span className="h-2 w-2 mx-0.5 rounded-sm" style={{ backgroundColor: chartConfig.green.color }}></span>
+              {g}
+            </span>, 
+            <span className="inline-flex items-center">
+              <span className="h-2 w-2 mx-0.5 rounded-sm" style={{ backgroundColor: chartConfig.blue.color }}></span>
+              {b}
+            </span>)
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 border-t border-border/30 pt-1.5">
+          {[
+            { channel: 'red', value: data.red, color: chartConfig.red.color },
+            { channel: 'green', value: data.green, color: chartConfig.green.color },
+            { channel: 'blue', value: data.blue, color: chartConfig.blue.color }
+          ]
+            .sort((a, b) => b.value - a.value)
+            .map(({ channel, value, color }) => (
+              <div key={channel} className="flex items-center">
+                <span className="h-2 w-2 mr-1.5 rounded-sm" style={{ backgroundColor: color }}></span>
+                <span className="font-mono text-xs">{value.toFixed(3)}</span>
+              </div>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Client-side only chart component
 const Chart = lazy(() =>
   Promise.resolve({
-    default: ({ data, onHover, onLeave, onMove }: ChartProps) => (
+    default: ({ data, previewData, onHover, onLeave, onMove }: ChartProps) => (
       <ResponsiveContainer>
         <LineChart
           accessibilityLayer
@@ -78,13 +144,13 @@ const Chart = lazy(() =>
             domain={[0, 1]}
             ticks={[0, 0.25, 0.5, 0.75, 1]}
           />
-          <Tooltip content={() => null} />
+          <Tooltip content={<CustomTooltip />} />
           <Line
             dataKey="red"
             type="linear"
             strokeWidth={2}
             dot={false}
-            isAnimationActive={true}
+            isAnimationActive={previewData ? false : true}
             animationDuration={200}
             stroke={chartConfig.red.color}
           />
@@ -93,7 +159,7 @@ const Chart = lazy(() =>
             type="linear"
             strokeWidth={2}
             dot={false}
-            isAnimationActive={true}
+            isAnimationActive={previewData ? false : true}
             animationDuration={200}
             stroke={chartConfig.green.color}
           />
@@ -102,7 +168,7 @@ const Chart = lazy(() =>
             type="linear"
             strokeWidth={2}
             dot={false}
-            isAnimationActive={true}
+            isAnimationActive={previewData ? false : true}
             animationDuration={200}
             stroke={chartConfig.blue.color}
           />
@@ -114,6 +180,7 @@ const Chart = lazy(() =>
 
 export const GradientChannelsChart = observer(function GradientChannelsChart({
   gradientColors,
+  previewData,
 }: GradientChannelsChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -121,6 +188,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   const [tooltipData, setTooltipData] = useState<{
     t: number;
     rgb: string;
+    hex: string;
     red: number;
     green: number;
     blue: number;
@@ -135,6 +203,15 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
     } catch (err) {
       console.error('Failed to copy color:', err);
     }
+  };
+
+  // Convert RGB values (0-1) to hex
+  const rgbToHex = (r: number, g: number, b: number): string => {
+    const toHex = (value: number) => {
+      const hex = Math.round(value * 255).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
   useHotkeys([
@@ -153,6 +230,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
     green: color[1],
     blue: color[2],
     rgb: `rgb(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)})`,
+    hex: rgbToHex(color[0], color[1], color[2]),
   }));
 
   return (
@@ -182,7 +260,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
                     style={{ backgroundColor: (activeTooltipData || previousTooltipData)!.rgb }}
                   />
                   <span className="font-mono text-[13px]">
-                    {(activeTooltipData || previousTooltipData)!.rgb}
+                    {(activeTooltipData || previousTooltipData)!.hex}
                   </span>
                 </div>
                 <Button
@@ -196,7 +274,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
                     'transition-colors duration-200',
                   )}
                   onClick={async () => {
-                    await copyColorToClipboard((activeTooltipData || previousTooltipData)!.rgb);
+                    await copyColorToClipboard((activeTooltipData || previousTooltipData)!.hex);
                     const button = document.activeElement as HTMLButtonElement;
                     button.classList.add('bg-green-500/20');
                     setTimeout(() => button.classList.remove('bg-green-500/20'), 200);
@@ -218,6 +296,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
           <Suspense fallback={<div className="w-full h-full" />}>
             <Chart
               data={chartData}
+              previewData={previewData}
               onHover={() => setIsHovering(true)}
               onMove={(e: any) => {
                 if (e.activePayload) {

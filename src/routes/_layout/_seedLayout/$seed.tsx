@@ -130,7 +130,10 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             {/* Preview chart with reduced opacity - only render if previewCoeffs exists */}
             {previewCoeffs && (
               <div className="absolute inset-0 z-20 opacity-40">
-                <GradientChannelsChart gradientColors={cosineGradient(numStops, previewCoeffs)} />
+                <GradientChannelsChart 
+                  gradientColors={cosineGradient(numStops, previewCoeffs)} 
+                  previewData={previewCoeffs} 
+                />
               </div>
             )}
           </div>

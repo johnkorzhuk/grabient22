@@ -5,10 +5,6 @@ import { nanoid } from 'nanoid';
 import { COEFF_PRECISION, PI } from '../validators';
 import { serializeCoeffs } from './serialization';
 
-export const getCoeffs = (coeffs: CollectionPreset['coeffs'], withAlpha: boolean = false) => {
-  return withAlpha ? coeffs : coeffs.map((channels: number[]) => channels.slice(0, 3));
-};
-
 export const applyGlobals = (
   cosCoeffs: CollectionPreset['coeffs'],
   globals: CollectionPreset['globals'],
