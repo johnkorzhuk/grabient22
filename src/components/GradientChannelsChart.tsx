@@ -14,6 +14,8 @@ import { useRef, lazy, Suspense } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
 import { cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
 import { uiTempStore$ } from '~/stores/ui';
+import { useHotkeys, useClipboard } from '@mantine/hooks';
+import { Copy, Check } from 'lucide-react';
 
 interface GradientChannelsChartProps {
   steps: number;
@@ -49,20 +51,31 @@ interface CustomTooltipProps {
     };
   }>;
   label?: string;
+  copied?: boolean;
 }
 
 // Custom tooltip component for the chart
-const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) => {
   if (!active || !payload || !payload.length) return null;
 
   const data = payload[0].payload;
   const r = Math.round(data.red * 255);
   const g = Math.round(data.green * 255);
   const b = Math.round(data.blue * 255);
+  const rgbColor = `rgb(${r}, ${g}, ${b})`;
+  const hexColor = data.hex;
 
   return (
     <div className="rounded-lg border border-border/50 bg-background/85 shadow-xl p-2">
       <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 rounded-sm" style={{ backgroundColor: rgbColor }}></div>
+          <span className="font-mono text-xs">{hexColor}</span>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            <span>cmd + c</span>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs flex items-center">
             rgb(
@@ -160,12 +173,19 @@ interface ChartProps {
   isPreview?: boolean;
   gradientColors: number[][];
   onIndexChange?: (index: number | null) => void;
+  copied?: boolean;
 }
 
 // Client-side only chart component
 const Chart = lazy(() =>
   Promise.resolve({
-    default: ({ data, isPreview = false, gradientColors, onIndexChange }: ChartProps) => (
+    default: ({
+      data,
+      isPreview = false,
+      gradientColors,
+      onIndexChange,
+      copied = false,
+    }: ChartProps) => (
       <ResponsiveContainer style={{ opacity: isPreview ? 0.25 : 1 }}>
         <LineChart
           accessibilityLayer
@@ -211,7 +231,7 @@ const Chart = lazy(() =>
             ticks={[0, 0.25, 0.5, 0.75, 1]}
           />
           <Tooltip
-            content={<CustomTooltip />}
+            content={<CustomTooltip copied={copied} />}
             // Keep the tooltip active even when not directly hovering over the chart
             // This allows the cursor to remain visible when hovering over the X-axis
             isAnimationActive={false}
@@ -264,6 +284,8 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   const gradientColors = cosineGradient(steps, processedCoeffs);
   const previewChartData = previewColors ? getChartData(previewColors) : [];
   const chartData = getChartData(gradientColors);
+  const activeIndex = use$(uiTempStore$.previewColorIndex);
+  const clipboard = useClipboard({ timeout: 1500 });
 
   const handleChartIndexChange = (index: number | null) => {
     if (index !== undefined) {
@@ -272,6 +294,20 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
       uiTempStore$.previewColorIndex.set(null);
     }
   };
+
+  useHotkeys([
+    [
+      'mod+c',
+      () => {
+        if (typeof activeIndex !== 'number') return;
+
+        const hexColor = chartData[activeIndex]?.hex;
+        if (hexColor) {
+          clipboard.copy(hexColor);
+        }
+      },
+    ],
+  ]);
 
   return (
     <div className="flex h-full flex-col">
@@ -287,6 +323,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
               data={chartData}
               gradientColors={gradientColors}
               onIndexChange={handleChartIndexChange}
+              copied={clipboard.copied}
             />
           </Suspense>
         </ChartContainer>
@@ -294,14 +331,6 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
     </div>
   );
 });
-
-function copyColorToClipboard(color: string) {
-  try {
-    navigator.clipboard.writeText(color);
-  } catch (err) {
-    console.error('Failed to copy color:', err);
-  }
-}
 
 function rgbToHex(r: number, g: number, b: number) {
   const toHex = (value: number) => {
