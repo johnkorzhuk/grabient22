@@ -62,7 +62,7 @@ export const CollectionRow = observer(function CollectionRow({
         initialSteps={collection.steps}
         initialAngle={collection.angle || 90.0}
         processedCoeffs={processedCoeffs}
-        routePrefix={isSeedRoute ? '/_layout/_seedLayout' : '/_layout'}
+        isSeedRoute={isSeedRoute}
         className="absolute inset-0"
       />
       <Separator ref={ref} />

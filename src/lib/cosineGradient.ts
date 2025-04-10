@@ -38,30 +38,100 @@ export function getCollectionStyleCSS(
   type: CollectionStyle = 'linearGradient',
   processedColors: number[][],
   angle: number = 90,
+  activeIndex?: number | null,
 ): React.CSSProperties {
   // Convert RGB values from 0-1 range to 0-255 range for CSS
   const getRgbString = (color: number[]) =>
-    `rgb(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)})`;
+    `${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)}`;
+
+  // Use the RGB string with alpha
+  const getRgbaString = (color: number[], alpha: number = 1) =>
+    `rgba(${getRgbString(color)}, ${alpha})`;
+
+  // Alpha value for inactive color stops when activeIndex exists
+  const inactiveAlpha = 0.5;
 
   if (processedColors.length === 0) {
     return {};
   }
 
   if (processedColors.length === 1) {
-    return { background: getRgbString(processedColors[0]) };
+    return { background: getRgbaString(processedColors[0]) };
   }
 
   switch (type) {
     case 'linearGradient': {
       // For linear gradients, create a smooth transition with configurable angle
       let gradientString = `linear-gradient(${angle}deg,`;
-      processedColors.forEach((color, index) => {
-        const position = (index / (processedColors.length - 1)) * 100;
-        gradientString += ` ${getRgbString(color)} ${position}%`;
-        if (index < processedColors.length - 1) {
-          gradientString += ',';
+
+      // If activeIndex is specified, handle special rendering
+      if (
+        typeof activeIndex === 'number' &&
+        activeIndex >= 0 &&
+        activeIndex < processedColors.length
+      ) {
+        const segmentSize = 100 / processedColors.length;
+        const activeStartPos = activeIndex * segmentSize;
+        const activeEndPos = (activeIndex + 1) * segmentSize;
+
+        // Create a gradient with a solid color segment for the active index
+        if (activeIndex === 0) {
+          // If first segment is active
+          gradientString += ` ${getRgbaString(processedColors[0])} ${activeEndPos}%,`;
+
+          // Continue with the rest of the gradient with reduced alpha
+          for (let i = 1; i < processedColors.length; i++) {
+            const position = (i / (processedColors.length - 1)) * 100;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${position}%`;
+            if (i < processedColors.length - 1) {
+              gradientString += ',';
+            }
+          }
+        } else if (activeIndex === processedColors.length - 1) {
+          // If last segment is active
+          // Start with reduced alpha gradient
+          for (let i = 0; i < processedColors.length - 1; i++) {
+            const position = (i / (processedColors.length - 1)) * 100;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${position}%`;
+            gradientString += ',';
+          }
+
+          // Add the active segment
+          gradientString += ` ${getRgbaString(processedColors[activeIndex], inactiveAlpha)} ${activeStartPos}%,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex])} ${activeStartPos}%`;
+        } else {
+          // If middle segment is active
+          // Start with reduced alpha gradient up to active segment
+          for (let i = 0; i < activeIndex; i++) {
+            const position = (i / (processedColors.length - 1)) * 100;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${position}%`;
+            gradientString += ',';
+          }
+
+          // Add the active segment with hard stops
+          gradientString += ` ${getRgbaString(processedColors[activeIndex], inactiveAlpha)} ${activeStartPos}%,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex])} ${activeStartPos}%,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex])} ${activeEndPos}%,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex], inactiveAlpha)} ${activeEndPos}%`;
+
+          // Continue with the rest of the gradient with reduced alpha
+          for (let i = activeIndex + 1; i < processedColors.length; i++) {
+            const position = (i / (processedColors.length - 1)) * 100;
+            gradientString += `,`;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${position}%`;
+          }
         }
-      });
+      } else {
+        // Standard gradient rendering
+        processedColors.forEach((color, index) => {
+          const position = (index / (processedColors.length - 1)) * 100;
+          gradientString += ` ${getRgbaString(color)} ${position}%`;
+          if (index < processedColors.length - 1) {
+            gradientString += ',';
+          }
+        });
+      }
+
       gradientString += ')';
       return { background: gradientString };
     }
@@ -78,18 +148,22 @@ export function getCollectionStyleCSS(
         const startPos = index * segmentSize;
         const endPos = (index + 1) * segmentSize;
 
+        // Determine alpha value based on activeIndex
+        const alpha =
+          typeof activeIndex === 'number' ? (index === activeIndex ? 1 : inactiveAlpha) : 1;
+
         // Add color with its segment position
         if (index === 0) {
           // For first color, use single position
-          gradientString += ` ${getRgbString(color)} ${startPos}%`;
+          gradientString += ` ${getRgbaString(color, alpha)} ${startPos}%`;
         } else {
           // For subsequent colors, add a hard stop
-          gradientString += `, ${getRgbString(color)} ${startPos}%`;
+          gradientString += `, ${getRgbaString(color, alpha)} ${startPos}%`;
         }
 
         // If not the last color, add end position
         if (index < processedColors.length - 1) {
-          gradientString += `, ${getRgbString(color)} ${endPos}%`;
+          gradientString += `, ${getRgbaString(color, alpha)} ${endPos}%`;
         } else {
           // Last color needs its endpoint too
           gradientString += ` ${endPos}%`;
@@ -103,13 +177,75 @@ export function getCollectionStyleCSS(
     case 'angularGradient': {
       // For angular gradients, create a smooth transition using conic gradient with configurable starting angle
       let gradientString = `conic-gradient(from ${angle}deg,`;
-      processedColors.forEach((color, index) => {
-        const anglePos = (index / (processedColors.length - 1)) * 360;
-        gradientString += ` ${getRgbString(color)} ${anglePos}deg`;
-        if (index < processedColors.length - 1) {
-          gradientString += ',';
+
+      // If activeIndex is specified, handle special rendering
+      if (
+        typeof activeIndex === 'number' &&
+        activeIndex >= 0 &&
+        activeIndex < processedColors.length
+      ) {
+        const segmentSize = 360 / processedColors.length;
+        const activeStartAngle = activeIndex * segmentSize;
+        const activeEndAngle = (activeIndex + 1) * segmentSize;
+
+        // Create a gradient with a solid color segment for the active index
+        if (activeIndex === 0) {
+          // If first segment is active
+          gradientString += ` ${getRgbaString(processedColors[0])} ${activeEndAngle}deg,`;
+
+          // Continue with the rest of the gradient with reduced alpha
+          for (let i = 1; i < processedColors.length; i++) {
+            const anglePos = (i / (processedColors.length - 1)) * 360;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${anglePos}deg`;
+            if (i < processedColors.length - 1) {
+              gradientString += ',';
+            }
+          }
+        } else if (activeIndex === processedColors.length - 1) {
+          // If last segment is active
+          // Start with reduced alpha gradient
+          for (let i = 0; i < processedColors.length - 1; i++) {
+            const anglePos = (i / (processedColors.length - 1)) * 360;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${anglePos}deg`;
+            gradientString += ',';
+          }
+
+          // Add the active segment
+          gradientString += ` ${getRgbaString(processedColors[activeIndex], inactiveAlpha)} ${activeStartAngle}deg,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex])} ${activeStartAngle}deg`;
+        } else {
+          // If middle segment is active
+          // Start with reduced alpha gradient up to active segment
+          for (let i = 0; i < activeIndex; i++) {
+            const anglePos = (i / (processedColors.length - 1)) * 360;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${anglePos}deg`;
+            gradientString += ',';
+          }
+
+          // Add the active segment with hard stops
+          gradientString += ` ${getRgbaString(processedColors[activeIndex], inactiveAlpha)} ${activeStartAngle}deg,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex])} ${activeStartAngle}deg,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex])} ${activeEndAngle}deg,`;
+          gradientString += ` ${getRgbaString(processedColors[activeIndex], inactiveAlpha)} ${activeEndAngle}deg`;
+
+          // Continue with the rest of the gradient with reduced alpha
+          for (let i = activeIndex + 1; i < processedColors.length; i++) {
+            const anglePos = (i / (processedColors.length - 1)) * 360;
+            gradientString += `,`;
+            gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${anglePos}deg`;
+          }
         }
-      });
+      } else {
+        // Standard gradient rendering
+        processedColors.forEach((color, index) => {
+          const anglePos = (index / (processedColors.length - 1)) * 360;
+          gradientString += ` ${getRgbaString(color)} ${anglePos}deg`;
+          if (index < processedColors.length - 1) {
+            gradientString += ',';
+          }
+        });
+      }
+
       gradientString += ')';
       return { background: gradientString };
     }
@@ -126,18 +262,22 @@ export function getCollectionStyleCSS(
         const startAngle = index * segmentSize;
         const endAngle = (index + 1) * segmentSize;
 
+        // Determine alpha value based on activeIndex
+        const alpha =
+          typeof activeIndex === 'number' ? (index === activeIndex ? 1 : inactiveAlpha) : 1;
+
         // Add color with its segment position
         if (index === 0) {
           // For first color, use single position
-          gradientString += ` ${getRgbString(color)} ${startAngle}deg`;
+          gradientString += ` ${getRgbaString(color, alpha)} ${startAngle}deg`;
         } else {
           // For subsequent colors, add a hard stop
-          gradientString += `, ${getRgbString(color)} ${startAngle}deg`;
+          gradientString += `, ${getRgbaString(color, alpha)} ${startAngle}deg`;
         }
 
         // If not the last color, add end position
         if (index < processedColors.length - 1) {
-          gradientString += `, ${getRgbString(color)} ${endAngle}deg`;
+          gradientString += `, ${getRgbaString(color, alpha)} ${endAngle}deg`;
         } else {
           // Last color needs its endpoint too
           gradientString += ` ${endAngle}deg`;

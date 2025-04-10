@@ -5,7 +5,6 @@ import { getCollectionStyleCSS, cosineGradient } from '~/lib/cosineGradient';
 import type { CollectionStyle } from '~/types';
 import * as v from 'valibot';
 import { coeffsSchema } from '~/validators';
-import { searchValidatorSchema } from '~/routes/_layout/_seedLayout';
 
 export const GradientPreview = observer(function GradientPreview({
   initialStyle,
@@ -13,18 +12,20 @@ export const GradientPreview = observer(function GradientPreview({
   initialAngle,
   processedCoeffs,
   className = 'relative h-full',
-  routePrefix,
+  isSeedRoute = false,
+  activeIndex,
 }: {
   initialStyle: CollectionStyle;
   initialSteps: number;
   initialAngle: number;
   processedCoeffs: v.InferOutput<typeof coeffsSchema>;
   className?: string;
-  routePrefix: '/_layout/_seedLayout' | '/_layout';
+  isSeedRoute: boolean;
+  activeIndex?: number | null;
 }) {
-  const { style, steps, angle } = useSearch({ from: routePrefix }) as v.InferOutput<
-    typeof searchValidatorSchema
-  >;
+  const { style, steps, angle } = useSearch({
+    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
+  });
   const previewStyle = use$(uiTempStore$.previewStyle);
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewAngle = use$(uiTempStore$.previewAngle);
@@ -52,7 +53,7 @@ export const GradientPreview = observer(function GradientPreview({
     <div
       className={className}
       style={{
-        ...getCollectionStyleCSS(styleToUse, gradientColors, angleToUse),
+        ...getCollectionStyleCSS(styleToUse, gradientColors, angleToUse, activeIndex),
       }}
     />
   );

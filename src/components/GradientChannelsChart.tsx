@@ -35,21 +35,6 @@ const chartConfig = {
   },
 } as const;
 
-interface ChartProps {
-  data: Array<{
-    t: number;
-    red: number;
-    green: number;
-    blue: number;
-    rgb: string;
-    hex: string;
-  }>;
-
-  isPreview?: boolean;
-
-  gradientColors: number[][];
-}
-
 // Define proper types for the tooltip props
 interface CustomTooltipProps {
   active?: boolean;
@@ -142,9 +127,8 @@ interface CustomXAxisTickProps {
   gradientColors: number[][];
 }
 
-const CustomXAxisTick: React.FC<CustomXAxisTickProps> = (props) => {
+function CustomXAxisTick(props: CustomXAxisTickProps) {
   const { y, gradientColors } = props;
-
   const barHeight = 25;
   const barY = y - barHeight - 16; // Position the bar above the axis line, within the chart area
 
@@ -161,13 +145,28 @@ const CustomXAxisTick: React.FC<CustomXAxisTickProps> = (props) => {
       </foreignObject>
     </g>
   );
-};
+}
+
+interface ChartProps {
+  data: Array<{
+    t: number;
+    red: number;
+    green: number;
+    blue: number;
+    rgb: string;
+    hex: string;
+  }>;
+
+  isPreview?: boolean;
+  gradientColors: number[][];
+  onIndexChange?: (index: number | null) => void;
+}
 
 // Client-side only chart component
 const Chart = lazy(() =>
   Promise.resolve({
-    default: ({ data, isPreview = false, gradientColors }: ChartProps) => (
-      <ResponsiveContainer style={{ opacity: isPreview ? 0.4 : 1 }}>
+    default: ({ data, isPreview = false, gradientColors, onIndexChange }: ChartProps) => (
+      <ResponsiveContainer style={{ opacity: isPreview ? 0.25 : 1 }}>
         <LineChart
           accessibilityLayer
           data={data}
@@ -176,6 +175,16 @@ const Chart = lazy(() =>
             right: -26,
             top: 0,
             bottom: 40,
+          }}
+          onMouseMove={(state) => {
+            if (!isPreview && onIndexChange && state?.activeTooltipIndex !== undefined) {
+              onIndexChange(state.activeTooltipIndex);
+            }
+          }}
+          onMouseLeave={() => {
+            if (!isPreview && onIndexChange) {
+              onIndexChange(null);
+            }
           }}
         >
           <CartesianGrid vertical={false} />
@@ -250,16 +259,23 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   processedCoeffs,
   steps,
 }: GradientChannelsChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const previewCoeffs = use$(uiTempStore$.previewCollection);
   const previewColors = previewCoeffs ? cosineGradient(steps, previewCoeffs) : undefined;
   const gradientColors = cosineGradient(steps, processedCoeffs);
   const previewChartData = previewColors ? getChartData(previewColors) : [];
   const chartData = getChartData(gradientColors);
 
+  const handleChartIndexChange = (index: number | null) => {
+    if (index !== undefined) {
+      uiTempStore$.previewColorIndex.set(index);
+    } else {
+      uiTempStore$.previewColorIndex.set(null);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
-      <div ref={containerRef} className="relative flex-1 w-full">
+      <div className="relative flex-1 w-full">
         <ChartContainer config={chartConfig} className="absolute inset-0">
           <Suspense fallback={<div className="w-full h-full" />}>
             <Chart isPreview data={previewChartData} gradientColors={gradientColors} />
@@ -267,7 +283,11 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
         </ChartContainer>
         <ChartContainer config={chartConfig} className="absolute inset-0">
           <Suspense fallback={<div className="w-full h-full" />}>
-            <Chart data={chartData} gradientColors={gradientColors} />
+            <Chart
+              data={chartData}
+              gradientColors={gradientColors}
+              onIndexChange={handleChartIndexChange}
+            />
           </Suspense>
         </ChartContainer>
       </div>

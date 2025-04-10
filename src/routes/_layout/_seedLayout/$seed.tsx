@@ -106,6 +106,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   // Get preview steps from store
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewCoeffs = use$(uiTempStore$.previewCollection);
+  const previewColorIndex = use$(uiTempStore$.previewColorIndex);
 
   // Determine steps to use (preview -> URL -> initial)
   const stepsToUse =
@@ -129,7 +130,8 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             initialSteps={seedCollection.steps}
             initialAngle={seedCollection.angle}
             processedCoeffs={previewCoeffs || processedCoeffs}
-            routePrefix="/_layout/_seedLayout"
+            isSeedRoute
+            activeIndex={previewColorIndex}
           />
         </ResizablePanel>
       </ResizablePanelGroup>
