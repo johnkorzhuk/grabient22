@@ -7,11 +7,9 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
-import { MAX_STEPS, MIN_STEPS, stepsWithAutoValidator } from '~/validators';
+import { DEFAULT_STEPS, MAX_STEPS, MIN_STEPS, stepsWithAutoValidator } from '~/validators';
 import * as v from 'valibot';
 
-// Default values
-export const defaultSteps = 7;
 const presets = [3, 5, 8, 13, 21, 34];
 const step = 1;
 
@@ -135,8 +133,8 @@ export const StepsInput = observer(function NumberInputWithPresets({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
 
-      let currentValue = value === 'auto' ? defaultSteps : Number(value);
-      if (isNaN(currentValue)) currentValue = defaultSteps;
+      let currentValue = value === 'auto' ? DEFAULT_STEPS : Number(value);
+      if (isNaN(currentValue)) currentValue = DEFAULT_STEPS;
 
       const newValue = e.key === 'ArrowUp' ? currentValue + step : currentValue - step;
 
@@ -161,7 +159,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         navigate({
           search: (prev) => ({
             ...prev,
-            steps: defaultSteps,
+            steps: DEFAULT_STEPS,
           }),
           replace: true,
         });
@@ -236,7 +234,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
   // Determine the display value
   const displayValue = () => {
     if (isFocused) {
-      return value === 'auto' ? defaultSteps.toString() : value.toString();
+      return value === 'auto' ? DEFAULT_STEPS.toString() : value.toString();
     } else {
       if (value === 'auto') {
         return previewValue !== null ? previewValue.toString() : 'auto';

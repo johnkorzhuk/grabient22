@@ -1,11 +1,9 @@
 import { createFileRoute, useParams, useSearch } from '@tanstack/react-router';
-import type { AppCollection, CollectionStyle, CosineCoeffs } from '~/types';
+import type { AppCollection, CosineCoeffs } from '~/types';
 import { useRef } from 'react';
 import { deserializeCoeffs } from '~/lib/serialization';
 import { redirect } from '@tanstack/react-router';
-import { defaultSteps } from '~/components/StepsInput';
-import { defaultStyle } from '~/components/StyleSelect';
-import { defaultAngle } from '~/components/AngleInput';
+
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import {
   generateExposureVariations,
@@ -13,17 +11,16 @@ import {
   generateFrequencyVariations,
   generatePhaseVariations,
   applyGlobals,
-  cosineGradient,
 } from '~/lib/cosineGradient';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import * as v from 'valibot';
-import { coeffsSchema } from '~/validators';
+import { coeffsSchema, DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
 import { GradientPreview } from '~/components/GradientPreview';
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
 
-export const Route = createFileRoute('/_layout/_seedLayout/$seed')({
+export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
   beforeLoad: ({ params, search }) => {
     try {
@@ -36,18 +33,18 @@ export const Route = createFileRoute('/_layout/_seedLayout/$seed')({
 });
 
 function Home() {
-  const { style, steps, angle } = useSearch({ from: '/_layout/_seedLayout' });
+  const { style, steps, angle } = useSearch({ from: '/_layout' });
 
   const { seed: encodedSeedData } = useParams({
-    from: '/_layout/_seedLayout/$seed',
+    from: '/_layout/$seed',
   });
 
   // TODO: we should do something similar in StepsInput, AngleInput instead of hard coded defaults
   // so the value rendered in the input is the actual default value when select === 'auto'
   const initialSearchDataRef = useRef({
-    style: style === 'auto' ? defaultStyle : style,
-    steps: steps === 'auto' ? defaultSteps : steps,
-    angle: angle === 'auto' ? defaultAngle : angle,
+    style: style === 'auto' ? DEFAULT_STYLE : style,
+    steps: steps === 'auto' ? DEFAULT_STEPS : steps,
+    angle: angle === 'auto' ? DEFAULT_ANGLE : angle,
   });
 
   // We know this will succeed because we validated it in beforeLoad
@@ -119,7 +116,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
           <div className="relative w-full h-full">
             <GradientChannelsChart
               processedCoeffs={processedCoeffs}
-              steps={stepsToUse === 'auto' ? defaultSteps : stepsToUse}
+              steps={stepsToUse === 'auto' ? DEFAULT_STEPS : stepsToUse}
             />
           </div>
         </ResizablePanel>
@@ -130,7 +127,6 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             initialSteps={seedCollection.steps}
             initialAngle={seedCollection.angle}
             processedCoeffs={previewCoeffs || processedCoeffs}
-            isSeedRoute
             activeIndex={previewColorIndex}
           />
         </ResizablePanel>

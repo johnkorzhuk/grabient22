@@ -15,11 +15,9 @@ type AppHeaderProps = {
 };
 
 export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isSeedRoute = false }, ref) => {
-  // Get search params from the current route only
-  const currentRouteSearch = useSearch({
-    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
+  const { style, steps, angle } = useSearch({
+    from: '/_layout',
   });
-  const { style, steps, angle, rowHeight } = currentRouteSearch;
 
   return (
     <header
@@ -30,9 +28,9 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isSeedRoute 
         <div className="flex items-center gap-4">
           <Link
             to="/"
-            search={({ rowHeight: _, ...search }) => ({
-              ...search,
-            })}
+            search={(search) => {
+              return search;
+            }}
           >
             <h1 className="text-xl font-bold">Grabient</h1>
           </Link>

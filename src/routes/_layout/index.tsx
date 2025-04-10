@@ -1,55 +1,23 @@
-import {
-  createFileRoute,
-  retainSearchParams,
-  stripSearchParams,
-  useLoaderData,
-} from '@tanstack/react-router';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import { fetchCollections } from '~/lib/fetchCollections';
 import type { AppCollection } from '~/types';
-import {
-  angleWithAutoValidator,
-  COMMON_SEARCH_DEFAULTS,
-  stepsWithAutoValidator,
-  styleWithAutoValidator,
-} from '~/validators';
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
-import * as v from 'valibot';
 
-export const DEFAULT_ITEM_HEIGHT = 25;
-export const MIN_ITEM_HEIGHT = 10;
-export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
-export const rowHeightValidator = v.pipe(
-  v.number(),
-  v.minValue(MIN_ITEM_HEIGHT),
-  v.maxValue(MAX_ITEM_HEIGHT),
-  v.transform((input) => Number(input.toFixed(1))),
-);
+// export const DEFAULT_ITEM_HEIGHT_ROW = 15;
+// export const DEFAULT_ITEM_HEIGHT_GRID = 35;
+// export const MIN_ITEM_HEIGHT = 10;
+// export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
 
-export const searchValidatorSchema = v.object({
-  rowHeight: v.optional(
-    v.fallback(rowHeightValidator, COMMON_SEARCH_DEFAULTS.rowHeight),
-    COMMON_SEARCH_DEFAULTS.rowHeight,
-  ),
-  style: v.optional(
-    v.fallback(styleWithAutoValidator, COMMON_SEARCH_DEFAULTS.style),
-    COMMON_SEARCH_DEFAULTS.style,
-  ),
-  steps: v.optional(
-    v.fallback(stepsWithAutoValidator, COMMON_SEARCH_DEFAULTS.steps),
-    COMMON_SEARCH_DEFAULTS.steps,
-  ),
-  angle: v.optional(
-    v.fallback(angleWithAutoValidator, COMMON_SEARCH_DEFAULTS.angle),
-    COMMON_SEARCH_DEFAULTS.angle,
-  ),
-});
+// // Use the factory function to create the search validator schema
+// export const searchValidatorSchema = createSearchValidatorSchemaFactory({
+//   defaultItemHeightRow: DEFAULT_ITEM_HEIGHT_ROW,
+//   minItemHeight: MIN_ITEM_HEIGHT,
+//   maxItemHeight: MAX_ITEM_HEIGHT,
+// });
 
 export const Route = createFileRoute('/_layout/')({
   component: Home,
-  validateSearch: searchValidatorSchema,
-  search: {
-    middlewares: [stripSearchParams(COMMON_SEARCH_DEFAULTS)],
-  },
+
   loader: async () => {
     const data = await fetchCollections();
     return data;

@@ -12,7 +12,6 @@ export const GradientPreview = observer(function GradientPreview({
   initialAngle,
   processedCoeffs,
   className = 'relative h-full',
-  isSeedRoute = false,
   activeIndex,
 }: {
   initialStyle: CollectionStyle;
@@ -20,11 +19,10 @@ export const GradientPreview = observer(function GradientPreview({
   initialAngle: number;
   processedCoeffs: v.InferOutput<typeof coeffsSchema>;
   className?: string;
-  isSeedRoute: boolean;
   activeIndex?: number | null;
 }) {
   const { style, steps, angle } = useSearch({
-    from: isSeedRoute ? '/_layout/_seedLayout' : '/_layout/',
+    from: '/_layout',
   });
   const previewStyle = use$(uiTempStore$.previewStyle);
   const previewSteps = use$(uiTempStore$.previewSteps);

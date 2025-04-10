@@ -1,55 +1,32 @@
 import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
 import { applyGlobals } from '~/lib/cosineGradient';
 import type { AppCollection } from '~/types';
-import { useHover } from '@mantine/hooks';
 import { Separator } from '~/components/ui/serpator';
-import { useEffect } from 'react';
 import { uiTempStore$ } from '~/stores/ui';
-import { observer, use$ } from '@legendapp/state/react';
+import { observer } from '@legendapp/state/react';
 import { GradientPreview } from './GradientPreview';
 import * as v from 'valibot';
 import { coeffsSchema } from '~/validators';
+import { cn } from '~/lib/utils';
 
 export const CollectionRow = observer(function CollectionRow({
   collection,
   rowHeight,
-  onAnchorStateChange,
-  index,
-  isSeedRoute = false,
+  className = '',
 }: {
   collection: AppCollection;
   rowHeight: number;
-  onAnchorStateChange: (
-    centerY: number | null,
-    index: number,
-    element: HTMLDivElement | null,
-  ) => void;
-  index: number;
-  isSeedRoute?: boolean;
+  className?: string;
 }) {
-  const { hovered, ref } = useHover<HTMLDivElement>();
-
   // Process coefficients
   const processedCoeffs = v.parse(
     coeffsSchema,
     applyGlobals(collection.coeffs, collection.globals),
   );
 
-  // Effect for hover state
-  useEffect(() => {
-    if (hovered && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      const centerY = rect.top + rect.height / 2;
-
-      onAnchorStateChange(centerY, index, ref.current);
-    } else if (!hovered) {
-      onAnchorStateChange(null, index, null);
-    }
-  }, [hovered, index, onAnchorStateChange]);
-
   return (
-    <li
-      className="relative"
+    <div
+      className={cn('relative', className)}
       style={{
         height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${rowHeight} / 100)`,
       }}
@@ -62,10 +39,9 @@ export const CollectionRow = observer(function CollectionRow({
         initialSteps={collection.steps}
         initialAngle={collection.angle || 90.0}
         processedCoeffs={processedCoeffs}
-        isSeedRoute={isSeedRoute}
         className="absolute inset-0"
       />
-      <Separator ref={ref} />
-    </li>
+      <Separator />
+    </div>
   );
 });

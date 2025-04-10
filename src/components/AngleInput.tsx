@@ -7,11 +7,9 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
-import { MIN_ANGLE, MAX_ANGLE, angleWithAutoValidator } from '~/validators';
+import { MIN_ANGLE, MAX_ANGLE, angleWithAutoValidator, DEFAULT_ANGLE } from '~/validators';
 import * as v from 'valibot';
 
-// Default values
-export const defaultAngle = 90.0;
 const presets = [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0];
 const step = 1.0; // Increment/decrement step for arrow keys
 
@@ -134,8 +132,8 @@ export const AngleInput = observer(function AngleInput({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
 
-      let currentValue = value === 'auto' ? defaultAngle : Number(value);
-      if (isNaN(currentValue)) currentValue = defaultAngle;
+      let currentValue = value === 'auto' ? DEFAULT_ANGLE : Number(value);
+      if (isNaN(currentValue)) currentValue = DEFAULT_ANGLE;
 
       const newValue = e.key === 'ArrowUp' ? currentValue + step : currentValue - step;
 
@@ -163,7 +161,7 @@ export const AngleInput = observer(function AngleInput({
         navigate({
           search: (prev) => ({
             ...prev,
-            angle: defaultAngle,
+            angle: DEFAULT_ANGLE,
           }),
           replace: true,
         });
@@ -249,7 +247,7 @@ export const AngleInput = observer(function AngleInput({
   // Determine the display value
   const displayValue = () => {
     if (isFocused) {
-      return value === 'auto' ? defaultAngle.toString() : value.toString();
+      return value === 'auto' ? DEFAULT_ANGLE.toString() : value.toString();
     } else {
       if (value === 'auto') {
         return previewAngle !== null ? previewAngle.toString() : 'auto';

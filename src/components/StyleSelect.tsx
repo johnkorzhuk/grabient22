@@ -19,8 +19,6 @@ const STYLE_LABELS: Record<CollectionStyle, string> = {
   angularSwatches: 'Angular Swatches',
 };
 
-export const defaultStyle: CollectionStyle = 'linearGradient';
-
 export const StyleSelect = observer(function TypeSelect({
   value,
   isSeedRoute = false,
@@ -29,7 +27,6 @@ export const StyleSelect = observer(function TypeSelect({
   isSeedRoute: boolean;
 }) {
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
-  // const { style: value } = useSearch({ from: !isRootRoute ? '/_layout/$data' : '/_layout/' });
   const previewValue = use$(uiTempStore$.previewStyle);
 
   const handleValueClick = (clickedStyle: SelectCollectionStyle) => {

@@ -7,18 +7,33 @@ export const COLLECTION_STYLES = [
   'angularSwatches',
 ] as const;
 
+export const DEFAULT_STYLE: (typeof COLLECTION_STYLES)[number] = 'linearGradient';
 export const collectionStyleValidator = v.union(COLLECTION_STYLES.map((t) => v.literal(t)));
 export const styleWithAutoValidator = v.union([v.literal('auto'), collectionStyleValidator]);
 
+export const DEFAULT_STEPS = 7;
 export const MIN_STEPS = 2;
 export const MAX_STEPS = 50;
 export const stepsValidator = v.pipe(v.number(), v.minValue(MIN_STEPS), v.maxValue(MAX_STEPS));
 export const stepsWithAutoValidator = v.union([v.literal('auto'), stepsValidator]);
 
+export const DEFAULT_ANGLE = 90.0;
 export const MIN_ANGLE = 0;
 export const MAX_ANGLE = 360;
 export const angleValidator = v.pipe(v.number(), v.minValue(MIN_ANGLE), v.maxValue(MAX_ANGLE));
 export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
+
+export const DEFAULT_ITEM_HEIGHT_ROW = 20;
+export const DEFAULT_ITEM_HEIGHT_GRID = 35;
+export const MIN_ITEM_HEIGHT = 5;
+export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
+// Create row height validator with the provided min/max constraints
+export const rowHeightValidator = v.pipe(
+  v.number(),
+  v.minValue(MIN_ITEM_HEIGHT),
+  v.maxValue(MAX_ITEM_HEIGHT),
+  v.transform((input) => Number(input.toFixed(1))),
+);
 
 export const PI = Math.PI;
 export const COEFF_PRECISION = 4 as const;
@@ -82,13 +97,6 @@ export const globalsSchema = v.tuple([
   globalPhaseSchema, // phase [-π, π]
 ]);
 
-export const COMMON_SEARCH_DEFAULTS = {
-  style: 'auto' as const,
-  steps: 'auto' as const,
-  angle: 'auto' as const,
-  rowHeight: 25,
-};
-
 /**
  * Cosine gradient collection validator
  * Validates the complete structure of a gradient collection
@@ -100,3 +108,19 @@ export const collectionSchema = v.object({
   style: collectionStyleValidator,
   angle: angleValidator,
 });
+
+export const validateRowHeight = (min: number, max: number) => (input: number) => {
+  const result = v.safeParse(v.pipe(v.number(), v.minValue(min), v.maxValue(max)), input);
+
+  if (!result.success && result.issues && result.issues.length > 0) {
+    const rangeIssue = result.issues.find(
+      (issue) => issue.type === 'min_value' || issue.type === 'max_value',
+    );
+
+    if (rangeIssue) {
+      return rangeIssue.requirement;
+    }
+  }
+
+  return input;
+};
