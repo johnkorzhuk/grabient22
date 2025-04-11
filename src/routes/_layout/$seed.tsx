@@ -63,14 +63,12 @@ function Home() {
   };
 
   // Generate variations
-  const allVariations = [
+  const collections = [
     ...generateExposureVariations(seedCollection, { stepSize: 0.5, steps: 5 }).reverse(),
     ...generateContrastVariations(seedCollection, { stepSize: 0.15, steps: 5 }).reverse(),
     ...generateFrequencyVariations(seedCollection, { stepSize: 0.15, steps: 5 }).reverse(),
     ...generatePhaseVariations(seedCollection, { stepSize: 0.02, steps: 5 }).reverse(),
   ];
-
-  const collections = allVariations;
 
   // redundant validation. w/e fixes a ts error
   const processedCoeffs = v.parse(
@@ -114,7 +112,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   return (
     <ResizablePanel>
       <ResizablePanelGroup direction="vertical">
-        <ResizablePanel defaultSize={66.7} minSize={50} maxSize={85}>
+        <ResizablePanel defaultSize={50} minSize={40} maxSize={60}>
           <div className="relative w-full h-full">
             <GradientChannelsChart
               processedCoeffs={processedCoeffs}
@@ -123,7 +121,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={33.3} minSize={15}>
+        <ResizablePanel defaultSize={50} minSize={15}>
           <GradientPreview
             initialStyle={seedCollection.style}
             initialSteps={seedCollection.steps}
