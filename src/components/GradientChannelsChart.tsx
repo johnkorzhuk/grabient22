@@ -150,7 +150,7 @@ function CustomXAxisTick(props: CustomXAxisTickProps) {
 
   return (
     <g>
-      <foreignObject x={isVertical ? 0 : 20} y={barY} width="calc(100% - 56px)" height={barHeight}>
+      <foreignObject x={isVertical ? 10 : 20} y={barY} width="calc(100% - 56px)" height={barHeight}>
         <div
           style={{
             width: '100%',
@@ -430,30 +430,6 @@ const Chart = lazy(() =>
   }),
 );
 
-// Custom styles to override Recharts default styling
-const chartStyles = `
-  .recharts-responsive-container {
-    height: 100% !important;
-    width: 100% !important;
-  }
-  .recharts-wrapper {
-    height: 100% !important;
-    width: 100% !important;
-  }
-  .flex-aspect-video {
-    aspect-ratio: auto !important;
-    height: 100% !important;
-  }
-  .flex-col {
-    height: 100% !important;
-  }
-  [data-chart] {
-    aspect-ratio: auto !important;
-    height: 100% !important;
-    width: 100% !important;
-  }
-`;
-
 export const GradientChannelsChart = observer(function GradientChannelsChart({
   processedCoeffs,
   steps,
@@ -500,7 +476,6 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
 
   return (
     <div className="flex h-full flex-col" style={{ height: '100%' }}>
-      <style dangerouslySetInnerHTML={{ __html: chartStyles }} />
       <div
         className="relative flex-1 w-full h-full"
         ref={ref}

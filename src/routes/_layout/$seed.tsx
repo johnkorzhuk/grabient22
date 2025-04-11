@@ -78,15 +78,17 @@ function Home() {
 
   return (
     <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel minSize={25} maxSize={60}>
+      <ResizablePanel minSize={40} maxSize={60}>
         <CollectionsDisplay collections={collections} isSeedRoute />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <SeedChartAndPreviewPanel
-        seedCollection={seedCollection}
-        processedCoeffs={processedCoeffs}
-        steps={steps} // Pass the URL search param
-      />
+      <ResizablePanel>
+        <SeedChartAndPreviewPanel
+          seedCollection={seedCollection}
+          processedCoeffs={processedCoeffs}
+          steps={steps} // Pass the URL search param
+        />
+      </ResizablePanel>
     </ResizablePanelGroup>
   );
 }
@@ -110,27 +112,25 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
     previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : seedCollection.steps;
 
   return (
-    <ResizablePanel>
-      <ResizablePanelGroup direction="vertical">
-        <ResizablePanel defaultSize={50} minSize={40} maxSize={60}>
-          <div className="relative w-full h-full">
-            <GradientChannelsChart
-              processedCoeffs={processedCoeffs}
-              steps={stepsToUse === 'auto' ? DEFAULT_STEPS : stepsToUse}
-            />
-          </div>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={50} minSize={15}>
-          <GradientPreview
-            initialStyle={seedCollection.style}
-            initialSteps={seedCollection.steps}
-            initialAngle={seedCollection.angle}
-            processedCoeffs={previewCoeffs || processedCoeffs}
-            activeIndex={previewColorIndex}
+    <ResizablePanelGroup direction="vertical">
+      <ResizablePanel defaultSize={50} minSize={20} maxSize={60}>
+        <div className="relative w-full h-full">
+          <GradientChannelsChart
+            processedCoeffs={processedCoeffs}
+            steps={stepsToUse === 'auto' ? DEFAULT_STEPS : stepsToUse}
           />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </ResizablePanel>
+        </div>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel defaultSize={50} minSize={15} maxSize={60}>
+        <GradientPreview
+          initialStyle={seedCollection.style}
+          initialSteps={seedCollection.steps}
+          initialAngle={seedCollection.angle}
+          processedCoeffs={previewCoeffs || processedCoeffs}
+          activeIndex={previewColorIndex}
+        />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 });
