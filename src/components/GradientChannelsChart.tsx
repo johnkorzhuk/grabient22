@@ -302,7 +302,7 @@ const Chart = lazy(() =>
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.red.color }}
-                  isAnimationActive={isPreview ? false : true}
+                  isAnimationActive={false}
                   animationDuration={200}
                   stroke={chartConfig.red.color}
                   strokeOpacity={1}
@@ -313,7 +313,7 @@ const Chart = lazy(() =>
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.green.color }}
-                  isAnimationActive={isPreview ? false : true}
+                  isAnimationActive={false}
                   animationDuration={200}
                   stroke={chartConfig.green.color}
                   strokeOpacity={1}
@@ -324,7 +324,7 @@ const Chart = lazy(() =>
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.blue.color }}
-                  isAnimationActive={isPreview ? false : true}
+                  isAnimationActive={false}
                   animationDuration={200}
                   stroke={chartConfig.blue.color}
                   strokeOpacity={1}
@@ -394,7 +394,7 @@ const Chart = lazy(() =>
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.red.color }}
-                  isAnimationActive={isPreview ? false : true}
+                  isAnimationActive={false}
                   animationDuration={200}
                   stroke={chartConfig.red.color}
                   strokeOpacity={1}
@@ -405,7 +405,7 @@ const Chart = lazy(() =>
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.green.color }}
-                  isAnimationActive={isPreview ? false : true}
+                  isAnimationActive={false}
                   animationDuration={200}
                   stroke={chartConfig.green.color}
                   strokeOpacity={1}
@@ -416,7 +416,7 @@ const Chart = lazy(() =>
                   strokeWidth={2}
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.blue.color }}
-                  isAnimationActive={isPreview ? false : true}
+                  isAnimationActive={false}
                   animationDuration={200}
                   stroke={chartConfig.blue.color}
                   strokeOpacity={1}
@@ -471,9 +471,10 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   // Determine if the chart should be rendered vertically based on width and viewport
   // Only render vertically if the viewport is less than 700px AND either:
   // 1. Width is explicitly measured and less than 500, OR
-  // 2. The height is at least 1.5x the width (very tall portrait orientation)
-  const isVertical =
-    isMobile && ((width ? width < 500 : false) || (width && height && height > width * 1.3));
+  // 2. The height is at least 1.3x the width (very tall portrait orientation)
+  const isVertical = Boolean(
+    isMobile && ((width ? width < 500 : false) || (width && height && height > width * 1.3)),
+  );
 
   const handleChartIndexChange = (index: number | null) => {
     if (index !== undefined) {
@@ -505,15 +506,19 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
         ref={ref}
         style={{ minHeight: '350px', height: '100%' }}
       >
-        <ChartContainer config={chartConfig} className="absolute inset-0 h-full w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="absolute inset-0 h-full w-full"
+          style={{ opacity: 0.33 }}
+        >
           <Suspense fallback={<div className="w-full h-full" />}>
             <Chart
               isPreview
               data={previewChartData}
               gradientColors={gradientColors}
               isVertical={isVertical}
-              width={width}
-              height={height}
+              width={width || undefined}
+              height={height || undefined}
             />
           </Suspense>
         </ChartContainer>
@@ -525,8 +530,8 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
               onIndexChange={handleChartIndexChange}
               copied={clipboard.copied}
               isVertical={isVertical}
-              width={width}
-              height={height}
+              width={width || undefined}
+              height={height || undefined}
             />
           </Suspense>
         </ChartContainer>
