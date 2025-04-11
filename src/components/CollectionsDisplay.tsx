@@ -61,47 +61,47 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   }, 150);
 
   return (
-    <ul
-      className="h-full w-full overflow-auto relative"
-      ref={scrollContainerRef}
-      onMouseLeave={() => {
-        if (!previewCollection) return;
-        uiTempStore$.previewCollection.set(null);
-      }}
-    >
-      {collections.map((collection, index) => {
-        const isCurrentSeed = seed !== undefined && collection.seed === seed;
+    <section className="h-full w-full overflow-auto relative">
+      <ul
+        ref={scrollContainerRef}
+        onMouseLeave={() => {
+          if (!previewCollection) return;
+          uiTempStore$.previewCollection.set(null);
+        }}
+      >
+        {collections.map((collection, index) => {
+          const isCurrentSeed = seed !== undefined && collection.seed === seed;
 
-        if (isCurrentSeed) {
+          if (isCurrentSeed) {
+            return (
+              <CollectionRow
+                key={collection._id}
+                collection={collection}
+                rowHeight={localRowHeight}
+              />
+            );
+          }
+
           return (
-            <CollectionRow
-              key={collection._id}
-              collection={collection}
-              rowHeight={localRowHeight}
-            />
+            <li key={collection._id} className="contents" style={{ display: 'contents' }}>
+              <Link
+                to="/$seed"
+                params={{
+                  seed: collection.seed,
+                }}
+                search={(search) => {
+                  return search;
+                }}
+                replace={isSeedRoute}
+                aria-label={`Gradient ${index + 1}`}
+                className="block"
+              >
+                <CollectionRow collection={collection} rowHeight={localRowHeight} />
+              </Link>
+            </li>
           );
-        }
-
-        return (
-          <li key={collection._id} className="contents" style={{ display: 'contents' }}>
-            <Link
-              to="/$seed"
-              params={{
-                seed: collection.seed,
-              }}
-              search={(search) => {
-                return search;
-              }}
-              replace={isSeedRoute}
-              aria-label={`Gradient ${index + 1}`}
-              className="block"
-            >
-              <CollectionRow collection={collection} rowHeight={localRowHeight} />
-            </Link>
-          </li>
-        );
-      })}
-
+        })}
+      </ul>
       {/* Resizable panel overlay - only affects the first item */}
       {collections.length > 0 && (
         <div
@@ -135,6 +135,6 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
           </ResizablePanelGroup>
         </div>
       )}
-    </ul>
+    </section>
   );
 });

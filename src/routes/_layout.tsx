@@ -18,8 +18,8 @@ export const SEARCH_DEFAULTS = {
 
 export const searchValidatorSchema = v.object({
   rowHeight: v.optional(
-    v.fallback(rowHeightValidator, DEFAULT_ITEM_HEIGHT_ROW),
-    DEFAULT_ITEM_HEIGHT_ROW,
+    v.fallback(rowHeightValidator, SEARCH_DEFAULTS.rowHeight),
+    SEARCH_DEFAULTS.rowHeight,
   ),
   style: v.optional(
     v.fallback(styleWithAutoValidator, SEARCH_DEFAULTS.style),

@@ -25,7 +25,9 @@ export const Route = createFileRoute('/_layout/$seed')({
   beforeLoad: ({ params, search }) => {
     try {
       // Try to deserialize the data - if it fails, redirect to home
-      deserializeCoeffs(params.seed);
+      const collection = deserializeCoeffs(params.seed);
+      const coeffs = applyGlobals(collection.coeffs, collection.globals);
+      uiTempStore$.previewCollection.set(coeffs);
     } catch (error) {
       throw redirect({ to: '/', search });
     }

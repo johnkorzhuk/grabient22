@@ -2,28 +2,29 @@ import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
 import type { Tuple } from '@thi.ng/api';
 import type { AppCollection } from '../types';
 import { nanoid } from 'nanoid';
-import { COEFF_PRECISION, PI } from '../validators';
+import { COEFF_PRECISION, PI, coeffsSchema } from '../validators';
 import { serializeCoeffs } from './serialization';
+import * as v from 'valibot';
 
 export const applyGlobals = (
   cosCoeffs: CollectionPreset['coeffs'],
   globals: CollectionPreset['globals'],
-) => {
+): v.InferOutput<typeof coeffsSchema> => {
   return cosCoeffs.map((coeff: number[], i: number) => {
     const alpha = coeff[3] ?? 1;
     switch (i) {
       case 0:
-        return [...coeff.slice(0, 3).map((v: number) => v + globals[0]!), alpha];
+        return [...coeff.slice(0, 3).map((v) => v + globals[0]), alpha];
       case 1:
-        return [...coeff.slice(0, 3).map((v: number) => v * globals[1]!), alpha];
+        return [...coeff.slice(0, 3).map((v) => v * globals[1]), alpha];
       case 2:
-        return [...coeff.slice(0, 3).map((v: number) => v * globals[2]!), alpha];
+        return [...coeff.slice(0, 3).map((v) => v * globals[2]), alpha];
       case 3:
-        return [...coeff.slice(0, 3).map((v: number) => v + globals[3]!), alpha];
+        return [...coeff.slice(0, 3).map((v) => v + globals[3]), alpha];
       default:
         return coeff;
     }
-  });
+  }) as v.InferOutput<typeof coeffsSchema>;
 };
 
 export const getRandomCoeffsFromRanges = (ranges: CoeffsRanges, showAlpha: boolean = false) => {
