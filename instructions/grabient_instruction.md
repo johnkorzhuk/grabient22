@@ -89,6 +89,8 @@ className={cn(
 )}
 ```
 
+Do not include the comments in the output code.
+
 Additional styling guidelines:
 
 - Use viewport-relative units for responsive layouts

@@ -143,10 +143,10 @@ interface CustomXAxisTickProps {
 
 function CustomXAxisTick(props: CustomXAxisTickProps) {
   const { y, gradientColors, isVertical = false } = props;
-  const barHeight = 40; // Reduced height from 50px to 40px
+  const barHeight = 25; // Reduced height from 40px to 25px
   // Position the bar based on vertical/horizontal orientation
   // For horizontal mode with large negative margin, position the bar at the bottom of the visible area
-  const barY = isVertical ? y - barHeight - 2 : y - 32;
+  const barY = isVertical ? y - barHeight - 2 : y - 25; // Adjusted position to account for smaller height
 
   return (
     <g>
@@ -179,9 +179,9 @@ interface CustomYAxisTickProps {
 
 function CustomYAxisTick(props: CustomYAxisTickProps) {
   const { x, gradientColors, isVertical = true } = props;
-  const barWidth = 40; // Width for the gradient swatch
+  const barWidth = 25; // Reduced width from 40px to 25px
   // Adjust position based on vertical/horizontal orientation
-  const barX = isVertical ? x - barWidth + 45 : x - barWidth - 5;
+  const barX = isVertical ? x - barWidth + 40 : x - barWidth - 5; // Adjusted position to account for smaller width
 
   return (
     <g>
@@ -189,7 +189,7 @@ function CustomYAxisTick(props: CustomYAxisTickProps) {
         x={isVertical ? 0 : barX}
         y={isVertical ? 24 : 18}
         width={barWidth}
-        height={`calc(100% - ${isVertical ? 42 : 36}px)`}
+        height={`calc(100% - ${isVertical ? 24 : 36}px)`}
       >
         <div
           style={{
@@ -252,7 +252,7 @@ const Chart = lazy(() =>
                   left: -56,
                   right: 10,
                   top: -6,
-                  bottom: 16,
+                  bottom: 0,
                 }}
                 onMouseMove={(state) => {
                   if (!isPreview && onIndexChange && state?.activeTooltipIndex !== undefined) {
@@ -285,7 +285,7 @@ const Chart = lazy(() =>
                         )
                       : false
                   }
-                  width={70}
+                  width={55} // Reduced width from 70px to 55px
                 />
                 <XAxis
                   type="number"
@@ -371,7 +371,7 @@ const Chart = lazy(() =>
                         )
                       : false
                   }
-                  height={60} // Reduced height from 70px to 60px
+                  height={45} // Reduced height from 60px to 45px
                   padding={{ left: 0, right: 0 }}
                 />
                 <YAxis
@@ -479,7 +479,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
       <div
         className="relative flex-1 w-full h-full"
         ref={ref}
-        style={{ minHeight: '350px', height: '100%' }}
+        style={{ minHeight: '150px', height: '100%' }}
       >
         <ChartContainer
           config={chartConfig}
