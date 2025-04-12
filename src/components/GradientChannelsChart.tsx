@@ -12,10 +12,11 @@ import { coeffsSchema } from '~/validators';
 import * as v from 'valibot';
 import { lazy, Suspense } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
-import { cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
+import { applyGlobals, cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
 import { uiTempStore$ } from '~/stores/ui';
 import { useHotkeys, useClipboard, useElementSize, useMediaQuery } from '@mantine/hooks';
 import { Copy, Check } from 'lucide-react';
+import { deserializeCoeffs } from '~/lib/serialization';
 
 interface GradientChannelsChartProps {
   steps: number;
@@ -434,8 +435,12 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   processedCoeffs,
   steps,
 }: GradientChannelsChartProps) {
-  const previewCoeffs = use$(uiTempStore$.previewCollection);
-  const previewColors = previewCoeffs ? cosineGradient(steps, previewCoeffs) : undefined;
+  const previewSeed = use$(uiTempStore$.previewSeed);
+  const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
+  const previewCoeffs = previewData
+    ? applyGlobals(previewData.coeffs, previewData.globals)
+    : processedCoeffs;
+  const previewColors = previewSeed ? cosineGradient(steps, previewCoeffs) : undefined;
   const gradientColors = cosineGradient(steps, processedCoeffs);
   const previewChartData = previewColors ? getChartData(previewColors) : [];
   const chartData = getChartData(gradientColors);

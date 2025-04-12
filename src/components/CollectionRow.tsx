@@ -8,6 +8,7 @@ import { GradientPreview } from './GradientPreview';
 import * as v from 'valibot';
 import { coeffsSchema } from '~/validators';
 import { cn } from '~/lib/utils';
+import { serializeCoeffs } from '~/lib/serialization';
 
 export const CollectionRow = observer(function CollectionRow({
   collection,
@@ -31,7 +32,7 @@ export const CollectionRow = observer(function CollectionRow({
         height: `calc((100vh - ${APP_HEADER_HEIGHT}px) * ${rowHeight} / 100)`,
       }}
       onMouseEnter={() => {
-        uiTempStore$.previewCollection.set(processedCoeffs);
+        uiTempStore$.previewSeed.set(serializeCoeffs(collection.coeffs, collection.globals));
       }}
     >
       <GradientPreview

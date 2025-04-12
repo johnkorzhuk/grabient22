@@ -30,7 +30,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 
   const scrollContainerRef = useRef<HTMLUListElement>(null);
 
-  const previewCollection = use$(uiTempStore$.previewCollection);
+  const previewSeed = use$(uiTempStore$.previewSeed);
   const [localRowHeight, setLocalRowHeight] = useState<number>(rowHeight);
 
   // Effect to sync URL state to local state when URL changes
@@ -65,8 +65,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
       <ul
         ref={scrollContainerRef}
         onMouseLeave={() => {
-          if (!previewCollection) return;
-          uiTempStore$.previewCollection.set(null);
+          if (!previewSeed) return;
+          uiTempStore$.previewSeed.set(null);
         }}
       >
         {collections.map((collection, index) => {

@@ -12,6 +12,7 @@ import {
   generateFrequencyVariations,
   generatePhaseVariations,
   applyGlobals,
+  compareCoeffs,
 } from '~/lib/cosineGradient';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
@@ -23,15 +24,15 @@ import { uiTempStore$ } from '~/stores/ui';
 import { CollectionModifierRangeInput } from '~/components/CollectionModifierRangeInput';
 import type { GlobalModifierType } from '~/stores/ui';
 import { cn } from '~/lib/utils';
+import SuperJSON from 'superjson';
 
 export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
   beforeLoad: ({ params, search }) => {
     try {
       // Try to deserialize the data - if it fails, redirect to home
-      const collection = deserializeCoeffs(params.seed);
-      const coeffs = applyGlobals(collection.coeffs, collection.globals);
-      uiTempStore$.previewCollection.set(coeffs);
+      deserializeCoeffs(params.seed);
+      uiTempStore$.previewSeed.set(params.seed);
     } catch (error) {
       throw redirect({ to: '/', search });
     }
@@ -109,6 +110,7 @@ interface GlobalModifierItemProps {
   onValueChange: (value: number) => void;
   onDragEnd: () => void;
   onFocus: (modifier: GlobalModifierType) => void;
+  renderPreviewGlobals: boolean;
 }
 
 const GlobalModifierItem = ({
@@ -139,8 +141,8 @@ const GlobalModifierItem = ({
     >
       {activeModifier === name && (
         <div
-          className={cn('absolute left-0 top-0 bottom-0', 'w-1.5', 'rounded-full', 'bg-foreground')}
-          style={{ left: '-8px' }}
+          className={cn('absolute left-0 top-0 bottom-0', 'w-1', 'rounded-full', 'bg-foreground')}
+          style={{ left: '-1px' }}
         />
       )}
       <div className={cn('flex justify-between')}>
@@ -162,6 +164,62 @@ const GlobalModifierItem = ({
   );
 };
 
+// Configuration for the global modifiers
+const modifierConfig = [
+  { name: 'exposure' as GlobalModifierType, label: 'Exposure', min: -1, max: 1, index: 0 },
+  { name: 'contrast' as GlobalModifierType, label: 'Contrast', min: 0, max: 2, index: 1 },
+  { name: 'frequency' as GlobalModifierType, label: 'Frequency', min: 0, max: 2, index: 2 },
+  { name: 'phase' as GlobalModifierType, label: 'Phase', min: -PI, max: PI, index: 3 },
+];
+
+// Global modifiers grid component to fix scroll position issues during navigation
+interface GlobalModifiersGridProps {
+  globals: [number, number, number, number];
+  activeModifier: GlobalModifierType;
+  onModifierClick: (modifier: GlobalModifierType) => void;
+  onValueChange: (index: number, value: number) => void;
+  onDragEnd: () => void;
+  onFocus: (modifier: GlobalModifierType) => void;
+  renderPreviewGlobals: boolean;
+}
+
+const GlobalModifiersGrid = ({
+  globals,
+  activeModifier,
+  onModifierClick,
+  onValueChange,
+  onDragEnd,
+  onFocus,
+  renderPreviewGlobals,
+}: GlobalModifiersGridProps) => {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 @[600px]:grid-cols-1 md:@[600px]:grid-cols-1 md:grid-cols-2',
+        'gap-6',
+      )}
+    >
+      {modifierConfig.map((config) => (
+        <GlobalModifierItem
+          key={config.name}
+          name={config.name}
+          label={config.label}
+          value={globals[config.index]}
+          min={config.min}
+          max={config.max}
+          step={0.001}
+          activeModifier={activeModifier}
+          onModifierClick={onModifierClick}
+          onValueChange={(value) => onValueChange(config.index, value)}
+          onDragEnd={onDragEnd}
+          onFocus={onFocus}
+          renderPreviewGlobals={renderPreviewGlobals}
+        />
+      ))}
+    </div>
+  );
+};
+
 const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   seedCollection,
   processedCoeffs,
@@ -173,23 +231,25 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   const { steps } = search;
   // Get preview steps from store
   const previewSteps = use$(uiTempStore$.previewSteps);
-  const previewCoeffs = use$(uiTempStore$.previewCollection);
+  const previewSeed = use$(uiTempStore$.previewSeed);
   const previewColorIndex = use$(uiTempStore$.previewColorIndex);
   const activeModifier = use$(uiTempStore$.activeModifier);
   const navigate = useNavigate({ from: '/$seed' });
   const location = useLocation();
+  const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
+  const previewCoeffs = previewData
+    ? applyGlobals(previewData.coeffs, previewData.globals)
+    : processedCoeffs;
 
   // Track if we're currently dragging a slider
   const [isDragging, setIsDragging] = useState(false);
 
   // State for global modifiers - explicitly type as a tuple with 4 numbers
-  const [globals, setGlobals] = useState<[number, number, number, number]>(
-    seedCollection.globals as [number, number, number, number],
-  );
+  const [globals, setGlobals] = useState(seedCollection.globals);
 
   // Update globals when seedCollection changes (e.g., URL state changes)
   useEffect(() => {
-    setGlobals(seedCollection.globals as [number, number, number, number]);
+    setGlobals(seedCollection.globals);
   }, [seedCollection]);
 
   // Sync active modifier with URL hash on component mount
@@ -199,6 +259,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
       uiTempStore$.activeModifier.set(hash as GlobalModifierType);
     }
   }, [location.hash]);
+  const renderPreviewGlobals = Boolean(previewData && previewData.globals !== globals);
 
   // Determine steps to use (preview -> URL -> initial)
   const stepsToUse =
@@ -229,9 +290,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
     newGlobals[index] = value;
     setGlobals(newGlobals);
 
-    // Update the preview with new globals
-    const updatedCoeffs = applyGlobals(seedCollection.coeffs, newGlobals);
-    uiTempStore$.previewCollection.set(updatedCoeffs);
+    uiTempStore$.previewSeed.set(serializeCoeffs(seedCollection.coeffs, newGlobals));
   };
 
   // Handle the end of dragging - update the URL
@@ -260,14 +319,6 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
     setActiveModifier(modifier);
   };
 
-  // Configuration for the global modifiers
-  const modifierConfig = [
-    { name: 'exposure' as GlobalModifierType, label: 'Exposure', min: -1, max: 1, index: 0 },
-    { name: 'contrast' as GlobalModifierType, label: 'Contrast', min: 0, max: 2, index: 1 },
-    { name: 'frequency' as GlobalModifierType, label: 'Frequency', min: 0, max: 2, index: 2 },
-    { name: 'phase' as GlobalModifierType, label: 'Phase', min: -PI, max: PI, index: 3 },
-  ];
-
   return (
     <div className="flex flex-col w-full h-full">
       {/* Graph section - fixed at 35% */}
@@ -289,7 +340,9 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
         />
       </div>
 
-      {/* Inputs section - auto height */}
+      {/* Inputs section - auto height.
+      TODO: figure out why this code is causing the scroll
+      position reset bug when navigating */}
       <div
         className={cn(
           'w-full',
@@ -302,29 +355,15 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
           <div className={cn('flex flex-col', 'w-full @[600px]:w-1/2', 'gap-6')}>
             <h3 className={cn('text-lg font-medium')}>Global Modifiers</h3>
 
-            <div
-              className={cn(
-                'grid grid-cols-1 @[600px]:grid-cols-1 md:@[600px]:grid-cols-1 md:grid-cols-2',
-                'gap-6',
-              )}
-            >
-              {modifierConfig.map((config) => (
-                <GlobalModifierItem
-                  key={config.name}
-                  name={config.name}
-                  label={config.label}
-                  value={globals[config.index]}
-                  min={config.min}
-                  max={config.max}
-                  step={0.001}
-                  activeModifier={activeModifier}
-                  onModifierClick={handleModifierClick}
-                  onValueChange={(value) => handleGlobalChange(config.index, value)}
-                  onDragEnd={handleDragEnd}
-                  onFocus={setActiveModifier}
-                />
-              ))}
-            </div>
+            <GlobalModifiersGrid
+              globals={renderPreviewGlobals ? previewData!.globals : globals}
+              activeModifier={activeModifier}
+              onModifierClick={handleModifierClick}
+              onValueChange={handleGlobalChange}
+              onDragEnd={handleDragEnd}
+              onFocus={setActiveModifier}
+              renderPreviewGlobals={renderPreviewGlobals}
+            />
           </div>
 
           {/* Reserved space for future RGB channel modifiers */}

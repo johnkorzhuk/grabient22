@@ -1,4 +1,4 @@
-import type { CoeffsRanges, CollectionPreset, CollectionStyle } from '../types';
+import type { CoeffsRanges, CollectionPreset, CollectionStyle, CosineCoeffs } from '../types';
 import type { Tuple } from '@thi.ng/api';
 import type { AppCollection } from '../types';
 import { nanoid } from 'nanoid';
@@ -561,4 +561,33 @@ export function generatePhaseVariations(
       return values;
     },
   );
+}
+
+/**
+ * Compares two sets of cosine gradient coefficients and determines if they are equal
+ *
+ * @param coeffsA - First set of coefficients
+ * @param coeffsB - Second set of coefficients
+ * @param precision - Number of decimal places to consider (defaults to COEFF_PRECISION)
+ * @returns Boolean indicating if the coefficients are equal
+ */
+export function compareCoeffs(
+  coeffsA: CosineCoeffs,
+  coeffsB: CosineCoeffs,
+  precision: number = COEFF_PRECISION,
+): boolean {
+  // Compare each coefficient value
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < coeffsA[i].length; j++) {
+      // Round to specified precision for comparison
+      const roundedA = Number(coeffsA[i][j].toFixed(precision));
+      const roundedB = Number(coeffsB[i][j].toFixed(precision));
+
+      if (roundedA !== roundedB) {
+        return false; // Early return if not equal
+      }
+    }
+  }
+
+  return true;
 }
