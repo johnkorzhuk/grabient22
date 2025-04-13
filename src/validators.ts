@@ -85,8 +85,9 @@ export const globalFrequencySchema = v.pipe(
 
 export const globalPhaseSchema = v.pipe(
   v.number(),
-  v.minValue(-PI),
-  v.maxValue(PI),
+  // Add a small buffer to prevent validation errors at min/max positions
+  v.minValue(-PI - Math.pow(10, -COEFF_PRECISION)),
+  v.maxValue(PI + Math.pow(10, -COEFF_PRECISION)),
   v.transform((input) => Number(input.toFixed(COEFF_PRECISION))),
 );
 

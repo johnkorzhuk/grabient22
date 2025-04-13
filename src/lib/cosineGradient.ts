@@ -27,6 +27,60 @@ export const applyGlobals = (
   }) as v.InferOutput<typeof coeffsSchema>;
 };
 
+/**
+ * Apply the inverse of the global modifiers to get the raw coefficient value.
+ * This is used when updating individual RGB channels to ensure the raw coefficient
+ * values are correctly modified.
+ *
+ * @param modifierIndex The index of the modifier (0: exposure, 1: contrast, 2: frequency, 3: phase)
+ * @param value The value to apply the inverse operation to
+ * @param globals The global modifiers array
+ * @returns The raw coefficient value after applying the inverse operation
+ */
+export const applyInverseGlobal = (
+  modifierIndex: number,
+  value: number,
+  globals: [number, number, number, number],
+): number => {
+  switch (modifierIndex) {
+    case 0: // Exposure - subtract the global
+      return value - globals[0];
+    case 1: // Contrast - divide by the global
+      return value / globals[1];
+    case 2: // Frequency - divide by the global
+      return value / globals[2];
+    case 3: // Phase - subtract the global
+      return value - globals[3];
+    default:
+      return value;
+  }
+};
+
+/**
+ * Update a specific RGB channel in a coefficient vector with the inverse global modifier applied
+ *
+ * @param coeffs The original coefficients array
+ * @param modifierIndex The index of the modifier to update
+ * @param channelIndex The RGB channel index to update
+ * @param value The new value (already affected by globals)
+ * @param globals The global modifiers array
+ * @returns A new coefficients array with the updated value
+ */
+export const updateCoeffWithInverseGlobal = (
+  coeffs: CosineCoeffs,
+  modifierIndex: number,
+  channelIndex: number,
+  value: number,
+  globals: [number, number, number, number],
+): CosineCoeffs => {
+  const newCoeffs = coeffs.map((vector) => vector.map((val) => val)) as CosineCoeffs;
+
+  // Apply the inverse global modifier to get the raw coefficient value
+  newCoeffs[modifierIndex][channelIndex] = applyInverseGlobal(modifierIndex, value, globals);
+
+  return newCoeffs;
+};
+
 export const getRandomCoeffsFromRanges = (ranges: CoeffsRanges, showAlpha: boolean = false) => {
   return ranges.map((range: Tuple<number, 2>) =>
     Array.from({ length: showAlpha ? 4 : 3 }).map(
@@ -586,6 +640,33 @@ export function compareCoeffs(
       if (roundedA !== roundedB) {
         return false; // Early return if not equal
       }
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Compares two sets of global modifiers and determines if they are equal
+ *
+ * @param globalsA - First set of global modifiers [exposure, contrast, frequency, phase]
+ * @param globalsB - Second set of global modifiers [exposure, contrast, frequency, phase]
+ * @param precision - Number of decimal places to consider (defaults to COEFF_PRECISION)
+ * @returns Boolean indicating if the global modifiers are equal
+ */
+export function compareGlobals(
+  globalsA: [number, number, number, number],
+  globalsB: [number, number, number, number],
+  precision: number = COEFF_PRECISION,
+): boolean {
+  // Compare each global modifier value
+  for (let i = 0; i < 4; i++) {
+    // Round to specified precision for comparison
+    const roundedA = Number(globalsA[i].toFixed(precision));
+    const roundedB = Number(globalsB[i].toFixed(precision));
+
+    if (roundedA !== roundedB) {
+      return false; // Early return if not equal
     }
   }
 
