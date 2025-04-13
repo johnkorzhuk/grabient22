@@ -36,7 +36,12 @@ export const rowHeightValidator = v.pipe(
 );
 
 export const PI = Math.PI;
-export const COEFF_PRECISION = 4 as const;
+/**
+ * Very important constant here.
+ * I think 3 is a sweet spot where the seed generated isnt too long
+ * and grainular enough to guarantee uniqueness
+ */
+export const COEFF_PRECISION = 3 as const;
 
 /**
  * Cosine gradient formula: color(t) = a + b * cos(2π * (c*t + d))

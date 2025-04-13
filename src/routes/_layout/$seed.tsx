@@ -135,7 +135,8 @@ const GlobalModifierItem = ({
         'hover:bg-gray-50 dark:hover:bg-gray-900/30',
         activeModifier === name && 'bg-gray-50 dark:bg-gray-900/30',
         'transition-all',
-        'gap-4 p-2 pl-4 -ml-4',
+        'gap-5 p-2 pl-2 -ml-2',
+        '2xl:gap-4 2xl:p-2 2xl:pl-4 2xl:-ml-4',
       )}
     >
       {activeModifier === name && (
@@ -204,7 +205,8 @@ const GlobalModifiersGrid = ({
     <div
       className={cn(
         'grid grid-cols-1',
-        'gap-5',
+        'gap-3',
+        '2xl:gap-5',
         activeModifier && containerWidth <= 450 ? 'w-full px-0' : '',
       )}
     >
@@ -372,10 +374,17 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
       </div>
 
       {/* Inputs section - auto height */}
-      <div className={cn('w-full', 'border-y border-gray-200 dark:border-gray-800', 'p-6')}>
+      <div
+        className={cn(
+          'w-full',
+          'border-y border-gray-200 dark:border-gray-800',
+          'px-4 py-3',
+          '2xl:px-6 2xl:py-4',
+        )}
+      >
         {/* Mobile layout (≤ 450px) */}
         {containerWidth <= 450 && (
-          <div className={cn('flex flex-col gap-4')}>
+          <div className={cn('flex flex-col gap-2', '2xl:gap-4')}>
             {/* Header with back button for mobile layout */}
             <div className="flex items-center mb-1">
               {activeModifier ? (
@@ -424,7 +433,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
 
               {/* Mobile: RGB channels below active modifier */}
               {activeModifier && (
-                <div className="mt-4">
+                <div className="mt-3 2xl:mt-4">
                   <RGBChannelSliders
                     coeffs={seedCollection.coeffs}
                     globals={globals}
@@ -442,7 +451,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
         {containerWidth > 450 && (
           <div className="flex flex-row gap-6">
             {/* Desktop: Global modifiers column */}
-            <div className="flex flex-col gap-6 w-1/2">
+            <div className="flex flex-col gap-2 w-1/2 2xl:gap-6">
               <h3 className="text-lg font-medium">
                 {activeModifier
                   ? `${activeModifier.charAt(0).toUpperCase() + activeModifier.slice(1)} Modifiers`
@@ -459,7 +468,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             </div>
 
             {/* Desktop: RGB channels column */}
-            <div className="w-1/2 mt-15 pl-2">
+            <div className="w-1/2 mt-10 pl-2 2xl:mt-15">
               {activeModifier && (
                 <RGBChannelSliders
                   coeffs={seedCollection.coeffs}

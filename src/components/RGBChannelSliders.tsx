@@ -109,7 +109,12 @@ export function RGBChannelSliders({
         {channels.map((channel, channelIndex) => (
           <div
             key={channel.key}
-            className={cn('flex flex-col relative', 'rounded', 'gap-4 p-2 pl-4 -ml-4')}
+            className={cn(
+              'flex flex-col relative',
+              'rounded',
+              'gap-4 p-2 pl-2 -ml-2',
+              '2xl:pl-4 2xl:-ml-4',
+            )}
           >
             <div
               className={cn('absolute left-0 top-0 bottom-0', 'w-1', 'rounded-full')}
