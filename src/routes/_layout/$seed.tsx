@@ -19,7 +19,14 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/componen
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import { RGBChannelSliders } from '~/components/RGBChannelSliders';
 import * as v from 'valibot';
-import { coeffsSchema, DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE, PI } from '~/validators';
+import {
+  COEFF_PRECISION,
+  coeffsSchema,
+  DEFAULT_ANGLE,
+  DEFAULT_STEPS,
+  DEFAULT_STYLE,
+  PI,
+} from '~/validators';
 import { GradientPreview } from '~/components/GradientPreview';
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
@@ -135,14 +142,13 @@ const GlobalModifierItem = ({
         'hover:bg-gray-50 dark:hover:bg-gray-900/30',
         activeModifier === name && 'bg-gray-50 dark:bg-gray-900/30',
         'transition-all',
-        'gap-5 p-2 pl-2 -ml-2',
+        'gap-5 p-2 pl-3 -ml-3',
         '2xl:gap-4 2xl:p-2 2xl:pl-4 2xl:-ml-4',
       )}
     >
       {activeModifier === name && (
         <div
           className={cn('absolute left-0 top-0 bottom-0', 'w-1', 'rounded-full', 'bg-foreground')}
-          style={{ left: '-1px' }}
         />
       )}
       <div
@@ -152,7 +158,7 @@ const GlobalModifierItem = ({
         <label className={cn('text-sm font-medium')}>
           {activeModifier && containerWidth <= 450 ? `Global ${label}` : label}
         </label>
-        <span className={cn('text-sm', 'text-gray-500')}>{value.toFixed(3)}</span>
+        <span className={cn('text-sm', 'text-gray-500')}>{value.toFixed(COEFF_PRECISION)}</span>
       </div>
       <CollectionModifierRangeInput
         min={min}
@@ -435,8 +441,8 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
               {activeModifier && (
                 <div className="mt-3 2xl:mt-4">
                   <RGBChannelSliders
-                    coeffs={seedCollection.coeffs}
-                    globals={globals}
+                    coeffs={previewData ? previewData.coeffs : seedCollection.coeffs}
+                    globals={renderPreviewGlobals ? previewData!.globals : globals}
                     activeModifier={activeModifier}
                     onValueChange={handleRGBChannelChange}
                     onDragEnd={handleDragEnd}
@@ -468,11 +474,11 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             </div>
 
             {/* Desktop: RGB channels column */}
-            <div className="w-1/2 mt-10 pl-2 2xl:mt-15">
+            <div className="w-1/2 mt-10 pl-2 2xl:mt-13">
               {activeModifier && (
                 <RGBChannelSliders
-                  coeffs={seedCollection.coeffs}
-                  globals={globals}
+                  coeffs={previewData ? previewData.coeffs : seedCollection.coeffs}
+                  globals={renderPreviewGlobals ? previewData!.globals : globals}
                   activeModifier={activeModifier}
                   onValueChange={handleRGBChannelChange}
                   onDragEnd={handleDragEnd}

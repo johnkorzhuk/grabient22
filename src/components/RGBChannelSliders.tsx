@@ -3,7 +3,7 @@ import { cn } from '~/lib/utils';
 import type { GlobalModifierType } from '~/stores/ui';
 import type { CosineCoeffs } from '~/types';
 import { useState, useEffect } from 'react';
-import { PI } from '~/validators';
+import { COEFF_PRECISION, PI } from '~/validators';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { rgbChannelConfig } from '~/constants/colors';
 
@@ -26,7 +26,7 @@ export function RGBChannelSliders({
   if (!activeModifier) return null;
 
   // Get the index of the active modifier
-  const getModifierIndex = (type: GlobalModifierType): number => {
+  const getModifierIndex = (type: GlobalModifierType) => {
     switch (type) {
       case 'exposure':
         return 0;
@@ -59,7 +59,7 @@ export function RGBChannelSliders({
   ];
 
   // Local state to track current values during dragging
-  const [localValues, setLocalValues] = useState<[number, number, number]>(appliedRgbValues);
+  const [localValues, setLocalValues] = useState(appliedRgbValues);
 
   // Update local values when coeffs, globals, or activeModifier changes
   useEffect(() => {
@@ -112,18 +112,20 @@ export function RGBChannelSliders({
             className={cn(
               'flex flex-col relative',
               'rounded',
-              'gap-4 p-2 pl-2 -ml-2',
+              'gap-4 p-2 pl-3 -ml-3',
               '2xl:pl-4 2xl:-ml-4',
             )}
           >
             <div
               className={cn('absolute left-0 top-0 bottom-0', 'w-1', 'rounded-full')}
-              style={{ left: '-1px', backgroundColor: channel.color }}
+              style={{ backgroundColor: channel.color }}
             />
 
             <div className={cn('flex justify-between')}>
               <label className={cn('text-sm font-medium')}>{channel.name}</label>
-              <span className={cn('text-sm', 'text-gray-500')}>{channel.value.toFixed(3)}</span>
+              <span className={cn('text-sm', 'text-gray-500')}>
+                {channel.value.toFixed(COEFF_PRECISION)}
+              </span>
             </div>
 
             <CollectionModifierRangeInput
