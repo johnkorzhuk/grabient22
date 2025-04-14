@@ -2,6 +2,9 @@ import * as v from 'valibot';
 import LZString from 'lz-string';
 import { coeffsSchema, globalsSchema, COEFF_PRECISION } from '../validators';
 
+// Default values for global modifiers [exposure, contrast, frequency, phase]
+const DEFAULT_GLOBALS = [0, 1, 1, 0] as const;
+
 type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
 type GlobalModifiers = v.InferOutput<typeof globalsSchema>;
 
@@ -30,11 +33,14 @@ function formatNumber(num: number): string {
 export function serializeCoeffs(coeffs: CosineCoeffs, globals: GlobalModifiers): string {
   const validatedCoeffs = v.parse(coeffsSchema, coeffs);
   const validatedGlobals = v.parse(globalsSchema, globals);
+  
+  // Check if globals are at default values
+  const useDefaultGlobals = validatedGlobals.every((val, index) => val === DEFAULT_GLOBALS[index]);
 
-  // Combine coeffs (dropping alpha) and globals
+  // Combine coeffs (dropping alpha) and globals if non-default
   const data = [
     ...validatedCoeffs.map((vec) => [vec[0], vec[1], vec[2]]).flat(),
-    ...validatedGlobals,
+    ...(useDefaultGlobals ? [] : validatedGlobals),
   ];
 
   // Convert to minimal string format with commas
@@ -64,14 +70,15 @@ export function deserializeCoeffs(seed: string) {
   // Split by commas and parse numbers
   const numbers = decompressed.split(',').map(parseNumber);
 
-  // We expect exactly 16 values (12 from coeffs RGB + 4 from globals)
-  if (numbers.length !== 16) {
-    throw new Error(`Expected 16 values, got ${numbers.length}`);
+  // Check if we have just coeffs data (12 values) or coeffs + globals (16 values)
+  if (numbers.length !== 12 && numbers.length !== 16) {
+    throw new Error(`Expected 12 or 16 values, got ${numbers.length}`);
   }
 
-  // First 12 numbers are coeffs (4 vectors × 3 values), rest are globals
+  // First 12 numbers are always coeffs (4 vectors × 3 values)
   const coeffsData = numbers.slice(0, 12);
-  const globalsData = numbers.slice(12, 16);
+  // If we have more than 12 values, those are globals, otherwise use defaults
+  const globalsData = numbers.length > 12 ? numbers.slice(12, 16) : DEFAULT_GLOBALS;
 
   // Reconstruct coeffs with alpha channel
   const coeffsWithAlpha = [];
