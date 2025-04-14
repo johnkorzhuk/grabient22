@@ -22,9 +22,13 @@ const STYLE_LABELS: Record<CollectionStyle, string> = {
 export const StyleSelect = observer(function TypeSelect({
   value,
   isSeedRoute = false,
+  className,
+  popoverClassName,
 }: {
   value: SelectCollectionStyle;
   isSeedRoute: boolean;
+  className?: string;
+  popoverClassName?: string;
 }) {
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const previewValue = use$(uiTempStore$.previewStyle);
@@ -57,11 +61,12 @@ export const StyleSelect = observer(function TypeSelect({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          size="sm"
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={false}
           aria-label="Select gradient style"
-          className="w-[180px] justify-between disable-animation-on-theme-change group"
+          className={cn("w-full justify-between disable-animation-on-theme-change group", className)}
         >
           {value === 'auto' ? (
             <span className="text-muted-foreground text-opacity-75">
@@ -74,14 +79,14 @@ export const StyleSelect = observer(function TypeSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[180px] p-0"
+        className={cn("p-0 w-[var(--radix-popover-trigger-width)]", popoverClassName)}
         onMouseLeave={() => {
           if (previewValue) {
             uiTempStore$.previewStyle.set(null);
           }
         }}
       >
-        <Command>
+        <Command className="text-xs">
           <CommandList>
             <CommandGroup>
               {COLLECTION_STYLES.map((style) => (
@@ -92,12 +97,12 @@ export const StyleSelect = observer(function TypeSelect({
                   onMouseEnter={() => {
                     uiTempStore$.previewStyle.set(style);
                   }}
-                  className="cursor-pointer pl-3 relative"
+                  className="cursor-pointer pl-3 relative h-7 min-h-[1.75rem] py-1"
                 >
                   {STYLE_LABELS[style]}
                   <CheckIcon
                     className={cn(
-                      'mr-2 h-4 w-4 absolute right-0',
+                      'mr-2 h-3 w-3 absolute right-0',
                       value === style ? 'opacity-100' : 'opacity-0',
                     )}
                   />

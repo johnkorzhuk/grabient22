@@ -18,14 +18,28 @@ Where:
 - `c` (frequency) controls number of color cycles
 - `d` (phase) shifts colors along the gradient
 
-The implementation in `cosineGradient.ts`:
+### Global Modifiers
 
-- Generates color arrays based on coefficient vectors
-- Applies global modifiers to adjust the overall gradient
-- Supports various gradient styles (linear, angular, swatches)
-- Provides functions for rendering CSS gradients from calculated colors
+The app doesn't use the raw values from the formula directly. Instead, it adds global controls that affect all colors:
 
-This algorithm enables efficient, procedural generation of smooth, customizable color gradients with minimal code.
+1. **Four main controls**:
+   - **Exposure** (globals[0]): Adds to the base color values (a)
+   - **Contrast** (globals[1]): Multiplies the color range values (b)
+   - **Frequency** (globals[2]): Multiplies the cycle count values (c)
+   - **Phase** (globals[3]): Shifts the color position values (d)
+
+2. **How it works**:
+   - `applyGlobals`: Takes raw values and applies the global settings
+   - `applyInverseGlobal`: Converts back to raw values when needed
+   - This lets users adjust both global settings and individual RGB channels
+
+3. **Simple math**:
+   ```
+   Final a = Raw a + Exposure
+   Final b = Raw b * Contrast
+   Final c = Raw c * Frequency
+   Final d = Raw d + Phase
+   ```
 
 ## Data Management
 

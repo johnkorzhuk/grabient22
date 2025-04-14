@@ -13,7 +13,7 @@ export function ThemeToggle() {
   return (
     <Button
       variant="ghost"
-      className="disable-animation-on-theme-change size-9"
+      className="disable-animation-on-theme-change size-9 cursor-pointer"
       onClick={handleToggle}
     >
       <Sun className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

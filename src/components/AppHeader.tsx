@@ -34,20 +34,45 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(({ isSeedRoute 
           >
             <h1 className="text-xl font-bold">Grabient</h1>
           </Link>
+          <div className="w-[160px]">
+            <StyleSelect value={style} isSeedRoute={isSeedRoute} />
+          </div>
+          <div className="w-[80px]">
+            <StepsInput value={steps} isSeedRoute={isSeedRoute} />
+          </div>
+          <div className="w-[80px]">
+            <AngleInput value={angle} isSeedRoute={isSeedRoute} />
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
           <a
             href="https://iquilezles.org/articles/palettes/"
             target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-muted-foreground hover:text-foreground"
+            rel="noopener noreferrer external"
+            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+            aria-label="About color palettes by Inigo Quilez (opens in a new window)"
           >
             About
+            <span className="sr-only">(opens in a new window)</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-external-link"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
           </a>
-
-          <StyleSelect value={style} isSeedRoute={isSeedRoute} />
-          <StepsInput value={steps} isSeedRoute={isSeedRoute} />
-          <AngleInput value={angle} isSeedRoute={isSeedRoute} />
+          <ThemeToggle />
         </div>
-        <ThemeToggle />
       </div>
     </header>
   );

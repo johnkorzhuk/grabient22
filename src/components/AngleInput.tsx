@@ -16,9 +16,13 @@ const step = 1.0; // Increment/decrement step for arrow keys
 export const AngleInput = observer(function AngleInput({
   value,
   isSeedRoute = false,
+  className,
+  popoverClassName,
 }: {
   value: v.InferOutput<typeof angleWithAutoValidator>;
   isSeedRoute: boolean;
+  className?: string;
+  popoverClassName?: string;
 }) {
   const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
   const previousValue = usePrevious(value);
@@ -271,7 +275,10 @@ export const AngleInput = observer(function AngleInput({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-label="Angle input"
-          className="flex items-center w-[90px] relative border border-input rounded-md h-9 bg-background hover:bg-accent hover:text-accent-foreground transition-colors disable-animation-on-theme-change shadow-sm"
+          className={cn(
+            'flex items-center relative border border-input rounded-md bg-background hover:bg-accent hover:text-accent-foreground transition-colors disable-animation-on-theme-change shadow-sm h-8 w-full',
+            className,
+          )}
           onClick={(e) => {
             // If clicking on the input area but not the button, don't toggle
             if (e.target !== buttonRef.current && !buttonRef.current?.contains(e.target as Node)) {
@@ -289,7 +296,7 @@ export const AngleInput = observer(function AngleInput({
             onKeyDown={handleInputKeyDown}
             aria-label="Angle value"
             className={cn(
-              'h-full px-3 py-2 text-sm rounded-md w-full',
+              'h-full px-3 rounded-md w-full',
               'bg-transparent',
               'focus-visible:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-50',
@@ -298,6 +305,7 @@ export const AngleInput = observer(function AngleInput({
               'disable-animation-on-theme-change',
               'border-0', // Remove input border since we're using a parent border
               'font-medium', // Match StyleSelect's text weight
+              'py-1 text-xs',
             )}
           />
           <div
@@ -316,7 +324,7 @@ export const AngleInput = observer(function AngleInput({
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[90px] p-0"
+        className={cn('p-0 w-[var(--radix-popover-trigger-width)]', popoverClassName)}
         align="start"
         side="bottom"
         sideOffset={0}
@@ -328,8 +336,8 @@ export const AngleInput = observer(function AngleInput({
           }
         }}
       >
-        <Command className="border-0 rounded-none w-full">
-          <CommandList className="max-h-[220px] w-full">
+        <Command className="border-0 rounded-none w-full text-xs">
+          <CommandList className="w-full" style={{ height: 'auto' }}>
             <CommandGroup className="w-full">
               {presets.map((preset) => (
                 <CommandItem
@@ -339,12 +347,12 @@ export const AngleInput = observer(function AngleInput({
                   onMouseEnter={() => {
                     uiTempStore$.previewAngle.set(preset);
                   }}
-                  className="cursor-pointer pl-3 relative w-full"
+                  className="cursor-pointer pl-3 relative w-full h-8 min-h-[2rem] py-1.5"
                 >
                   {`${preset}°`}
                   <CheckIcon
                     className={cn(
-                      'mr-2 h-4 w-4 absolute right-0',
+                      'mr-2 h-3 w-3 absolute right-0',
                       value === preset ? 'opacity-100' : 'opacity-0',
                     )}
                   />
