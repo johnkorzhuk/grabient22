@@ -35,6 +35,17 @@ export const rowHeightValidator = v.pipe(
   v.transform((input) => Number(input.toFixed(1))),
 );
 
+export const DEFAULT_LIST_WIDTH = 50;
+export const MIN_LIST_WIDTH = 20;
+export const MAX_LIST_WIDTH = 60;
+// Create list width validator with the provided min/max constraints
+export const listWidthValidator = v.pipe(
+  v.number(),
+  v.minValue(MIN_LIST_WIDTH),
+  v.maxValue(MAX_LIST_WIDTH),
+  v.transform((input) => Number(input.toFixed(1))),
+);
+
 export const PI = Math.PI;
 /**
  * Very important constant here.
@@ -115,7 +126,7 @@ export const collectionSchema = v.object({
   angle: angleValidator,
 });
 
-export const validateRowHeight = (min: number, max: number) => (input: number) => {
+export const validatePanelValue = (min: number, max: number) => (input: number) => {
   const result = v.safeParse(v.pipe(v.number(), v.minValue(min), v.maxValue(max)), input);
 
   if (!result.success && result.issues && result.issues.length > 0) {

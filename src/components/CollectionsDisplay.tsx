@@ -8,7 +8,7 @@ import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
 
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
-import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validateRowHeight } from '~/validators';
+import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -40,7 +40,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
-    const finalHeight = validateRowHeight(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT)(truncatedValue);
+    const finalHeight = validatePanelValue(MIN_ITEM_HEIGHT, MAX_ITEM_HEIGHT)(truncatedValue);
 
     // Update local state immediately for responsive UI
     setLocalRowHeight(finalHeight);

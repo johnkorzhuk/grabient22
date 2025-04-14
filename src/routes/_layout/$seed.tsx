@@ -1,4 +1,10 @@
-import { createFileRoute, useParams, useSearch } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  retainSearchParams,
+  stripSearchParams,
+  useParams,
+  useSearch,
+} from '@tanstack/react-router';
 import type { AppCollection, CosineCoeffs } from '~/types';
 import { useRef, useState, useEffect } from 'react';
 import { deserializeCoeffs, serializeCoeffs } from '~/lib/serialization';
@@ -23,9 +29,14 @@ import {
   COEFF_PRECISION,
   coeffsSchema,
   DEFAULT_ANGLE,
+  DEFAULT_LIST_WIDTH,
   DEFAULT_STEPS,
   DEFAULT_STYLE,
+  listWidthValidator,
+  MAX_LIST_WIDTH,
+  MIN_LIST_WIDTH,
   PI,
+  validatePanelValue,
 } from '~/validators';
 import { GradientPreview } from '~/components/GradientPreview';
 import { observer, use$ } from '@legendapp/state/react';
@@ -35,8 +46,23 @@ import type { GlobalModifierType } from '~/stores/ui';
 import { cn } from '~/lib/utils';
 import { useElementSize } from '@mantine/hooks';
 
+export const SEARCH_DEFAULTS = {
+  listWidth: DEFAULT_LIST_WIDTH,
+};
+
+export const searchValidatorSchema = v.object({
+  listWidth: v.optional(
+    v.fallback(listWidthValidator, SEARCH_DEFAULTS.listWidth),
+    SEARCH_DEFAULTS.listWidth,
+  ),
+});
+
 export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
+  validateSearch: searchValidatorSchema,
+  search: {
+    middlewares: [stripSearchParams(SEARCH_DEFAULTS), retainSearchParams(['listWidth'])],
+  },
   beforeLoad: ({ params, search }) => {
     try {
       // Try to deserialize the data - if it fails, redirect to home
@@ -50,10 +76,40 @@ export const Route = createFileRoute('/_layout/$seed')({
 
 function Home() {
   const { style, steps, angle } = useSearch({ from: '/_layout' });
+  const navigate = useNavigate({ from: '/$seed' });
+
+  const { listWidth } = useSearch({ from: '/_layout/$seed' });
+  const [localListWidth, setLocalListWidth] = useState(listWidth);
 
   const { seed: encodedSeedData } = useParams({
     from: '/_layout/$seed',
   });
+
+  useEffect(() => {
+    setLocalListWidth(listWidth);
+  }, [listWidth]);
+
+  const handleResize = (newWidth: number) => {
+    const truncatedValue = Number(newWidth.toFixed(1));
+    const finalWidth = validatePanelValue(MIN_LIST_WIDTH, MAX_LIST_WIDTH)(truncatedValue);
+
+    // Update local state immediately for responsive UI
+    setLocalListWidth(finalWidth);
+
+    // Throttled update to URL and persisted store
+    throttledUpdateURL(finalWidth);
+  };
+
+  const throttledUpdateURL = useThrottledCallback((width: number) => {
+    // Update URL
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        listWidth: width,
+      }),
+      replace: true,
+    });
+  }, 150);
 
   // TODO: we should do something similar in StepsInput, AngleInput instead of hard coded defaults
   // so the value rendered in the input is the actual default value when select === 'auto'
@@ -92,11 +148,22 @@ function Home() {
 
   return (
     <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel minSize={20} maxSize={60}>
+      <ResizablePanel
+        minSize={MIN_LIST_WIDTH}
+        maxSize={MAX_LIST_WIDTH}
+        onResize={handleResize}
+        defaultSize={localListWidth}
+        className="min-w-[200px]"
+      >
         <CollectionsDisplay collections={collections} isSeedRoute />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel>
+      <ResizablePanel
+        defaultSize={100 - localListWidth}
+        minSize={100 - MAX_LIST_WIDTH}
+        maxSize={100 - MIN_LIST_WIDTH}
+        className="min-w-[250px]"
+      >
         <SeedChartAndPreviewPanel
           seedCollection={seedCollection}
           processedCoeffs={processedCoeffs}
