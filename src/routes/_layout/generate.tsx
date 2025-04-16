@@ -5,23 +5,18 @@ import {
   PaletteCategories,
   validateCategorySet,
   getIncompatibleCategories,
-  getGlobalBoundsForCategories,
 } from '~/lib/generation';
 import type {
   PaletteCategoryKey,
   PaletteGenerationResult,
-  GlobalModifierBounds,
   PaletteGenerationOptions,
 } from '~/lib/generation/types';
 import { rgbToHex } from '~/lib/generation';
 import { serializeCoeffs } from '~/lib/serialization';
-import { DualRangeSlider } from '~/components/DualRangeSlider';
 import { cn } from '~/lib/utils';
-import { COEFF_PRECISION } from '~/validators';
-import { RefreshCw, Info } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Badge } from '~/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 
 // Configuration constants
 const AVAILABLE_CATEGORIES: PaletteCategoryKey[] = [
@@ -36,17 +31,6 @@ const AVAILABLE_CATEGORIES: PaletteCategoryKey[] = [
 interface PaletteDisplayProps {
   palette: PaletteGenerationResult;
   index: number;
-}
-
-interface GlobalModifierItemProps {
-  label: string;
-  value: [number, number]; // Range with min/max values
-  min: number;
-  max: number;
-  step: number;
-  isVisible: boolean;
-  onValueChange: (value: [number, number]) => void;
-  onDragEnd: () => void;
 }
 
 interface CategoryCheckboxProps {
@@ -218,50 +202,6 @@ const CategoryCheckbox = ({
   );
 };
 
-// Global modifier item component
-const GlobalModifierItem = ({
-  label,
-  value,
-  min,
-  max,
-  step,
-  isVisible,
-  onValueChange,
-  onDragEnd,
-}: GlobalModifierItemProps) => {
-  if (!isVisible) return null;
-
-  return (
-    <div
-      className={cn(
-        'flex flex-col relative',
-        'rounded',
-        'hover:bg-gray-50 dark:hover:bg-gray-900/30',
-        'transition-all',
-        'gap-5 p-2 pl-3 -ml-3',
-        '2xl:gap-4 2xl:p-2 2xl:pl-4 2xl:-ml-4',
-      )}
-    >
-      <div className={cn('flex justify-between')}>
-        <label className={cn('text-sm font-medium')}>{label}</label>
-        <span className={cn('text-sm', 'text-gray-500')}>
-          {value[0].toFixed(COEFF_PRECISION)} - {value[1].toFixed(COEFF_PRECISION)}
-        </span>
-      </div>
-      <DualRangeSlider
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onValueChange={onValueChange}
-        onMouseUp={onDragEnd}
-        onKeyUp={onDragEnd}
-        onPointerUp={onDragEnd}
-      />
-    </div>
-  );
-};
-
 // Main component for the generate page
 function GeneratePage() {
   const [palettes, setPalettes] = useState<PaletteGenerationResult[]>([]);
@@ -271,55 +211,6 @@ function GeneratePage() {
   const [selectedCategories, setSelectedCategories] = useState<PaletteCategoryKey[]>([
     'Monochromatic',
   ]);
-
-  // Global modifiers state - using [min, max] ranges
-  const [exposureRange, setExposureRange] = useState<[number, number]>([-0.5, 0.5]);
-  const [contrastRange, setContrastRange] = useState<[number, number]>([0.8, 1.2]);
-  const [frequencyRange, setFrequencyRange] = useState<[number, number]>([0.8, 1.2]);
-
-  // Global bounds based on selected categories
-  const [globalBounds, setGlobalBounds] = useState<GlobalModifierBounds>({
-    exposure: [-0.5, 0.5],
-    contrast: [0.8, 1.2],
-    frequency: [0.8, 1.2],
-  });
-
-  // Update global bounds when category selection changes
-  useEffect(() => {
-    if (selectedCategories.length > 0) {
-      // Get combined bounds for all selected categories
-      const bounds = getGlobalBoundsForCategories(selectedCategories);
-      setGlobalBounds(bounds);
-
-      // Set ranges based on bounds, maintaining current values if they're within bounds
-      // Exposure
-      if (bounds.exposure) {
-        const [min, max] = bounds.exposure;
-        setExposureRange([
-          Math.max(min, Math.min(exposureRange[0], max)),
-          Math.max(min, Math.min(exposureRange[1], max)),
-        ]);
-      }
-
-      // Contrast
-      if (bounds.contrast) {
-        const [min, max] = bounds.contrast;
-        setContrastRange([
-          Math.max(min, Math.min(contrastRange[0], max)),
-          Math.max(min, Math.min(contrastRange[1], max)),
-        ]);
-      }
-
-      // Frequency
-      if (bounds.frequency) {
-        const [min, max] = bounds.frequency;
-        setFrequencyRange([
-          Math.max(min, Math.min(frequencyRange[0], max)),
-          Math.max(min, Math.min(frequencyRange[1], max)),
-        ]);
-      }
-    }
-  }, [selectedCategories]);
 
   // Generate palettes on component mount or when selection changes
   useEffect(() => {
@@ -371,24 +262,6 @@ function GeneratePage() {
     try {
       // Initialize options with proper typing
       const options: PaletteGenerationOptions = {};
-
-      // Only add initialGlobals if a single category is selected
-      if (selectedCategories.length === 1) {
-        options.initialGlobals = {};
-
-        // Only add a global if it's visible
-        if (globalBounds.exposure) {
-          options.initialGlobals.exposure = (exposureRange[0] + exposureRange[1]) / 2;
-        }
-
-        if (globalBounds.contrast) {
-          options.initialGlobals.contrast = (contrastRange[0] + contrastRange[1]) / 2;
-        }
-
-        if (globalBounds.frequency) {
-          options.initialGlobals.frequency = (frequencyRange[0] + frequencyRange[1]) / 2;
-        }
-      }
 
       // Use first category as main category and the rest as additional
       const mainCategory = selectedCategories[0];
@@ -474,7 +347,7 @@ function GeneratePage() {
                     No palettes could be generated with the current settings.
                   </p>
                   <p className="text-gray-500 text-sm mt-2">
-                    Try different category combinations or adjust the global modifiers.
+                    Try different category combinations for better results.
                   </p>
                 </div>
               )}
@@ -502,79 +375,14 @@ function GeneratePage() {
               </div>
             </div>
 
-            <div className="space-y-5">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-semibold">Global Modifiers</h3>
-
-                {/* Info tooltip about combined bounds */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center text-blue-500">
-                      <Info className="h-4 w-4" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs">
-                      {selectedCategories.length > 1
-                        ? 'Global modifiers are disabled when multiple categories are selected.'
-                        : 'These controls use the combined bounds from all selected categories. Some modifiers may not be available for certain category combinations.'}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-
-              {/* Only show global modifiers if a single category is selected */}
-              {selectedCategories.length === 1 ? (
-                <>
-                  {/* Exposure Slider */}
-                  <GlobalModifierItem
-                    label="Exposure"
-                    value={exposureRange}
-                    min={globalBounds.exposure ? globalBounds.exposure[0] : -1}
-                    max={globalBounds.exposure ? globalBounds.exposure[1] : 1}
-                    step={0.001}
-                    isVisible={!!globalBounds.exposure}
-                    onValueChange={setExposureRange}
-                    onDragEnd={handleRegenerate}
-                  />
-
-                  {/* Contrast Slider */}
-                  <GlobalModifierItem
-                    label="Contrast"
-                    value={contrastRange}
-                    min={globalBounds.contrast ? globalBounds.contrast[0] : 0}
-                    max={globalBounds.contrast ? globalBounds.contrast[1] : 2}
-                    step={0.001}
-                    isVisible={!!globalBounds.contrast}
-                    onValueChange={setContrastRange}
-                    onDragEnd={handleRegenerate}
-                  />
-
-                  {/* Frequency Slider */}
-                  <GlobalModifierItem
-                    label="Frequency"
-                    value={frequencyRange}
-                    min={globalBounds.frequency ? globalBounds.frequency[0] : 0}
-                    max={globalBounds.frequency ? globalBounds.frequency[1] : 2}
-                    step={0.001}
-                    isVisible={!!globalBounds.frequency}
-                    onValueChange={setFrequencyRange}
-                    onDragEnd={handleRegenerate}
-                  />
-
-                  {/* Message when no controls are available */}
-                  {!globalBounds.exposure && !globalBounds.contrast && !globalBounds.frequency && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      <p>No global modifiers are available for the current category selection.</p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                // Message when multiple categories are selected
-                <div className="mt-2 text-xs text-gray-500">
-                  <p>Global modifiers are disabled when multiple categories are selected.</p>
-                </div>
-              )}
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select one or more categories to generate palettes. Each category applies specific
+                color theory rules to create harmonious color combinations.
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Click on any palette to explore its gradient settings and customize further.
+              </p>
             </div>
           </div>
         </div>
