@@ -271,7 +271,7 @@ function GeneratePage() {
         options.additionalCategories = additionalCategories;
       }
 
-      const newPalettes = generatePalettes(100, mainCategory, options);
+      const newPalettes = generatePalettes(96, mainCategory, options);
 
       // Update state with the generated palettes
       setPalettes(newPalettes);
