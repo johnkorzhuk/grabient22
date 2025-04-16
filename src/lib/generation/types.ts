@@ -82,6 +82,9 @@ export interface PaletteCategory {
 
   /** Bounds for initial global modifiers used during palette generation */
   initialGlobalsBounds: GlobalModifierBounds;
+
+  /** Keys of categories that cannot coexist with this category */
+  exclusiveWith: PaletteCategoryKey[];
 }
 
 /**
@@ -105,8 +108,11 @@ export interface BasicColorResult {
  * Complete result of palette generation
  */
 export interface PaletteGenerationResult {
-  /** The category that was generated */
+  /** The primary category that was generated */
   category: PaletteCategoryKey;
+
+  /** All categories applied to this palette (including primary) */
+  appliedCategories: PaletteCategoryKey[];
 
   /** Basic color analysis results */
   basicColors: BasicColorResult[];
@@ -125,6 +131,11 @@ export interface PaletteGenerationResult {
 }
 
 /**
+ * Function type for category-specific validation
+ */
+export type CategoryValidator = (colors: RGBAVector[]) => boolean;
+
+/**
  * Configuration options for palette generation
  */
 export interface PaletteGenerationOptions {
@@ -141,6 +152,9 @@ export interface PaletteGenerationOptions {
     frequency?: number;
     phase?: number;
   };
+
+  /** Additional categories to combine with the primary category */
+  additionalCategories?: PaletteCategoryKey[];
 }
 
 /**

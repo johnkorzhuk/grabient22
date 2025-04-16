@@ -1,7 +1,7 @@
 /**
  * Base Palette Generator
  * Provides a foundation for all category-specific generators
- * Without category-specific validation logic
+ * With support for multi-category validation
  */
 
 import type { CosineCoeffs, RGBAVector } from '~/types';
@@ -14,6 +14,7 @@ import type {
   BasicColorResult,
 } from './types';
 import { PaletteCategories } from './color-constants';
+import { getCategoryValidator, validateMultiCategoryPalette } from './category-validators';
 
 /**
  * Default constants for generator
@@ -32,6 +33,9 @@ export abstract class BasePaletteGenerator {
   protected lastGeneratedCoeffs: CosineCoeffs;
   protected globals: [number, number, number, number] = [0, 1, 1, 0]; // Default globals: [exposure, contrast, frequency, phase]
 
+  // Multi-category support
+  protected appliedCategories: PaletteCategoryKey[] = [];
+
   /**
    * Constructor for base palette generator
    */
@@ -44,6 +48,12 @@ export abstract class BasePaletteGenerator {
     this.steps = steps || DEFAULT_STEPS;
     this.maxAttempts = options.maxAttempts || DEFAULT_MAX_ATTEMPTS;
     this.options = options;
+
+    // Setup categories for multi-category support
+    this.appliedCategories = [category];
+    if (options.additionalCategories && options.additionalCategories.length > 0) {
+      this.appliedCategories = this.appliedCategories.concat(options.additionalCategories);
+    }
 
     // Initialize with default coeffs
     this.lastGeneratedCoeffs = [
@@ -67,19 +77,19 @@ export abstract class BasePaletteGenerator {
     // always generate values within the bounds
     if (!options.initialGlobals && categoryBounds) {
       // 1. Exposure (globals[0])
-      if (categoryBounds.exposure) {
+      if (categoryBounds.exposure !== null) {
         const [min, max] = categoryBounds.exposure;
         this.globals[0] = min + Math.random() * (max - min);
       }
 
       // 2. Contrast (globals[1])
-      if (categoryBounds.contrast) {
+      if (categoryBounds.contrast !== null) {
         const [min, max] = categoryBounds.contrast;
         this.globals[1] = min + Math.random() * (max - min);
       }
 
       // 3. Frequency (globals[2])
-      if (categoryBounds.frequency) {
+      if (categoryBounds.frequency !== null) {
         const [min, max] = categoryBounds.frequency;
         this.globals[2] = min + Math.random() * (max - min);
       }
@@ -156,10 +166,10 @@ export abstract class BasePaletteGenerator {
 
       // Two-phase validation:
       // 1. General palette validation (common across all categories)
-      // 2. Category-specific validation (implemented by subclasses)
+      // 2. Category-specific validation (now supports multiple categories)
       if (
         isPaletteValid(colors, validationOptions) &&
-        this.validateCategorySpecificCriteria(colors)
+        validateMultiCategoryPalette(colors, this.appliedCategories)
       ) {
         // Analyze the colors to determine basic color names
         const rawBasicColors = analyzeBasicColors(colors);
@@ -169,6 +179,7 @@ export abstract class BasePaletteGenerator {
 
         return {
           category: this.category,
+          appliedCategories: this.appliedCategories,
           colors,
           coeffs,
           globals: this.globals,
@@ -223,12 +234,6 @@ export abstract class BasePaletteGenerator {
    * Each subclass must implement this method
    */
   protected abstract generateCandidateCoeffs(): CosineCoeffs;
-
-  /**
-   * Validate that generated colors meet category-specific criteria
-   * Each subclass must implement this method
-   */
-  protected abstract validateCategorySpecificCriteria(colors: RGBAVector[]): boolean;
 
   /**
    * Generate colors from coefficients with globals applied

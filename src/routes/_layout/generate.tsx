@@ -1,13 +1,27 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useEffect, useState, useCallback } from 'react';
-import { generatePalettes, PaletteCategories } from '~/lib/generation';
-import type { PaletteCategoryKey, PaletteGenerationResult } from '~/lib/generation/types';
+import { useEffect, useState } from 'react';
+import {
+  generatePalettes,
+  PaletteCategories,
+  validateCategorySet,
+  getIncompatibleCategories,
+  getGlobalBoundsForCategories,
+} from '~/lib/generation';
+import type {
+  PaletteCategoryKey,
+  PaletteGenerationResult,
+  GlobalModifierBounds,
+  PaletteGenerationOptions,
+} from '~/lib/generation/types';
 import { rgbToHex } from '~/lib/generation';
 import { serializeCoeffs } from '~/lib/serialization';
 import { DualRangeSlider } from '~/components/DualRangeSlider';
 import { cn } from '~/lib/utils';
 import { COEFF_PRECISION } from '~/validators';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Info } from 'lucide-react';
+import { Checkbox } from '~/components/ui/checkbox';
+import { Badge } from '~/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 
 // Configuration constants
 const AVAILABLE_CATEGORIES: PaletteCategoryKey[] = [
@@ -15,20 +29,7 @@ const AVAILABLE_CATEGORIES: PaletteCategoryKey[] = [
   'Pastel',
   'Earthy',
   'Random',
-  // 'Analogous',
-  // 'Complementary',
-  // 'Split-Complementary',
-  // 'Triadic',
-  // 'Tetradic',
-  // 'Hexadic',
-  // 'Warm-Dominant',
-  // 'Cool-Dominant',
-  // 'Temperature-Balanced',
-  // 'Neutral',
-  // 'High-Value',
-  // 'Low-Value',
-  // 'Jewel-Tones',
-  // 'Neon',
+  // Additional categories would be listed here
 ];
 
 // Component interface definitions
@@ -43,8 +44,16 @@ interface GlobalModifierItemProps {
   min: number;
   max: number;
   step: number;
+  isVisible: boolean;
   onValueChange: (value: [number, number]) => void;
   onDragEnd: () => void;
+}
+
+interface CategoryCheckboxProps {
+  category: PaletteCategoryKey;
+  isSelected: boolean;
+  isDisabled: boolean;
+  onToggle: (category: PaletteCategoryKey, checked: boolean) => void;
 }
 
 export const Route = createFileRoute('/_layout/generate')({
@@ -69,18 +78,37 @@ const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
       <div className="mb-2">
         <h3 className="text-lg font-medium">Palette #{index + 1}</h3>
         <p className="text-sm text-gray-500">
-          <span className="capitalize">
-            {palette.category === 'Random'
-              ? 'Random'
-              : palette.category.replace(/([A-Z])/g, ' $1').trim()}
-          </span>{' '}
-          palette
+          {/* Show categories count */}
+          {palette.appliedCategories && palette.appliedCategories.length > 0 ? (
+            <span>
+              {palette.appliedCategories.length}{' '}
+              {palette.appliedCategories.length === 1 ? 'category' : 'categories'}
+            </span>
+          ) : (
+            <span className="capitalize">
+              {palette.category === 'Random'
+                ? 'Random'
+                : palette.category.replace(/([A-Z])/g, ' $1').trim()}
+            </span>
+          )}
+
           <span className="ml-2">•</span>
           <span className="ml-2">
             Generated in {palette.attemptsTaken}{' '}
             {palette.attemptsTaken === 1 ? 'attempt' : 'attempts'}
           </span>
         </p>
+
+        {/* Display category badges */}
+        {palette.appliedCategories && palette.appliedCategories.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {palette.appliedCategories.map((cat, i) => (
+              <Badge key={i} variant="outline" className="text-xs">
+                {cat}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex h-12 rounded overflow-hidden">
         {palette.colors.map((color, i) => (
@@ -117,6 +145,14 @@ const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
 
   // Only wrap with Link if we have a valid seed
   if (seed) {
+    // Calculate recommended steps based on categories
+    const recommendedSteps =
+      palette.appliedCategories && palette.appliedCategories.length > 0
+        ? Math.max(
+            ...palette.appliedCategories.map((cat) => PaletteCategories[cat].recommendedColorStops),
+          )
+        : PaletteCategories[palette.category].recommendedColorStops;
+
     return (
       <Link
         to="/$seed"
@@ -124,7 +160,7 @@ const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
         search={(search) => ({
           rowHeight: 6,
           style: 'linearSwatches',
-          steps: PaletteCategories[palette.category].recommendedColorStops,
+          steps: recommendedSteps,
         })}
         className="block"
         aria-label={`Gradient ${index + 1}`}
@@ -138,6 +174,50 @@ const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
   return content;
 };
 
+// Category checkbox for multi-selection
+const CategoryCheckbox = ({
+  category,
+  isSelected,
+  isDisabled,
+  onToggle,
+}: CategoryCheckboxProps) => {
+  const categoryInfo = PaletteCategories[category];
+
+  return (
+    <div
+      className={cn(
+        'flex items-center space-x-2 p-2 rounded-md',
+        isSelected && 'bg-secondary/10',
+        isDisabled && 'opacity-50',
+      )}
+    >
+      <Checkbox
+        id={`category-${category}`}
+        checked={isSelected}
+        disabled={isDisabled}
+        onCheckedChange={(checked) => {
+          if (typeof checked === 'boolean') {
+            onToggle(category, checked);
+          }
+        }}
+      />
+      <div className="flex flex-col flex-grow">
+        <label
+          htmlFor={`category-${category}`}
+          className={cn(
+            'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+            isDisabled && 'cursor-not-allowed opacity-50',
+          )}
+        >
+          {/* Format the category name for display */}
+          {category === 'Random' ? 'Random' : category.replace(/([A-Z])/g, ' $1').trim()}
+        </label>
+        <p className="text-xs text-muted-foreground">{categoryInfo.description}</p>
+      </div>
+    </div>
+  );
+};
+
 // Global modifier item component
 const GlobalModifierItem = ({
   label,
@@ -145,9 +225,12 @@ const GlobalModifierItem = ({
   min,
   max,
   step,
+  isVisible,
   onValueChange,
   onDragEnd,
 }: GlobalModifierItemProps) => {
+  if (!isVisible) return null;
+
   return (
     <div
       className={cn(
@@ -183,63 +266,139 @@ const GlobalModifierItem = ({
 function GeneratePage() {
   const [palettes, setPalettes] = useState<PaletteGenerationResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<PaletteCategoryKey>('Monochromatic');
 
-  // Global modifiers state - now using [min, max] ranges
+  // Multi-category selection state
+  const [selectedCategories, setSelectedCategories] = useState<PaletteCategoryKey[]>([
+    'Monochromatic',
+  ]);
+
+  // Global modifiers state - using [min, max] ranges
   const [exposureRange, setExposureRange] = useState<[number, number]>([-0.5, 0.5]);
   const [contrastRange, setContrastRange] = useState<[number, number]>([0.8, 1.2]);
   const [frequencyRange, setFrequencyRange] = useState<[number, number]>([0.8, 1.2]);
 
-  // Update global modifiers when category changes
+  // Global bounds based on selected categories
+  const [globalBounds, setGlobalBounds] = useState<GlobalModifierBounds>({
+    exposure: [-0.5, 0.5],
+    contrast: [0.8, 1.2],
+    frequency: [0.8, 1.2],
+  });
+
+  // Update global bounds when category selection changes
   useEffect(() => {
-    const bounds = PaletteCategories[selectedCategory].initialGlobalsBounds;
+    if (selectedCategories.length > 0) {
+      // Get combined bounds for all selected categories
+      const bounds = getGlobalBoundsForCategories(selectedCategories);
+      setGlobalBounds(bounds);
 
-    // Set exposure range from bounds or default
-    if (bounds.exposure) {
-      setExposureRange([bounds.exposure[0], bounds.exposure[1]]);
-    } else {
-      // Use default range from validators if bounds are null
-      setExposureRange([-1, 1]);
+      // Set ranges based on bounds, maintaining current values if they're within bounds
+      // Exposure
+      if (bounds.exposure) {
+        const [min, max] = bounds.exposure;
+        setExposureRange([
+          Math.max(min, Math.min(exposureRange[0], max)),
+          Math.max(min, Math.min(exposureRange[1], max)),
+        ]);
+      }
+
+      // Contrast
+      if (bounds.contrast) {
+        const [min, max] = bounds.contrast;
+        setContrastRange([
+          Math.max(min, Math.min(contrastRange[0], max)),
+          Math.max(min, Math.min(contrastRange[1], max)),
+        ]);
+      }
+
+      // Frequency
+      if (bounds.frequency) {
+        const [min, max] = bounds.frequency;
+        setFrequencyRange([
+          Math.max(min, Math.min(frequencyRange[0], max)),
+          Math.max(min, Math.min(frequencyRange[1], max)),
+        ]);
+      }
     }
+  }, [selectedCategories]);
 
-    // Set contrast range from bounds or default
-    if (bounds.contrast) {
-      setContrastRange([bounds.contrast[0], bounds.contrast[1]]);
-    } else {
-      // Use default range from validators if bounds are null
-      setContrastRange([0, 2]);
-    }
-
-    // Set frequency range from bounds or default
-    if (bounds.frequency) {
-      setFrequencyRange([bounds.frequency[0], bounds.frequency[1]]);
-    } else {
-      // Use default range from validators if bounds are null
-      setFrequencyRange([0, 2]);
-    }
-  }, [selectedCategory]);
-
-  // Generate palettes on component mount or when category changes
+  // Generate palettes on component mount or when selection changes
   useEffect(() => {
-    generateAllPalettes();
-  }, [selectedCategory]);
+    if (selectedCategories.length > 0) {
+      generateAllPalettes();
+    }
+  }, [selectedCategories]);
+
+  // Handle category toggle
+  const handleCategoryToggle = (category: PaletteCategoryKey, checked: boolean) => {
+    if (checked) {
+      // Find conflicting categories
+      const conflictingCategories = selectedCategories.filter((selected) => {
+        return (
+          PaletteCategories[selected].exclusiveWith.includes(category) ||
+          PaletteCategories[category].exclusiveWith.includes(selected)
+        );
+      });
+
+      // Create new selection by removing conflicts and adding the new category
+      const newSelection = [
+        ...selectedCategories.filter((c) => !conflictingCategories.includes(c)),
+        category,
+      ];
+
+      setSelectedCategories(newSelection);
+    } else {
+      // Handle deselection
+      const newSelection = selectedCategories.filter((c) => c !== category);
+
+      // If empty, default to Random
+      if (newSelection.length === 0) {
+        setSelectedCategories(['Random']);
+      } else {
+        setSelectedCategories(newSelection);
+      }
+    }
+  };
 
   // Function to generate palettes
-  const generateAllPalettes = useCallback(async () => {
+  const generateAllPalettes = () => {
+    if (selectedCategories.length === 0) {
+      return;
+    }
+
     setLoading(true);
     setPalettes([]); // Clear existing palettes
 
     try {
-      // Use the new generator system to create palettes with global modifiers
-      // Using the average of the min/max values from each range
-      const newPalettes = generatePalettes(100, selectedCategory, {
-        initialGlobals: {
-          exposure: (exposureRange[0] + exposureRange[1]) / 2,
-          contrast: (contrastRange[0] + contrastRange[1]) / 2,
-          frequency: (frequencyRange[0] + frequencyRange[1]) / 2,
-        },
-      });
-      console.log({ newPalettes });
+      // Initialize options with proper typing
+      const options: PaletteGenerationOptions = {};
+
+      // Only add initialGlobals if a single category is selected
+      if (selectedCategories.length === 1) {
+        options.initialGlobals = {};
+
+        // Only add a global if it's visible
+        if (globalBounds.exposure) {
+          options.initialGlobals.exposure = (exposureRange[0] + exposureRange[1]) / 2;
+        }
+
+        if (globalBounds.contrast) {
+          options.initialGlobals.contrast = (contrastRange[0] + contrastRange[1]) / 2;
+        }
+
+        if (globalBounds.frequency) {
+          options.initialGlobals.frequency = (frequencyRange[0] + frequencyRange[1]) / 2;
+        }
+      }
+
+      // Use first category as main category and the rest as additional
+      const mainCategory = selectedCategories[0];
+      const additionalCategories = selectedCategories.slice(1);
+
+      if (additionalCategories.length > 0) {
+        options.additionalCategories = additionalCategories;
+      }
+
+      const newPalettes = generatePalettes(100, mainCategory, options);
 
       // Update state with the generated palettes
       setPalettes(newPalettes);
@@ -248,16 +407,11 @@ function GeneratePage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, exposureRange, contrastRange, frequencyRange]);
-
-  // Handler to regenerate palettes with the same category
-  const handleRegenerate = () => {
-    generateAllPalettes();
   };
 
-  // Handler to change category and regenerate palettes
-  const handleCategoryChange = (category: PaletteCategoryKey) => {
-    setSelectedCategory(category);
+  // Handler to regenerate palettes
+  const handleRegenerate = () => {
+    generateAllPalettes();
   };
 
   return (
@@ -285,10 +439,21 @@ function GeneratePage() {
 
           <div className="mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Generating{' '}
-              {selectedCategory === 'Random'
-                ? 'random'
-                : selectedCategory.toLowerCase().replace(/-/g, ' ')}{' '}
+              Generating {/* Display selected categories */}
+              {selectedCategories.length > 0 ? (
+                <>
+                  {selectedCategories.map((cat, index) => (
+                    <span key={cat}>
+                      {index > 0 && ' + '}
+                      <span>
+                        {cat === 'Random' ? 'random' : cat.toLowerCase().replace(/-/g, ' ')}
+                      </span>
+                    </span>
+                  ))}
+                </>
+              ) : (
+                'random'
+              )}{' '}
               palettes
             </p>
           </div>
@@ -302,6 +467,17 @@ function GeneratePage() {
               {palettes.map((palette, index) => (
                 <PaletteDisplay key={index} palette={palette} index={index} />
               ))}
+
+              {palettes.length === 0 && !loading && (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500">
+                    No palettes could be generated with the current settings.
+                  </p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Try different category combinations or adjust the global modifiers.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -310,64 +486,94 @@ function GeneratePage() {
         <div className="w-full md:w-1/3 lg:w-1/4 sticky top-4 self-start">
           <div className="bg-gray-50 dark:bg-gray-900/30 rounded-lg p-4 shadow-sm">
             <div className="mb-4">
-              <label htmlFor="category-select" className="block text-sm font-medium mb-1">
-                Color Harmony Category:
-              </label>
-              <select
-                id="category-select"
-                value={selectedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value as PaletteCategoryKey)}
-                className="block w-full px-3 py-2 bg-background border border-input rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              >
+              <h3 className="font-medium mb-2">Category Selection</h3>
+
+              {/* Category multi-selection with checkboxes */}
+              <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2">
                 {AVAILABLE_CATEGORIES.map((category) => (
-                  <option key={category} value={category}>
-                    {/* Format the category name for display */}
-                    {category === 'Random' ? 'Random' : category.replace(/([A-Z])/g, ' $1').trim()}
-                  </option>
+                  <CategoryCheckbox
+                    key={category}
+                    category={category}
+                    isSelected={selectedCategories.includes(category)}
+                    isDisabled={false}
+                    onToggle={handleCategoryToggle}
+                  />
                 ))}
-              </select>
+              </div>
             </div>
 
             <div className="space-y-5">
-              <h3 className="text-sm font-semibold">Global Modifiers</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-semibold">Global Modifiers</h3>
 
-              {/* Exposure Slider - only show if not null in initialGlobalsBounds */}
-              {PaletteCategories[selectedCategory].initialGlobalsBounds.exposure !== null && (
-                <GlobalModifierItem
-                  label="Exposure"
-                  value={exposureRange}
-                  min={-1} // Full range from validators
-                  max={1} // Full range from validators
-                  step={0.001}
-                  onValueChange={setExposureRange}
-                  onDragEnd={handleRegenerate}
-                />
-              )}
+                {/* Info tooltip about combined bounds */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center text-blue-500">
+                      <Info className="h-4 w-4" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">
+                      {selectedCategories.length > 1
+                        ? 'Global modifiers are disabled when multiple categories are selected.'
+                        : 'These controls use the combined bounds from all selected categories. Some modifiers may not be available for certain category combinations.'}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
 
-              {/* Contrast Slider - only show if not null in initialGlobalsBounds */}
-              {PaletteCategories[selectedCategory].initialGlobalsBounds.contrast !== null && (
-                <GlobalModifierItem
-                  label="Contrast"
-                  value={contrastRange}
-                  min={0} // Full range from validators
-                  max={2} // Full range from validators
-                  step={0.001}
-                  onValueChange={setContrastRange}
-                  onDragEnd={handleRegenerate}
-                />
-              )}
+              {/* Only show global modifiers if a single category is selected */}
+              {selectedCategories.length === 1 ? (
+                <>
+                  {/* Exposure Slider */}
+                  <GlobalModifierItem
+                    label="Exposure"
+                    value={exposureRange}
+                    min={globalBounds.exposure ? globalBounds.exposure[0] : -1}
+                    max={globalBounds.exposure ? globalBounds.exposure[1] : 1}
+                    step={0.001}
+                    isVisible={!!globalBounds.exposure}
+                    onValueChange={setExposureRange}
+                    onDragEnd={handleRegenerate}
+                  />
 
-              {/* Frequency Slider - only show if not null in initialGlobalsBounds */}
-              {PaletteCategories[selectedCategory].initialGlobalsBounds.frequency !== null && (
-                <GlobalModifierItem
-                  label="Frequency"
-                  value={frequencyRange}
-                  min={0} // Full range from validators
-                  max={2} // Full range from validators
-                  step={0.001}
-                  onValueChange={setFrequencyRange}
-                  onDragEnd={handleRegenerate}
-                />
+                  {/* Contrast Slider */}
+                  <GlobalModifierItem
+                    label="Contrast"
+                    value={contrastRange}
+                    min={globalBounds.contrast ? globalBounds.contrast[0] : 0}
+                    max={globalBounds.contrast ? globalBounds.contrast[1] : 2}
+                    step={0.001}
+                    isVisible={!!globalBounds.contrast}
+                    onValueChange={setContrastRange}
+                    onDragEnd={handleRegenerate}
+                  />
+
+                  {/* Frequency Slider */}
+                  <GlobalModifierItem
+                    label="Frequency"
+                    value={frequencyRange}
+                    min={globalBounds.frequency ? globalBounds.frequency[0] : 0}
+                    max={globalBounds.frequency ? globalBounds.frequency[1] : 2}
+                    step={0.001}
+                    isVisible={!!globalBounds.frequency}
+                    onValueChange={setFrequencyRange}
+                    onDragEnd={handleRegenerate}
+                  />
+
+                  {/* Message when no controls are available */}
+                  {!globalBounds.exposure && !globalBounds.contrast && !globalBounds.frequency && (
+                    <div className="mt-2 text-xs text-gray-500">
+                      <p>No global modifiers are available for the current category selection.</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                // Message when multiple categories are selected
+                <div className="mt-2 text-xs text-gray-500">
+                  <p>Global modifiers are disabled when multiple categories are selected.</p>
+                </div>
               )}
             </div>
           </div>

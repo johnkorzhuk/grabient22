@@ -4,7 +4,13 @@
  * to ensure complete coverage of the color space
  */
 
-import type { PaletteCategory, PaletteCategoryKey, BasicColor, BasicColorName } from './types';
+import type {
+  PaletteCategory,
+  PaletteCategoryKey,
+  BasicColor,
+  BasicColorName,
+  GlobalModifierBounds,
+} from './types';
 
 /**
  * Predefined palette categories with their properties
@@ -19,6 +25,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.8, 1.2],
       frequency: null,
     },
+    exclusiveWith: ['Random'],
   },
   Pastel: {
     key: 'Pastel',
@@ -29,16 +36,22 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: null,
       frequency: [0.75, 1.25],
     },
+    exclusiveWith: ['Earthy', 'Random'],
   },
   Earthy: {
     key: 'Earthy',
     description: 'Natural colors like browns, tans, olive greens.',
     recommendedColorStops: 7,
     initialGlobalsBounds: {
-      exposure: [-0.2, 0.1],
-      contrast: [0.6, 0.9],
-      frequency: [0.5, 1.2],
+      exposure: [-0.5, 0.5],
+      contrast: [0.3, 1.7],
+      frequency: [0.5, 1.5],
     },
+    exclusiveWith: [
+      'Pastel',
+      'Random',
+      // Earthy is exclusive with Pastel but not with Monochromatic
+    ],
   },
   Random: {
     key: 'Random',
@@ -49,151 +62,109 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.5, 1.5], // Full range for randomness
       frequency: [0.5, 1], // Full range for randomness
     },
+    exclusiveWith: ['Monochromatic', 'Pastel', 'Earthy'],
   },
-
-  //   Analogous: {
-  //     key: 'Analogous',
-  //     description: 'Adjacent colors on the color wheel (within 30-60°).',
-  //     recommendedColorStops: 6,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   Complementary: {
-  //     key: 'Complementary',
-  //     description: 'Colors opposite on the color wheel (180° apart).',
-  //     recommendedColorStops: 6,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   'Split-Complementary': {
-  //     key: 'Split-Complementary',
-  //     description: 'Primary color plus two colors adjacent to its complement.',
-  //     recommendedColorStops: 7,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   Triadic: {
-  //     key: 'Triadic',
-  //     description: 'Three colors evenly spaced (120°) around the color wheel.',
-  //     recommendedColorStops: 6,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   Tetradic: {
-  //     key: 'Tetradic',
-  //     description: 'Two complementary pairs forming a rectangle.',
-  //     recommendedColorStops: 8,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   Hexadic: {
-  //     key: 'Hexadic',
-  //     description: 'Six colors evenly spaced around the color wheel.',
-  //     recommendedColorStops: 12,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   'Warm-Dominant': {
-  //     key: 'Warm-Dominant',
-  //     description: 'Palette primarily consisting of reds, oranges, yellows.',
-  //     recommendedColorStops: 7,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.1, 0.3], // Allow more positive exposure for warm colors
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   'Cool-Dominant': {
-  //     key: 'Cool-Dominant',
-  //     description: 'Palette primarily consisting of blues, greens, purples.',
-  //     recommendedColorStops: 7,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.3, 0.1], // Allow more negative exposure for cool colors
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   'Temperature-Balanced': {
-  //     key: 'Temperature-Balanced',
-  //     description: 'Even mix of warm and cool colors.',
-  //     recommendedColorStops: 8,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.2],
-  //       contrast: [0.8, 1.2],
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   Neutral: {
-  //     key: 'Neutral',
-  //     description: 'Colors with very low saturation, not quite grayscale.',
-  //     recommendedColorStops: 5,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.1, 0.1], // Narrow range to maintain neutrality
-  //       contrast: [0.4, 0.8], // Lower contrast to reduce saturation
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   'High-Value': {
-  //     key: 'High-Value',
-  //     description: 'Predominantly light colors.',
-  //     recommendedColorStops: 5,
-  //     initialGlobalsBounds: {
-  //       exposure: [0.1, 0.4], // Higher exposure for brighter colors
-  //       contrast: [0.6, 1.0], // Lower contrast to maintain high value
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-  //   'Low-Value': {
-  //     key: 'Low-Value',
-  //     description: 'Predominantly dark colors.',
-  //     recommendedColorStops: 5,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.4, -0.1], // Lower exposure for darker colors
-  //       contrast: [0.6, 1.0], // Lower contrast to maintain low value
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-
-  //   'Jewel-Tones': {
-  //     key: 'Jewel-Tones',
-  //     description: 'Rich, deep colors with medium-high saturation.',
-  //     recommendedColorStops: 6,
-  //     initialGlobalsBounds: {
-  //       exposure: [-0.2, 0.1], // Slight negative exposure for richness
-  //       contrast: [1.0, 1.5], // Higher contrast for vibrancy
-  //       frequency: [0.5, 1.5],
-  //     },
-  //   },
-
-  //   Neon: {
-  //     key: 'Neon',
-  //     description: 'Very bright, highly saturated colors.',
-  //     recommendedColorStops: 5,
-  //     initialGlobalsBounds: {
-  //       exposure: [0.1, 0.3], // Higher exposure for brightness
-  //       contrast: [1.2, 2.0], // Higher contrast for intensity
-  //       frequency: [0.7, 1.8], // Higher frequency for vibrance
-  //     },
-  //   },
 };
+
+/**
+ * Helper function to merge global bounds from multiple categories
+ * Returns a usable range for generating palettes
+ *
+ * IMPROVED: Now finds proper intersection of bounds
+ */
+export function mergeGlobalsBounds(categories: PaletteCategoryKey[]): GlobalModifierBounds {
+  // Start with full ranges as default
+  const result: GlobalModifierBounds = {
+    exposure: [-1, 1],
+    contrast: [0, 2],
+    frequency: [0, 2],
+  };
+
+  // No categories provided, return default full range
+  if (!categories || categories.length === 0) {
+    return result;
+  }
+
+  // Single category, just return its bounds
+  if (categories.length === 1) {
+    return PaletteCategories[categories[0]].initialGlobalsBounds;
+  }
+
+  // For each global modifier, find the intersection of all bounds
+  let hasExposure = true;
+  let hasContrast = true;
+  let hasFrequency = true;
+
+  let minExposure = -1;
+  let maxExposure = 1;
+  let minContrast = 0;
+  let maxContrast = 2;
+  let minFrequency = 0;
+  let maxFrequency = 2;
+
+  // Check each category for bounds
+  for (const category of categories) {
+    const bounds = PaletteCategories[category].initialGlobalsBounds;
+
+    // Process exposure bounds
+    if (bounds.exposure === null) {
+      hasExposure = false;
+    } else if (hasExposure) {
+      minExposure = Math.max(minExposure, bounds.exposure[0]);
+      maxExposure = Math.min(maxExposure, bounds.exposure[1]);
+
+      // Check if the intersection becomes empty
+      if (minExposure > maxExposure) {
+        hasExposure = false;
+      }
+    }
+
+    // Process contrast bounds
+    if (bounds.contrast === null) {
+      hasContrast = false;
+    } else if (hasContrast) {
+      minContrast = Math.max(minContrast, bounds.contrast[0]);
+      maxContrast = Math.min(maxContrast, bounds.contrast[1]);
+
+      // Check if the intersection becomes empty
+      if (minContrast > maxContrast) {
+        hasContrast = false;
+      }
+    }
+
+    // Process frequency bounds
+    if (bounds.frequency === null) {
+      hasFrequency = false;
+    } else if (hasFrequency) {
+      minFrequency = Math.max(minFrequency, bounds.frequency[0]);
+      maxFrequency = Math.min(maxFrequency, bounds.frequency[1]);
+
+      // Check if the intersection becomes empty
+      if (minFrequency > maxFrequency) {
+        hasFrequency = false;
+      }
+    }
+  }
+
+  // Set final results based on intersection checks
+  result.exposure = hasExposure ? [minExposure, maxExposure] : null;
+  result.contrast = hasContrast ? [minContrast, maxContrast] : null;
+  result.frequency = hasFrequency ? [minFrequency, maxFrequency] : null;
+
+  return result;
+}
+
+/**
+ * Calculate recommended color stops for multi-category palettes
+ * Uses the maximum of all categories' recommended stops
+ */
+export function getRecommendedStops(categories: PaletteCategoryKey[]): number {
+  if (!categories || categories.length === 0) {
+    return 7; // Default value
+  }
+
+  return Math.max(...categories.map((cat) => PaletteCategories[cat].recommendedColorStops));
+}
 
 /**
  * Common hue ranges for color harmony generation

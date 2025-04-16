@@ -1,6 +1,6 @@
 /**
- * Pastel Palette Generator with Integrated Validator
- * Creates palettes with high brightness, low-medium saturation colors
+ * Enhanced Pastel Palette Generator
+ * Creates diverse pastel palettes with improved color distribution
  */
 
 import type { CosineCoeffs, RGBAVector } from '~/types';
@@ -13,18 +13,18 @@ export class PastelGenerator extends BasePaletteGenerator {
   }
 
   /**
-   * Generate candidate coefficients for a pastel palette
+   * Generate candidate coefficients for a pastel palette with greater diversity
    */
   protected generateCandidateCoeffs(): CosineCoeffs {
     const TAU = Math.PI * 2;
 
-    // Select from multiple pastel palette strategies
-    const strategyType = Math.floor(Math.random() * 4);
+    // Select from expanded pastel palette strategies
+    const strategyType = Math.floor(Math.random() * 7); // Increased from 4 to 7 strategies
 
     // Define hue distribution approach
     let hueDistribution: number[];
-    let brightnessStrategy: 'high' | 'varied' | 'gradient';
-    let saturationLevel: 'very-low' | 'low' | 'medium';
+    let brightnessStrategy: 'high' | 'varied' | 'gradient' | 'mixed';
+    let saturationLevel: 'very-low' | 'low' | 'medium' | 'mixed';
 
     // Configure palette characteristics based on strategy
     switch (strategyType) {
@@ -59,6 +59,32 @@ export class PastelGenerator extends BasePaletteGenerator {
         saturationLevel = 'very-low'; // Very delicate saturation
         break;
 
+      case 4: // Monochromatic pastel with more saturation variation
+        const monoHue = Math.random();
+        // Tighter hue distribution for monochromatic feel
+        hueDistribution = [monoHue, monoHue, monoHue];
+        brightnessStrategy = 'gradient'; // Gradient brightness for variation
+        saturationLevel = 'mixed'; // Mixed saturation for interest while keeping pastel
+        break;
+
+      case 5: // Duo-tone pastel with higher saturation
+        const primaryHue = Math.random();
+        const secondaryHue = (primaryHue + 0.3 + Math.random() * 0.2) % 1.0; // 0.3-0.5 away
+        // Use two main hues with slight variation in the third
+        hueDistribution = [primaryHue, secondaryHue, (primaryHue + 0.1) % 1.0];
+        brightnessStrategy = 'mixed'; // Mixed brightness levels
+        saturationLevel = 'medium'; // Medium saturation for more color presence
+        break;
+
+      case 6: // Naturalistic pastel - earthy pastels (greens, pinks, blues)
+        // Select from pastel-friendly nature hues (blue, green, pink, peach)
+        const natureHues = [0.08, 0.3, 0.58, 0.85]; // Peach, green, blue, pink
+        const natureBase = natureHues[Math.floor(Math.random() * natureHues.length)];
+        hueDistribution = [natureBase, (natureBase + 0.05) % 1.0, (natureBase + 0.1) % 1.0];
+        brightnessStrategy = 'varied';
+        saturationLevel = 'mixed';
+        break;
+
       default: // Fallback - balanced pastel
         hueDistribution = [0, 0.33, 0.67];
         brightnessStrategy = 'high';
@@ -82,6 +108,9 @@ export class PastelGenerator extends BasePaletteGenerator {
         offsetBase = 0.6;
         offsetVariation = 0.3; // 0.6-0.9
         break;
+      case 'mixed':
+        // Create variety by having different base values per channel
+        return this.generateMixedPastelCoeffs(hueDistribution);
       default:
         offsetBase = 0.75;
         offsetVariation = 0.15;
@@ -103,6 +132,11 @@ export class PastelGenerator extends BasePaletteGenerator {
       case 'medium':
         amplitudeBase = 0.15;
         amplitudeVariation = 0.15; // 0.15-0.3
+        break;
+      case 'mixed':
+        // Handle mixed in the mixed method
+        amplitudeBase = 0.1;
+        amplitudeVariation = 0.2;
         break;
       default:
         amplitudeBase = 0.08;
@@ -158,8 +192,56 @@ export class PastelGenerator extends BasePaletteGenerator {
   }
 
   /**
-   * Validate that the palette meets pastel criteria
-   * Integrated directly into the generator class
+   * Special method to generate mixed pastel coefficients with more channel variation
+   * This creates much more diverse pastels like seen in the second image
+   */
+  private generateMixedPastelCoeffs(hueDistribution: number[]): CosineCoeffs {
+    const TAU = Math.PI * 2;
+
+    // Create more diverse offset values to get a variety of base brightnesses
+    // This is key to getting diverse pastel bands rather than all white-based
+    const redOffset = 0.5 + Math.random() * 0.3; // 0.5-0.8
+    const greenOffset = 0.5 + Math.random() * 0.3; // 0.5-0.8
+    const blueOffset = 0.5 + Math.random() * 0.3; // 0.5-0.8
+
+    // Use higher amplitude values for more color presence
+    // This creates those stronger pastel colors rather than just white tints
+    const redAmp = 0.15 + Math.random() * 0.2; // 0.15-0.35
+    const greenAmp = 0.15 + Math.random() * 0.2; // 0.15-0.35
+    const blueAmp = 0.15 + Math.random() * 0.2; // 0.15-0.35
+
+    // Use varied frequencies per channel for more color mixing
+    // This creates those interesting transitions between pastel bands
+    const baseFreq = 0.5 + Math.random() * 0.5; // 0.5-1.0
+    const redFreq = baseFreq * (0.8 + Math.random() * 0.4);
+    const greenFreq = baseFreq * (0.8 + Math.random() * 0.4);
+    const blueFreq = baseFreq * (0.8 + Math.random() * 0.4);
+
+    // Use more diverse phase distribution
+    // This helps create those bands of different colors rather than just gradients
+    const phaseSpread = 0.2 + Math.random() * 0.3; // How far to spread phases
+    const redPhase = hueDistribution[0] * TAU;
+    const greenPhase = ((hueDistribution[1] + phaseSpread) % 1.0) * TAU;
+    const bluePhase = ((hueDistribution[2] + phaseSpread * 2) % 1.0) * TAU;
+
+    return [
+      // a: offset vector with intentional variety
+      [redOffset, greenOffset, blueOffset, 1] as [number, number, number, 1],
+
+      // b: amplitude vector with stronger values
+      [redAmp, greenAmp, blueAmp, 1] as [number, number, number, 1],
+
+      // c: frequency vector with per-channel variation
+      [redFreq, greenFreq, blueFreq, 1] as [number, number, number, 1],
+
+      // d: phase vector with wider spread
+      [redPhase, greenPhase, bluePhase, 1] as [number, number, number, 1],
+    ];
+  }
+
+  /**
+   * Validate that the palette meets pastel criteria with more flexibility
+   * to allow for more diverse pastels
    */
   protected validateCategorySpecificCriteria(colors: RGBAVector[]): boolean {
     return validatePastelPalette(colors);
@@ -167,29 +249,39 @@ export class PastelGenerator extends BasePaletteGenerator {
 }
 
 /**
- * Validates that a palette has pastel colors
+ * Validates that a palette has pastel colors with improved diversity
  * Ensures colors have high brightness and appropriate saturation
+ * Modified to allow more diverse pastel ranges
  */
 export function validatePastelPalette(colors: RGBAVector[]): boolean {
   let pastelCount = 0;
+  let uniqueHues = new Set();
 
   for (const color of colors) {
     const hsv = rgbToHsv(color);
 
-    // Standard pastel criteria:
+    // Track unique hues (rounded to nearest 0.1) for diversity check
+    if (hsv[1] > 0.15) {
+      // Only count hues if saturation is meaningful
+      uniqueHues.add(Math.round(hsv[0] * 10) / 10);
+    }
+
+    // Enhanced pastel criteria:
     // - High value (brightness)
     // - Low to medium saturation
+    // - Flexibility for more color presence
     if (
-      hsv[2] > 0.8 && // High brightness
+      hsv[2] > 0.7 && // High brightness (lowered from 0.8)
       hsv[1] >= 0.1 &&
-      hsv[1] <= 0.5 // Low-medium saturation
+      hsv[1] <= 0.6 // Increased upper saturation limit for more color presence
     ) {
       pastelCount++;
     }
   }
 
   // For standard pastel palette, at least 70% should be pastel colors
-  const strictPastel = pastelCount / colors.length >= 0.7;
+  // AND we should have at least 2 distinct hues for diversity
+  const strictPastel = pastelCount / colors.length >= 0.7 && uniqueHues.size >= 2;
 
   if (strictPastel) {
     return true;
@@ -201,18 +293,19 @@ export function validatePastelPalette(colors: RGBAVector[]): boolean {
   for (const color of colors) {
     const hsv = rgbToHsv(color);
 
-    // Extended pastel criteria:
-    // - High value (brightness) with more flexibility
-    // - Low to medium saturation with more flexibility
+    // Expanded pastel criteria:
+    // - More flexibility on brightness to allow for those pastel bands
+    // - Wider saturation range for more color presence
     if (
-      hsv[2] > 0.7 && // Slightly more flexible brightness threshold
+      hsv[2] > 0.6 && // More flexible brightness threshold
       hsv[1] >= 0.05 &&
-      hsv[1] <= 0.6 // Wider saturation range
+      hsv[1] <= 0.7 // Even wider saturation range
     ) {
       flexiblePastelCount++;
     }
   }
 
   // For flexible pastel validation, at least 60% should meet the criteria
-  return flexiblePastelCount / colors.length >= 0.6;
+  // AND we should have at least 2 distinct hues for diversity
+  return flexiblePastelCount / colors.length >= 0.6 && uniqueHues.size >= 2;
 }

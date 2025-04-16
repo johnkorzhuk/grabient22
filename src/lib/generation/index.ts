@@ -1,6 +1,7 @@
 /**
  * Harmonious Palette Generation System
  * Main entry point for generating color palettes based on color theory principles
+ * With support for multi-category palette generation
  */
 
 // Export types
@@ -23,11 +24,32 @@ export {
   hexToRgb,
 } from './color-utils';
 
-// Export constants
-export { PaletteCategories, HueRanges, BasicColors } from './color-constants';
+// Export constants and helper functions
+export {
+  PaletteCategories,
+  HueRanges,
+  BasicColors,
+  mergeGlobalsBounds,
+  getRecommendedStops,
+} from './color-constants';
+
+// Export validator utilities
+export {
+  getCategoryValidator,
+  validateMultiCategoryPalette,
+  CATEGORY_VALIDATORS,
+} from './category-validators';
 
 // Export main generator functions
-export { generatePalette, generatePalettes, PaletteGeneratorFactory } from './factory';
+export {
+  generatePalette,
+  generatePalettes,
+  PaletteGeneratorFactory,
+  getGlobalBoundsForCategory,
+  getGlobalBoundsForCategories,
+  validateCategorySet,
+  getIncompatibleCategories,
+} from './factory';
 
 // Export base generator class
 export { BasePaletteGenerator } from './base-generator';
@@ -36,19 +58,4 @@ export { BasePaletteGenerator } from './base-generator';
 export { EarthyGenerator } from './generators/earthy';
 export { MonochromaticGenerator } from './generators/monochromatic';
 export { PastelGenerator } from './generators/pastel';
-
-// export { AnalogousGenerator } from './generators/analogous';
-// export { ComplementaryGenerator } from './generators/complementary';
-// export { SplitComplementaryGenerator } from './generators/split-complementary';
-// export { TriadicGenerator } from './generators/triadic';
-// export { TetradicGenerator } from './generators/tetradic';
-// export { HexadicGenerator } from './generators/hexadic';
-// export { WarmDominantGenerator } from './generators/warm-dominant';
-// export { CoolDominantGenerator } from './generators/cool-dominant';
-// export { TemperatureBalancedGenerator } from './generators/temperature-balanced';
-// export { NeutralGenerator } from './generators/neutral';
-// export { HighValueGenerator } from './generators/high-value';
-// export { LowValueGenerator } from './generators/low-value';
-// export { JewelTonesGenerator } from './generators/jewel-tones';
-// export { NeonGenerator } from './generators/neon';
-// export { RandomGenerator } from './generators/random';
+export { RandomGenerator } from './generators/random';
