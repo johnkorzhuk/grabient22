@@ -17,6 +17,6 @@ export type CollectionStyle = v.InferOutput<typeof collectionStyleValidator>;
 // Cosine gradient types
 export type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
 export type RGBAVector = [number, number, number, number];
+export type HSVVector = [number, number, number];
 export type CosineParameters = [RGBAVector, RGBAVector, RGBAVector, RGBAVector];
-
-export type GlobalModifierType = 'exposure' | 'contrast' | 'frequency' | 'phase' | 'saturation' | 'brightness' | null;
+export type GlobalModifierType = 'exposure' | 'contrast' | 'frequency' | 'phase' | null;

@@ -5,7 +5,7 @@ import {
   useParams,
   useSearch,
 } from '@tanstack/react-router';
-import type { AppCollection, CosineCoeffs } from '~/types';
+import type { AppCollection, CosineCoeffs, GlobalModifierType } from '~/types';
 import { useRef, useState, useEffect } from 'react';
 import { deserializeCoeffs, serializeCoeffs } from '~/lib/serialization';
 import { redirect, useNavigate } from '@tanstack/react-router';
@@ -42,7 +42,6 @@ import { GradientPreview } from '~/components/GradientPreview';
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
 import { CollectionModifierRangeInput } from '~/components/CollectionModifierRangeInput';
-import type { GlobalModifierType } from '~/stores/ui';
 import { cn } from '~/lib/utils';
 import { useElementSize } from '@mantine/hooks';
 

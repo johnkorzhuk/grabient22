@@ -1,8 +1,7 @@
 import * as v from 'valibot';
 import { observable } from '@legendapp/state';
 import { collectionStyleValidator, stepsValidator, angleValidator } from '~/validators';
-
-export type GlobalModifierType = 'exposure' | 'contrast' | 'frequency' | 'phase' | null;
+import type { GlobalModifierType } from '~/types';
 
 export interface UITempStore {
   previewStyle: v.InferOutput<typeof collectionStyleValidator> | null;

@@ -1,7 +1,6 @@
 import { CollectionModifierRangeInput } from './CollectionModifierRangeInput';
 import { cn } from '~/lib/utils';
-import type { GlobalModifierType } from '~/stores/ui';
-import type { CosineCoeffs } from '~/types';
+import type { CosineCoeffs, GlobalModifierType } from '~/types';
 import { useState, useEffect } from 'react';
 import { COEFF_PRECISION, PI } from '~/validators';
 import { applyGlobals } from '~/lib/cosineGradient';
