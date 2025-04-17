@@ -8,21 +8,21 @@ import type { CosineCoeffs, RGBAVector } from '~/types';
  * These represent different color harmony and attribute patterns
  * that can be generated for a color palette
  */
-export type PaletteCategoryKey = 'Monochromatic' | 'Earthy' | 'Pastel' | 'Random';
-//   | 'Analogous'
-//   | 'Complementary'
-//   | 'Split-Complementary'
-//   | 'Triadic'
-//   | 'Tetradic'
-//   | 'Hexadic'
-//   | 'Warm-Dominant'
-//   | 'Cool-Dominant'
-//   | 'Temperature-Balanced'
-//   | 'Neutral'
-//   | 'High-Value'
-//   | 'Low-Value'
-//   | 'Jewel-Tones'
-//   | 'Neon';
+export type PaletteCategoryKey =
+  | 'Monochromatic'
+  | 'Earthy'
+  | 'Pastel'
+  | 'Complementary'
+  | 'Tetradic'
+  | 'Random'
+  | 'WarmDominant'
+  | 'CoolDominant'
+  | 'SplitComplementary'
+  | 'Neon'
+  | 'Analogous'
+  | 'Neutral'
+  | 'High-Value'
+  | 'Low-Value';
 
 /**
  * Basic color names for simplified color approximation

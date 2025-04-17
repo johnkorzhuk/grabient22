@@ -9,10 +9,7 @@ import type {
   PaletteGenerationOptions,
   PaletteGenerationResult,
 } from './types';
-import type { CosineCoeffs, RGBAVector } from '~/types';
 import { PaletteCategories, mergeGlobalsBounds, getRecommendedStops } from './color-constants';
-import { analyzeBasicColors } from './color-utils';
-import { cosineGradient } from '../cosineGradient';
 import { DEFAULT_MAX_ATTEMPTS } from './base-generator';
 import type { BasePaletteGenerator } from './base-generator';
 import { getCategoryValidator } from './category-validators';
@@ -22,7 +19,18 @@ import { MultiCategoryGenerator } from './multi-category-generator';
 import { EarthyGenerator } from './generators/earthy';
 import { MonochromaticGenerator } from './generators/monochromatic';
 import { PastelGenerator } from './generators/pastel';
+import { ComplementaryGenerator } from './generators/complementary';
 import { RandomGenerator } from './generators/random';
+import { WarmDominantGenerator } from './generators/warm-dominant';
+import { CoolDominantGenerator } from './generators/cool-dominant';
+import { SplitComplementaryGenerator } from './generators/split-complementary';
+import { TetradicGenerator } from './generators/tetradic';
+import { NeonGenerator } from './generators/neon';
+import { AnalogousGenerator } from './generators/analogous';
+
+import { NeutralGenerator } from './generators/neutral';
+import { LowValueGenerator } from './generators/low-value';
+import { HighValueGenerator } from './generators/high-value';
 
 /**
  * Factory class to create palette generators based on the requested category
@@ -94,8 +102,6 @@ export class PaletteGeneratorFactory {
 
     // Validate the category combination
     if (!this.validateCategorySet(categories)) {
-      console.warn('Invalid category combination - using only the first compatible categories');
-
       // Filter to keep only compatible categories
       const compatible: PaletteCategoryKey[] = [];
 
@@ -178,6 +184,27 @@ export class PaletteGeneratorFactory {
           return new PastelGenerator(steps, options);
         case 'Earthy':
           return new EarthyGenerator(steps, options);
+        case 'Complementary':
+          return new ComplementaryGenerator(steps, options);
+        case 'SplitComplementary':
+          return new SplitComplementaryGenerator(steps, options);
+        case 'WarmDominant':
+          return new WarmDominantGenerator(steps, options);
+        case 'CoolDominant':
+          return new CoolDominantGenerator(steps, options);
+        case 'Tetradic':
+          return new TetradicGenerator(steps, options);
+        case 'Neon':
+          return new NeonGenerator(steps, options);
+        case 'Analogous':
+          return new AnalogousGenerator(steps, options);
+        case 'Neutral':
+          return new NeutralGenerator(steps, options);
+        case 'High-Value':
+          return new HighValueGenerator(steps, options);
+        case 'Low-Value':
+          return new LowValueGenerator(steps, options);
+
         case 'Random':
         default:
           return new RandomGenerator(steps, options);
@@ -207,7 +234,6 @@ export class PaletteGeneratorFactory {
   ): PaletteGenerationResult | null {
     // Validate that the category set is valid
     if (!this.validateCategorySet(categories)) {
-      console.warn('Invalid category combination - some categories are mutually exclusive');
       return null;
     }
 
@@ -234,7 +260,6 @@ export class PaletteGeneratorFactory {
 
     // Validate category combination
     if (!this.validateCategorySet(categoryArray)) {
-      console.warn('Invalid category combination - some categories are mutually exclusive');
       return [];
     }
 

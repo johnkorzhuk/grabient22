@@ -7,6 +7,11 @@ import type { CosineCoeffs, RGBAVector } from '~/types';
 import { BasePaletteGenerator } from '../base-generator';
 import { generateRandomCoeffs, isPaletteValid } from '../color-utils';
 
+/**
+ * Export the generate function for use in other contexts
+ */
+export { generateRandomCoeffs } from '../color-utils';
+
 export class RandomGenerator extends BasePaletteGenerator {
   constructor(steps: number, options = {}) {
     super('Random', steps, options);

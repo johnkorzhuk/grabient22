@@ -1,11 +1,83 @@
 /**
  * Monochromatic Palette Generator with Improved Validation
  * Creates palettes with variations of a single hue
+ * Now compatible with Neon category
  */
 
 import type { CosineCoeffs, RGBAVector } from '~/types';
 import { BasePaletteGenerator } from '../base-generator';
-import { rgbToHsv, hsvToRgb } from '../color-utils';
+import { rgbToHsv } from '../color-utils';
+
+/**
+ * Utility function to generate monochromatic-style coefficients
+ * Enhanced to support potential neon characteristics
+ */
+export function generateMonochromaticCoeffs(): CosineCoeffs {
+  const TAU = Math.PI * 2;
+
+  // Choose a single base hue (0-1)
+  const baseHue = Math.random();
+
+  // Convert hue to phase in cosine gradient
+  const basePhase = baseHue * TAU;
+
+  // Create a stronger monochromatic effect by:
+  // 1. Using VERY similar phase values for all RGB channels (slight variance for richness)
+  // 2. Using lower frequency values for smoother transitions
+  // 3. Carefully controlling amplitude to prevent hue shifts
+
+  // Generate a balanced coefficient set for monochromatic palettes
+  const phaseVariance = Math.random() * 0.05; // Very small variance (max 5% of cycle)
+
+  // The key to monochromatic palettes is precisely balanced RGB amplitudes
+  // Too much difference creates hue shifts
+  // Extended range for amplitude to support neon-like intensity when needed
+  const baseAmplitude = 0.15 + Math.random() * 0.3; // 0.15-0.45 (extended upper range)
+
+  // We'll create coordinated amplitudes to maintain hue
+  // These small variances prevent completely flat colors
+  const ampVariance = 0.05; // Small amplitude variance
+
+  // Check if we need higher offsets for neon-compatibility
+  // This doesn't break monochromatic quality but allows for brighter colors
+  const useHigherOffset = Math.random() > 0.5;
+  const offsetBase = useHigherOffset ? 0.5 : 0.45;
+  const offsetRange = useHigherOffset ? 0.15 : 0.1;
+
+  return [
+    // a: offset vector - base colors (mid-range with intentional subtle variance)
+    [
+      offsetBase + Math.random() * offsetRange, // Red component
+      offsetBase + Math.random() * offsetRange, // Green component
+      offsetBase + Math.random() * offsetRange, // Blue component
+      1, // Alpha always 1
+    ] as [number, number, number, 1],
+
+    // b: amplitude vector - carefully balanced to maintain hue
+    [
+      baseAmplitude, // Red
+      baseAmplitude * (0.95 + Math.random() * ampVariance), // Green - small variation
+      baseAmplitude * (0.95 + Math.random() * ampVariance), // Blue - small variation
+      1, // Alpha for serialization
+    ] as [number, number, number, 1],
+
+    // c: frequency vector - VERY LOW to maintain smooth transitions
+    [
+      0.1 + Math.random() * 0.2, // Low frequency for Red (0.1-0.3)
+      0.1 + Math.random() * 0.2, // Low frequency for Green (0.1-0.3)
+      0.1 + Math.random() * 0.2, // Low frequency for Blue (0.1-0.3)
+      1, // Alpha for serialization
+    ] as [number, number, number, 1],
+
+    // d: phase vector - NEARLY IDENTICAL phase values with minor variance
+    [
+      basePhase, // Red - base phase
+      basePhase + (Math.random() * phaseVariance - phaseVariance / 2), // Green - tiny variance
+      basePhase + (Math.random() * phaseVariance - phaseVariance / 2), // Blue - tiny variance
+      1, // Alpha for serialization
+    ] as [number, number, number, 1],
+  ];
+}
 
 export class MonochromaticGenerator extends BasePaletteGenerator {
   constructor(steps: number, options = {}) {
@@ -14,79 +86,30 @@ export class MonochromaticGenerator extends BasePaletteGenerator {
 
   /**
    * Generate candidate coefficients for a monochromatic palette
-   * Improved to ensure truly monochromatic results
+   * Now uses the shared function for coefficient generation
    */
   protected generateCandidateCoeffs(): CosineCoeffs {
-    const TAU = Math.PI * 2;
-
-    // Choose a single base hue (0-1)
-    const baseHue = Math.random();
-
-    // Convert hue to phase in cosine gradient
-    const basePhase = baseHue * TAU;
-
-    // Create a stronger monochromatic effect by:
-    // 1. Using VERY similar phase values for all RGB channels (slight variance for richness)
-    // 2. Using lower frequency values for smoother transitions
-    // 3. Carefully controlling amplitude to prevent hue shifts
-
-    // Generate a balanced coefficient set for monochromatic palettes
-    const phaseVariance = Math.random() * 0.05; // Very small variance (max 5% of cycle)
-
-    // The key to monochromatic palettes is precisely balanced RGB amplitudes
-    // Too much difference creates hue shifts
-    const baseAmplitude = 0.15 + Math.random() * 0.2; // 0.15-0.35
-
-    // We'll create coordinated amplitudes to maintain hue
-    // These small variances prevent completely flat colors
-    const ampVariance = 0.05; // Small amplitude variance
-
-    return [
-      // a: offset vector - base colors (mid-range with intentional subtle variance)
-      [
-        0.45 + Math.random() * 0.1, // Red component (0.45-0.55)
-        0.45 + Math.random() * 0.1, // Green component (0.45-0.55)
-        0.45 + Math.random() * 0.1, // Blue component (0.45-0.55)
-        1, // Alpha always 1
-      ] as [number, number, number, 1],
-
-      // b: amplitude vector - carefully balanced to maintain hue
-      [
-        baseAmplitude, // Red
-        baseAmplitude * (0.95 + Math.random() * ampVariance), // Green - small variation
-        baseAmplitude * (0.95 + Math.random() * ampVariance), // Blue - small variation
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // c: frequency vector - VERY LOW to maintain smooth transitions
-      [
-        0.1 + Math.random() * 0.15, // Low frequency for Red (0.1-0.25)
-        0.1 + Math.random() * 0.15, // Low frequency for Green (0.1-0.25)
-        0.1 + Math.random() * 0.15, // Low frequency for Blue (0.1-0.25)
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // d: phase vector - NEARLY IDENTICAL phase values with minor variance
-      [
-        basePhase, // Red - base phase
-        basePhase + (Math.random() * phaseVariance - phaseVariance / 2), // Green - tiny variance
-        basePhase + (Math.random() * phaseVariance - phaseVariance / 2), // Blue - tiny variance
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-    ];
+    return generateMonochromaticCoeffs();
   }
 
   /**
    * Validates that the palette meets monochromatic criteria
-   * Greatly improved strictness to ensure true monochromatic palettes
+   * Relaxed for better compatibility with other categories
    */
   protected validateCategorySpecificCriteria(colors: RGBAVector[]): boolean {
+    // Check if we need to use the relaxed validation
+    // (when combining with other categories)
+    if (this.appliedCategories.length > 1 && this.appliedCategories.includes('Neon')) {
+      return validateRelaxedMonochromaticPalette(colors);
+    }
+
+    // Otherwise use standard validation
     return validateMonochromaticPalette(colors);
   }
 }
 
 /**
- * Significantly more strict validation for monochromatic palettes
+ * Standard validation for monochromatic palettes
  * Ensures all colors truly share the same hue with minimal variance
  */
 export function validateMonochromaticPalette(colors: RGBAVector[]): boolean {
@@ -169,4 +192,46 @@ export function validateMonochromaticPalette(colors: RGBAVector[]): boolean {
   }
 
   return isMonochromatic && hasSufficientSaturationRange && hasSmooth;
+}
+
+/**
+ * Relaxed validation for monochromatic palettes
+ * Used when combining with Neon or other categories
+ */
+export function validateRelaxedMonochromaticPalette(colors: RGBAVector[]): boolean {
+  // Convert to HSV for easier hue analysis
+  const hsvColors = colors.map(rgbToHsv);
+
+  // Get the reference hue from the most saturated color
+  const mostSaturatedColor = hsvColors.reduce(
+    (prev, curr) => (curr[1] > prev[1] ? curr : prev),
+    hsvColors[0],
+  );
+  const referenceHue = mostSaturatedColor[0];
+
+  // Count colors with similar hue to the reference
+  let similarHueCount = 0;
+  const maxHueDiff = 0.1; // Increased from 0.05 to 0.1 (10% of color wheel)
+
+  for (const hsv of hsvColors) {
+    // Skip very desaturated colors - they don't affect hue perception much
+    if (hsv[1] < 0.2) continue;
+
+    let hueDiff = Math.abs(hsv[0] - referenceHue);
+
+    // Handle color wheel wrap-around
+    if (hueDiff > 0.5) {
+      hueDiff = 1.0 - hueDiff;
+    }
+
+    if (hueDiff <= maxHueDiff) {
+      similarHueCount++;
+    }
+  }
+
+  // For relaxed validation, at least 70% of saturated colors should have similar hue
+  // (compared to 100% for strict validation)
+  const saturatedColors = hsvColors.filter((hsv) => hsv[1] >= 0.2);
+
+  return saturatedColors.length > 0 && similarHueCount / saturatedColors.length >= 0.7;
 }

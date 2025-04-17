@@ -14,7 +14,7 @@ import type {
   BasicColorResult,
 } from './types';
 import { PaletteCategories } from './color-constants';
-import { getCategoryValidator, validateMultiCategoryPalette } from './category-validators';
+import { validateMultiCategoryPalette } from './category-validators';
 
 /**
  * Default constants for generator

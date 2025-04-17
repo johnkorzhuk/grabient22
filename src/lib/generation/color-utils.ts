@@ -546,7 +546,6 @@ export function hexToRgb(hex: string): RGBAVector {
 
   // Validate hex format
   if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
-    console.warn(`Invalid hex color: ${hex}, defaulting to black`);
     return [0, 0, 0, 1];
   }
 

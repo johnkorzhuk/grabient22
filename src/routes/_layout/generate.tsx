@@ -18,14 +18,87 @@ import { RefreshCw } from 'lucide-react';
 import { Checkbox } from '~/components/ui/checkbox';
 import { Badge } from '~/components/ui/badge';
 
-// Configuration constants
 const AVAILABLE_CATEGORIES: PaletteCategoryKey[] = [
   'Monochromatic',
   'Pastel',
   'Earthy',
+  'Complementary',
+  'WarmDominant',
+  'CoolDominant',
+  'SplitComplementary',
+  'Tetradic',
+  'Neon',
+  'Analogous',
+  'Neutral',
+  'High-Value',
+  'Low-Value',
   'Random',
   // Additional categories would be listed here
 ];
+// Known optimal category orderings for consistent results
+// The key is a comma-separated list of categories, sorted alphabetically
+const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
+  'Complementary,Earthy': ['Earthy', 'Complementary'],
+  'Earthy,Monochromatic': ['Monochromatic', 'Earthy'],
+  'Earthy,Analogous': ['Earthy', 'Analogous'],
+  'Analogous,Earthy': ['Earthy', 'Analogous'],
+  'Monochromatic,Pastel': ['Monochromatic', 'Pastel'],
+  'Complementary,Pastel': ['Complementary', 'Pastel'],
+  'Tetradic,Pastel': ['Pastel', 'Tetradic'],
+  'Pastel,Tetradic': ['Pastel', 'Tetradic'],
+  'Pastel,SplitComplementary': ['Pastel', 'SplitComplementary'],
+  'Pastel,Analogous': ['Pastel', 'Analogous'],
+  'SplitComplementary,Pastel': ['Pastel', 'SplitComplementary'],
+  'Analogous,Pastel': ['Pastel', 'Analogous'],
+  'Neon,SplitComplementary': ['SplitComplementary', 'Neon'],
+  'SplitComplementary,Neon': ['SplitComplementary', 'Neon'],
+  'Monochromatic,Neon': ['Monochromatic', 'Neon'],
+  'Neutral,Monochromatic': ['Monochromatic', 'Neutral'],
+  'Monochromatic,Neutral': ['Monochromatic', 'Neutral'],
+  'SplitComplementary,Earthy': ['Earthy', 'SplitComplementary'],
+  'Earthy,SplitComplementary': ['Earthy', 'SplitComplementary'],
+  'Low-Value,Neutral': ['Low-Value', 'Neutral'],
+  'Neutral,Low-Value': ['Low-Value', 'Neutral'],
+  'High-Value,Neutral': ['High-Value', 'Neutral'],
+  'Neutral,High-Value': ['High-Value', 'Neutral'],
+  'Low-Value,Earthy': ['Low-Value', 'Earthy'],
+  'Earthy,Low-Value': ['Low-Value', 'Earthy'],
+  'High-Value,Earthy': ['High-Value', 'Earthy'],
+  'Earthy,High-Value': ['High-Value', 'Earthy'],
+  'Analogous,Neutral': ['Neutral', 'Analogous'],
+  'Neutral,Analogous': ['Neutral', 'Analogous'],
+  'Analogous,Neon': ['Neon', 'Analogous'],
+  'Neon,Analogous': ['Neon', 'Analogous'],
+  'Tetradic,Neon': ['Tetradic', 'Neon'],
+  'Neon,Tetradic': ['Tetradic', 'Neon'],
+  'High-Value,SplitComplementary': ['High-Value', 'SplitComplementary'],
+  'SplitComplementary,High-Value': ['High-Value', 'SplitComplementary'],
+  'Low-Value,SplitComplementary': ['Low-Value', 'SplitComplementary'],
+  'SplitComplementary,Low-Value': ['Low-Value', 'SplitComplementary'],
+  'Low-Value,Tetradic': ['Low-Value', 'Tetradic'],
+  'Tetradic,Low-Value': ['Low-Value', 'Tetradic'],
+  'High-Value,Tetradic': ['High-Value', 'Tetradic'],
+  'Tetradic,High-Value': ['High-Value', 'Tetradic'],
+};
+
+// Helper function to get optimal order
+function getOptimalOrder(categories: PaletteCategoryKey[]): PaletteCategoryKey[] {
+  // If only one category, no reordering needed
+  if (categories.length <= 1) {
+    return [...categories];
+  }
+
+  // Create a sorted key for lookup
+  const lookupKey = [...categories].sort().join(',');
+
+  // Check if we have an optimal order defined
+  if (OPTIMAL_CATEGORY_ORDERS[lookupKey]) {
+    return [...OPTIMAL_CATEGORY_ORDERS[lookupKey]];
+  }
+
+  // If no optimal order is defined, return the original order
+  return [...categories];
+}
 
 // Component interface definitions
 interface PaletteDisplayProps {
@@ -208,9 +281,7 @@ function GeneratePage() {
   const [loading, setLoading] = useState(true);
 
   // Multi-category selection state
-  const [selectedCategories, setSelectedCategories] = useState<PaletteCategoryKey[]>([
-    'Monochromatic',
-  ]);
+  const [selectedCategories, setSelectedCategories] = useState<PaletteCategoryKey[]>(['Earthy']);
 
   // Generate palettes on component mount or when selection changes
   useEffect(() => {
@@ -263,9 +334,13 @@ function GeneratePage() {
       // Initialize options with proper typing
       const options: PaletteGenerationOptions = {};
 
+      // Get the optimal category order to ensure consistent results
+      // regardless of the order categories were selected in the UI
+      const orderedCategories = getOptimalOrder([...selectedCategories]);
+
       // Use first category as main category and the rest as additional
-      const mainCategory = selectedCategories[0];
-      const additionalCategories = selectedCategories.slice(1);
+      const mainCategory = orderedCategories[0];
+      const additionalCategories = orderedCategories.slice(1);
 
       if (additionalCategories.length > 0) {
         options.additionalCategories = additionalCategories;

@@ -8,6 +8,128 @@ import { BasePaletteGenerator } from '../base-generator';
 import { rgbToHsv } from '../color-utils';
 import { HueRanges } from '../color-constants';
 
+/**
+ * Utility function to generate earthy-style coefficients
+ * Extracted from the generator to make it reusable
+ */
+export function generateEarthyCoeffs(): CosineCoeffs {
+  const TAU = Math.PI * 2;
+
+  // Select from multiple earthy palette strategies
+  const strategyType = Math.floor(Math.random() * 5);
+
+  // Define base values based on selected strategy
+  let baseHue: number;
+  let offsetRange: [number, number];
+  let amplitudeRange: [number, number];
+  let frequencyRange: [number, number];
+  let phaseVariation: number;
+
+  switch (strategyType) {
+    case 0: // Warm browns and oranges
+      baseHue = 0.05 + Math.random() * 0.05; // 0.05-0.1 (orange-brown)
+      offsetRange = [0.4, 0.6];
+      amplitudeRange = [0.15, 0.3];
+      frequencyRange = [0.25, 0.45];
+      phaseVariation = 0.15;
+      break;
+
+    case 1: // Forest and olive greens
+      baseHue = 0.26 + Math.random() * 0.1; // 0.26-0.36 (olive to forest)
+      offsetRange = [0.35, 0.55];
+      amplitudeRange = [0.15, 0.35];
+      frequencyRange = [0.3, 0.5];
+      phaseVariation = 0.12;
+      break;
+
+    case 2: // Muted sage and clay
+      baseHue = 0.15 + Math.random() * 0.15; // 0.15-0.3 (yellow-green to sage)
+      offsetRange = [0.45, 0.65];
+      amplitudeRange = [0.1, 0.25];
+      frequencyRange = [0.2, 0.4];
+      phaseVariation = 0.1;
+      break;
+
+    case 3: // Rich terra cotta and russets
+      baseHue = 0.02 + Math.random() * 0.04; // 0.02-0.06 (red-orange)
+      offsetRange = [0.3, 0.5];
+      amplitudeRange = [0.2, 0.4];
+      frequencyRange = [0.35, 0.55];
+      phaseVariation = 0.2;
+      break;
+
+    case 4: // Muted sand and wheat
+      baseHue = 0.08 + Math.random() * 0.07; // 0.08-0.15 (yellow-tan)
+      offsetRange = [0.5, 0.7];
+      amplitudeRange = [0.1, 0.2];
+      frequencyRange = [0.25, 0.4];
+      phaseVariation = 0.08;
+      break;
+
+    default: // Fallback to balanced earthy tones
+      baseHue = 0.1 + Math.random() * 0.2; // 0.1-0.3
+      offsetRange = [0.4, 0.6];
+      amplitudeRange = [0.15, 0.3];
+      frequencyRange = [0.3, 0.5];
+      phaseVariation = 0.15;
+  }
+
+  const basePhase = baseHue * TAU;
+
+  // Random value within a range helper
+  const randomInRange = (range: [number, number]): number => {
+    return range[0] + Math.random() * (range[1] - range[0]);
+  };
+
+  // Create diversity in each RGB channel
+  const redOffset = randomInRange(offsetRange);
+  const greenOffset = randomInRange(offsetRange);
+  const blueOffset = randomInRange(offsetRange);
+
+  const redAmp = randomInRange(amplitudeRange);
+  const greenAmp = randomInRange(amplitudeRange);
+  const blueAmp = randomInRange(amplitudeRange);
+
+  const redFreq = randomInRange(frequencyRange);
+  const greenFreq = randomInRange(frequencyRange);
+  const blueFreq = randomInRange(frequencyRange);
+
+  // Enhanced earthy palette with more diversity
+  return [
+    // a: offset vector - varied brightness
+    [
+      redOffset,
+      greenOffset,
+      blueOffset,
+      1, // Alpha always 1
+    ] as [number, number, number, 1],
+
+    // b: amplitude vector - varied saturation
+    [
+      redAmp,
+      greenAmp,
+      blueAmp,
+      1, // Alpha for serialization
+    ] as [number, number, number, 1],
+
+    // c: frequency vector - controls color cycling
+    [
+      redFreq,
+      greenFreq,
+      blueFreq,
+      1, // Alpha for serialization
+    ] as [number, number, number, 1],
+
+    // d: phase vector - controls hue shifting
+    [
+      basePhase,
+      basePhase + (Math.random() * phaseVariation - phaseVariation / 2),
+      basePhase + (Math.random() * phaseVariation - phaseVariation / 2),
+      1, // Alpha for serialization
+    ] as [number, number, number, 1],
+  ];
+}
+
 export class EarthyGenerator extends BasePaletteGenerator {
   constructor(steps: number, options = {}) {
     super('Earthy', steps, options);
@@ -15,128 +137,14 @@ export class EarthyGenerator extends BasePaletteGenerator {
 
   /**
    * Generate candidate coefficients for an earthy palette
+   * Now uses the shared function for coefficient generation
    */
   protected generateCandidateCoeffs(): CosineCoeffs {
-    const TAU = Math.PI * 2;
-
-    // Select from multiple earthy palette strategies
-    const strategyType = Math.floor(Math.random() * 5);
-
-    // Define base values based on selected strategy
-    let baseHue: number;
-    let offsetRange: [number, number];
-    let amplitudeRange: [number, number];
-    let frequencyRange: [number, number];
-    let phaseVariation: number;
-
-    switch (strategyType) {
-      case 0: // Warm browns and oranges
-        baseHue = 0.05 + Math.random() * 0.05; // 0.05-0.1 (orange-brown)
-        offsetRange = [0.4, 0.6];
-        amplitudeRange = [0.15, 0.3];
-        frequencyRange = [0.25, 0.45];
-        phaseVariation = 0.15;
-        break;
-
-      case 1: // Forest and olive greens
-        baseHue = 0.26 + Math.random() * 0.1; // 0.26-0.36 (olive to forest)
-        offsetRange = [0.35, 0.55];
-        amplitudeRange = [0.15, 0.35];
-        frequencyRange = [0.3, 0.5];
-        phaseVariation = 0.12;
-        break;
-
-      case 2: // Muted sage and clay
-        baseHue = 0.15 + Math.random() * 0.15; // 0.15-0.3 (yellow-green to sage)
-        offsetRange = [0.45, 0.65];
-        amplitudeRange = [0.1, 0.25];
-        frequencyRange = [0.2, 0.4];
-        phaseVariation = 0.1;
-        break;
-
-      case 3: // Rich terra cotta and russets
-        baseHue = 0.02 + Math.random() * 0.04; // 0.02-0.06 (red-orange)
-        offsetRange = [0.3, 0.5];
-        amplitudeRange = [0.2, 0.4];
-        frequencyRange = [0.35, 0.55];
-        phaseVariation = 0.2;
-        break;
-
-      case 4: // Muted sand and wheat
-        baseHue = 0.08 + Math.random() * 0.07; // 0.08-0.15 (yellow-tan)
-        offsetRange = [0.5, 0.7];
-        amplitudeRange = [0.1, 0.2];
-        frequencyRange = [0.25, 0.4];
-        phaseVariation = 0.08;
-        break;
-
-      default: // Fallback to balanced earthy tones
-        baseHue = 0.1 + Math.random() * 0.2; // 0.1-0.3
-        offsetRange = [0.4, 0.6];
-        amplitudeRange = [0.15, 0.3];
-        frequencyRange = [0.3, 0.5];
-        phaseVariation = 0.15;
-    }
-
-    const basePhase = baseHue * TAU;
-
-    // Random value within a range helper
-    const randomInRange = (range: [number, number]): number => {
-      return range[0] + Math.random() * (range[1] - range[0]);
-    };
-
-    // Create diversity in each RGB channel
-    const redOffset = randomInRange(offsetRange);
-    const greenOffset = randomInRange(offsetRange);
-    const blueOffset = randomInRange(offsetRange);
-
-    const redAmp = randomInRange(amplitudeRange);
-    const greenAmp = randomInRange(amplitudeRange);
-    const blueAmp = randomInRange(amplitudeRange);
-
-    const redFreq = randomInRange(frequencyRange);
-    const greenFreq = randomInRange(frequencyRange);
-    const blueFreq = randomInRange(frequencyRange);
-
-    // Enhanced earthy palette with more diversity
-    return [
-      // a: offset vector - varied brightness
-      [
-        redOffset,
-        greenOffset,
-        blueOffset,
-        1, // Alpha always 1
-      ] as [number, number, number, 1],
-
-      // b: amplitude vector - varied saturation
-      [
-        redAmp,
-        greenAmp,
-        blueAmp,
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // c: frequency vector - controls color cycling
-      [
-        redFreq,
-        greenFreq,
-        blueFreq,
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // d: phase vector - controls hue shifting
-      [
-        basePhase,
-        basePhase + (Math.random() * phaseVariation - phaseVariation / 2),
-        basePhase + (Math.random() * phaseVariation - phaseVariation / 2),
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-    ];
+    return generateEarthyCoeffs();
   }
 
   /**
    * Validate that the palette meets earthy criteria
-   * Integrated directly into the generator class
    */
   protected validateCategorySpecificCriteria(colors: RGBAVector[]): boolean {
     return validateEarthyPalette(colors);

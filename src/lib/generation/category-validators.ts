@@ -10,6 +10,16 @@ import type { RGBAVector } from '~/types';
 import { validateMonochromaticPalette } from './generators/monochromatic';
 import { validatePastelPalette } from './generators/pastel';
 import { validateEarthyPalette } from './generators/earthy';
+import { validateComplementaryPalette } from './generators/complementary';
+import { validateWarmDominantPalette } from './generators/warm-dominant';
+import { validateCoolDominantPalette } from './generators/cool-dominant';
+import { validateSplitComplementaryPalette } from './generators/split-complementary';
+import { validateTetradicPalette } from './generators/tetradic';
+import { validateNeonPalette } from './generators/neon';
+import { validateAnalogousPalette } from './generators/analogous';
+import { validateNeutralPalette } from './generators/neutral';
+import { validateHighValuePalette } from './generators/high-value';
+import { validateLowValuePalette } from './generators/low-value';
 
 /**
  * Map of validator functions for each palette category
@@ -20,6 +30,16 @@ export const CATEGORY_VALIDATORS: Record<PaletteCategoryKey, CategoryValidator> 
   Monochromatic: validateMonochromaticPalette,
   Pastel: validatePastelPalette,
   Earthy: validateEarthyPalette,
+  Complementary: validateComplementaryPalette,
+  WarmDominant: validateWarmDominantPalette,
+  CoolDominant: validateCoolDominantPalette,
+  SplitComplementary: validateSplitComplementaryPalette,
+  Tetradic: validateTetradicPalette,
+  Neon: validateNeonPalette,
+  Analogous: validateAnalogousPalette,
+  Neutral: validateNeutralPalette,
+  'High-Value': validateHighValuePalette,
+  'Low-Value': validateLowValuePalette,
 
   // Random has no specific constraints - it's valid for any palette
   Random: () => true,
@@ -35,7 +55,6 @@ export function getCategoryValidator(category: PaletteCategoryKey): CategoryVali
 
   // If no validator found, use a default that always returns true
   if (!validator) {
-    console.warn(`No validator found for category: ${category}`);
     return () => true;
   }
 

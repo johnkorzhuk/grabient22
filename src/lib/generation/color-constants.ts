@@ -25,7 +25,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.8, 1.2],
       frequency: null,
     },
-    exclusiveWith: ['Random'],
+    exclusiveWith: ['Random', 'Complementary', 'Tetradic', 'SplitComplementary'],
   },
   Pastel: {
     key: 'Pastel',
@@ -47,12 +47,132 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.3, 1.7],
       frequency: [0.5, 1.5],
     },
+    exclusiveWith: ['Pastel', 'Random'],
+  },
+  WarmDominant: {
+    key: 'WarmDominant',
+    description: 'Dominated by warm colors (reds, oranges, yellows).',
+    recommendedColorStops: 7,
+    initialGlobalsBounds: {
+      exposure: [-0.3, 0.5],
+      contrast: [0.7, 1.6],
+      frequency: [0.4, 1.2],
+    },
+    exclusiveWith: ['Random', 'Complementary', 'SplitComplementary', 'Tetradic'],
+  },
+  CoolDominant: {
+    key: 'CoolDominant',
+    description: 'Dominated by cool colors (blues, greens, purples).',
+    recommendedColorStops: 7,
+    initialGlobalsBounds: {
+      exposure: [-0.3, 0.5],
+      contrast: [0.7, 1.6],
+      frequency: [0.4, 1.2],
+    },
+    exclusiveWith: ['Random', 'WarmDominant', 'Complementary', 'SplitComplementary', 'Tetradic'],
+  },
+  Complementary: {
+    key: 'Complementary',
+    description: 'Colors from opposite sides of the color wheel.',
+    recommendedColorStops: 6,
+    initialGlobalsBounds: {
+      exposure: [-0.3, 0.3],
+      contrast: [0.8, 1.5],
+      frequency: [0.5, 1.2],
+    },
+    exclusiveWith: ['Monochromatic', 'Random', 'Tetradic'],
+  },
+  SplitComplementary: {
+    key: 'SplitComplementary',
+    description: 'Colors from opposite sides of the color wheel, with one color adjacent to each.',
+    recommendedColorStops: 6,
+    initialGlobalsBounds: {
+      exposure: [-0.3, 0.3],
+      contrast: [0.8, 1.5],
+      frequency: [0.5, 1.2],
+    },
+    exclusiveWith: ['Monochromatic', 'Random'],
+  },
+  Tetradic: {
+    key: 'Tetradic',
+    description: 'Colors from opposite sides of the color wheel, with one color adjacent to each.',
+    recommendedColorStops: 6,
+    initialGlobalsBounds: {
+      exposure: [-0.3, 0.3],
+      contrast: [0.8, 1.5],
+      frequency: [0.5, 1.2],
+    },
     exclusiveWith: [
-      'Pastel',
+      'Monochromatic',
       'Random',
-      // Earthy is exclusive with Pastel but not with Monochromatic
+      'Complementary',
+      'SplitComplementary',
+      'WarmDominant',
+      'CoolDominant',
     ],
   },
+  Neon: {
+    key: 'Neon',
+    description: 'Vibrant, high-intensity colors with a glowing quality.',
+    recommendedColorStops: 7,
+    initialGlobalsBounds: {
+      exposure: [-0.2, 0.6],
+      contrast: [1.0, 1.8],
+      frequency: [0.5, 1.2],
+    },
+    exclusiveWith: ['Earthy', 'Pastel', 'Random'],
+  },
+
+  Analogous: {
+    key: 'Analogous',
+    description: 'Colors that are next to each other on the color wheel.',
+    recommendedColorStops: 6,
+    initialGlobalsBounds: {
+      exposure: [-0.3, 0.3],
+      contrast: [0.8, 1.5],
+      frequency: [0.5, 1.2],
+    },
+    exclusiveWith: ['Monochromatic', 'Random', 'Tetradic', 'SplitComplementary'],
+  },
+
+  Neutral: {
+    key: 'Neutral',
+    description: 'Subtle, desaturated colors with minimal hue variation.',
+    recommendedColorStops: 6,
+    initialGlobalsBounds: {
+      exposure: [-0.2, 0.4],
+      contrast: [0.5, 1.3],
+      frequency: [0.3, 0.8],
+    },
+    exclusiveWith: ['Neon', 'Random', 'Complementary', 'SplitComplementary', 'Tetradic', 'Neon'],
+  },
+
+  // High-Value category
+  'High-Value': {
+    key: 'High-Value',
+    description: 'Bright, luminous colors with high brightness values.',
+    recommendedColorStops: 7,
+    initialGlobalsBounds: {
+      exposure: [0.3, 0.9],
+      contrast: [0.5, 1.2],
+      frequency: [0.3, 1.0],
+    },
+    exclusiveWith: ['Low-Value', 'Random', 'Pastel'],
+  },
+
+  // Low-Value category
+  'Low-Value': {
+    key: 'Low-Value',
+    description: 'Dark, rich colors with low brightness values.',
+    recommendedColorStops: 7,
+    initialGlobalsBounds: {
+      exposure: [-0.5, 0.1],
+      contrast: [0.7, 1.5],
+      frequency: [0.3, 1.0],
+    },
+    exclusiveWith: ['High-Value', 'Random', 'Pastel'],
+  },
+
   Random: {
     key: 'Random',
     description: 'Randomly generated color palette.',
@@ -62,7 +182,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.5, 1.5], // Full range for randomness
       frequency: [0.5, 1], // Full range for randomness
     },
-    exclusiveWith: ['Monochromatic', 'Pastel', 'Earthy'],
+    exclusiveWith: ['Monochromatic', 'Pastel', 'Earthy', 'Complementary'],
   },
 };
 
@@ -216,6 +336,34 @@ export const HueRanges = {
     [0.67, 0.7], // Neon indigo
     [0.83, 0.86], // Neon purple
     [0.92, 0.95], // Neon pink
+  ],
+
+  // Complementary pairs (for complementary palette generation)
+  COMPLEMENTARY_PAIRS: [
+    [
+      [0.0, 0.05],
+      [0.5, 0.55],
+    ], // Red & Cyan
+    [
+      [0.08, 0.13],
+      [0.58, 0.63],
+    ], // Orange & Blue
+    [
+      [0.16, 0.21],
+      [0.66, 0.71],
+    ], // Yellow & Purple
+    [
+      [0.25, 0.3],
+      [0.75, 0.8],
+    ], // Green & Magenta
+    [
+      [0.33, 0.38],
+      [0.83, 0.88],
+    ], // Teal & Pink
+    [
+      [0.41, 0.46],
+      [0.91, 0.96],
+    ], // Blue & Orange-Red
   ],
 };
 

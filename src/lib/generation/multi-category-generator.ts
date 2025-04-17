@@ -6,10 +6,24 @@
 import type { CosineCoeffs, RGBAVector } from '~/types';
 import type { PaletteCategoryKey, CategoryValidator, PaletteGenerationOptions } from './types';
 import { BasePaletteGenerator } from './base-generator';
+
+// Import coefficient generation functions from each generator
+import { generateMonochromaticCoeffs } from './generators/monochromatic';
+import { generatePastelCoeffs } from './generators/pastel';
+import { generateEarthyCoeffs } from './generators/earthy';
+import { generateComplementaryCoeffs } from './generators/complementary';
 import { generateRandomCoeffs } from './color-utils';
+import { generateWarmDominantCoeffs } from './generators/warm-dominant';
+import { generateSplitComplementaryCoeffs } from './generators/split-complementary';
+import { generateTetradicCoeffs } from './generators/tetradic';
+import { generateNeonCoeffs } from './generators/neon';
+import { generateAnalogousCoeffs } from './generators/analogous';
+import { generateNeutralCoeffs } from './generators/neutral';
+import { generateHighValueCoeffs } from './generators/high-value';
+import { generateLowValueCoeffs } from './generators/low-value';
 
 /**
- * Generator that combines validation from multiple palette categories
+ * Generator that combines validation logic from multiple palette categories
  * This enables creation of palettes that satisfy multiple style constraints
  */
 export class MultiCategoryGenerator extends BasePaletteGenerator {
@@ -45,252 +59,55 @@ export class MultiCategoryGenerator extends BasePaletteGenerator {
    * Uses the primary category's strategy while considering all constraints
    */
   protected generateCandidateCoeffs(): CosineCoeffs {
-    // Strategy selection depends on the primary category
+    // Special handling for specific category combinations
+    // This ensures the right strategy is used regardless of which category was passed as primary
+    if (this.allCategories.includes('Complementary') && this.allCategories.includes('Earthy')) {
+      // For Complementary+Earthy, always use Earthy as the base
+      return generateEarthyCoeffs();
+    }
+
+    if (this.allCategories.includes('Monochromatic') && this.allCategories.includes('Earthy')) {
+      // For Monochromatic+Earthy, always use Monochromatic as the base
+      return generateMonochromaticCoeffs();
+    }
+
+    if (
+      this.allCategories.includes('WarmDominant') &&
+      this.allCategories.includes('Monochromatic')
+    ) {
+      // For WarmDominant+Monochromatic, use Monochromatic as the base
+      return generateMonochromaticCoeffs();
+    }
+
     switch (this.category) {
       case 'Monochromatic':
-        // If primary is Monochromatic, generate monochromatic-style coefficients
-        return this.generateMonochromaticStyleCoeffs();
+        return generateMonochromaticCoeffs();
       case 'Pastel':
-        // If primary is Pastel, generate pastel-style coefficients
-        return this.generatePastelStyleCoeffs();
+        return generatePastelCoeffs();
       case 'Earthy':
-        // If primary is Earthy, generate earthy-style coefficients
-        return this.generateEarthyStyleCoeffs();
+        return generateEarthyCoeffs();
+      case 'Complementary':
+        return generateComplementaryCoeffs();
+      case 'WarmDominant':
+        return generateWarmDominantCoeffs();
+      case 'SplitComplementary':
+        return generateSplitComplementaryCoeffs();
+      case 'Tetradic':
+        return generateTetradicCoeffs();
+      case 'Neon':
+        return generateNeonCoeffs();
+      case 'Analogous':
+        return generateAnalogousCoeffs();
+      case 'Neutral':
+        return generateNeutralCoeffs();
+      case 'High-Value':
+        return generateHighValueCoeffs();
+      case 'Low-Value':
+        return generateLowValueCoeffs();
       case 'Random':
       default:
-        // Default to random generation
         return generateRandomCoeffs();
     }
-  }
-
-  /**
-   * Generate Monochromatic-style coefficients
-   * Focuses on a single hue with variations in brightness/saturation
-   */
-  private generateMonochromaticStyleCoeffs(): CosineCoeffs {
-    const TAU = Math.PI * 2;
-
-    // Choose a single base hue (0-1)
-    const baseHue = Math.random();
-
-    // Convert hue to phase in cosine gradient
-    const basePhase = baseHue * TAU;
-
-    // Create a stronger monochromatic effect
-    const phaseVariance = Math.random() * 0.05; // Very small variance (max 5% of cycle)
-
-    // The key to monochromatic palettes is balanced RGB amplitudes
-    const baseAmplitude = 0.15 + Math.random() * 0.2; // 0.15-0.35
-    const ampVariance = 0.05; // Small amplitude variance
-
-    return [
-      // a: offset vector - base colors (mid-range with intentional subtle variance)
-      [
-        0.45 + Math.random() * 0.1, // Red component (0.45-0.55)
-        0.45 + Math.random() * 0.1, // Green component (0.45-0.55)
-        0.45 + Math.random() * 0.1, // Blue component (0.45-0.55)
-        1, // Alpha always 1
-      ] as [number, number, number, 1],
-
-      // b: amplitude vector - carefully balanced to maintain hue
-      [
-        baseAmplitude, // Red
-        baseAmplitude * (0.95 + Math.random() * ampVariance), // Green - small variation
-        baseAmplitude * (0.95 + Math.random() * ampVariance), // Blue - small variation
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // c: frequency vector - VERY LOW to maintain smooth transitions
-      [
-        0.1 + Math.random() * 0.15, // Low frequency for Red (0.1-0.25)
-        0.1 + Math.random() * 0.15, // Low frequency for Green (0.1-0.25)
-        0.1 + Math.random() * 0.15, // Low frequency for Blue (0.1-0.25)
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // d: phase vector - NEARLY IDENTICAL phase values with minor variance
-      [
-        basePhase, // Red - base phase
-        basePhase + (Math.random() * phaseVariance - phaseVariance / 2), // Green - tiny variance
-        basePhase + (Math.random() * phaseVariance - phaseVariance / 2), // Blue - tiny variance
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-    ];
-  }
-
-  /**
-   * Generate Pastel-style coefficients
-   * Focuses on high brightness and low-medium saturation
-   */
-  private generatePastelStyleCoeffs(): CosineCoeffs {
-    const TAU = Math.PI * 2;
-
-    // Pastel strategy selection (7 types)
-    const strategyType = Math.floor(Math.random() * 7);
-
-    // Define hue distribution approach
-    let hueDistribution: number[];
-    let brightnessStrategy: 'high' | 'varied' | 'gradient' | 'mixed';
-    let saturationLevel: 'very-low' | 'low' | 'medium' | 'mixed';
-
-    // Configure based on strategy (simplified from pastel.ts)
-    switch (strategyType) {
-      case 0: // Classic pastel with evenly distributed hues
-        hueDistribution = [0, 0.33, 0.67]; // Evenly distributed RGB phases
-        brightnessStrategy = 'high'; // Uniformly high brightness
-        saturationLevel = 'low'; // Classic low saturation
-        break;
-      // ... other cases would be implemented similar to pastel.ts
-      default: // Fallback - balanced pastel
-        hueDistribution = [0, 0.33, 0.67];
-        brightnessStrategy = 'high';
-        saturationLevel = 'low';
-    }
-
-    // Configure brightness
-    const offsetBase = 0.75;
-    const offsetVariation = 0.15; // 0.75-0.9
-
-    // Configure amplitude (saturation)
-    const amplitudeBase = 0.08;
-    const amplitudeVariation = 0.12; // 0.08-0.2
-
-    // Add intentional diversity to RGB channels
-    const redOffset = offsetBase + Math.random() * offsetVariation;
-    const greenOffset = offsetBase + Math.random() * offsetVariation;
-    const blueOffset = offsetBase + Math.random() * offsetVariation;
-
-    const redAmp = amplitudeBase + Math.random() * amplitudeVariation;
-    const greenAmp = amplitudeBase + Math.random() * amplitudeVariation;
-    const blueAmp = amplitudeBase + Math.random() * amplitudeVariation;
-
-    // Frequency controls color cycling - keep moderate for pastels
-    const frequency = 0.4 + Math.random() * 0.8; // 0.4-1.2
-
-    // Create enhanced pastel palette with more diversity
-    return [
-      // a: offset vector - high values for brightness with variation
-      [
-        redOffset,
-        greenOffset,
-        blueOffset,
-        1, // Alpha always 1
-      ] as [number, number, number, 1],
-
-      // b: amplitude vector - controls saturation
-      [
-        redAmp,
-        greenAmp,
-        blueAmp,
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // c: frequency vector - controls cycling
-      [
-        frequency * (0.8 + Math.random() * 0.4),
-        frequency * (0.8 + Math.random() * 0.4),
-        frequency * (0.8 + Math.random() * 0.4),
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // d: phase vector - varied for different hue distributions
-      [
-        hueDistribution[0] * TAU,
-        hueDistribution[1] * TAU,
-        hueDistribution[2] * TAU,
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-    ];
-  }
-
-  /**
-   * Generate Earthy-style coefficients
-   * Focuses on natural colors like browns, tans, olive greens
-   */
-  private generateEarthyStyleCoeffs(): CosineCoeffs {
-    const TAU = Math.PI * 2;
-
-    // Select from multiple earthy palette strategies
-    const strategyType = Math.floor(Math.random() * 5);
-
-    // Define base values based on selected strategy
-    let baseHue: number;
-    let offsetRange: [number, number];
-    let amplitudeRange: [number, number];
-    let frequencyRange: [number, number];
-    let phaseVariation: number;
-
-    switch (strategyType) {
-      case 0: // Warm browns and oranges
-        baseHue = 0.05 + Math.random() * 0.05; // 0.05-0.1 (orange-brown)
-        offsetRange = [0.4, 0.6];
-        amplitudeRange = [0.15, 0.3];
-        frequencyRange = [0.25, 0.45];
-        phaseVariation = 0.15;
-        break;
-      // ... other cases would be implemented similar to earthy.ts
-      default: // Fallback to balanced earthy tones
-        baseHue = 0.1 + Math.random() * 0.2; // 0.1-0.3
-        offsetRange = [0.4, 0.6];
-        amplitudeRange = [0.15, 0.3];
-        frequencyRange = [0.3, 0.5];
-        phaseVariation = 0.15;
-    }
-
-    const basePhase = baseHue * TAU;
-
-    // Random value within a range helper
-    const randomInRange = (range: [number, number]): number => {
-      return range[0] + Math.random() * (range[1] - range[0]);
-    };
-
-    // Create diversity in each RGB channel
-    const redOffset = randomInRange(offsetRange);
-    const greenOffset = randomInRange(offsetRange);
-    const blueOffset = randomInRange(offsetRange);
-
-    const redAmp = randomInRange(amplitudeRange);
-    const greenAmp = randomInRange(amplitudeRange);
-    const blueAmp = randomInRange(amplitudeRange);
-
-    const redFreq = randomInRange(frequencyRange);
-    const greenFreq = randomInRange(frequencyRange);
-    const blueFreq = randomInRange(frequencyRange);
-
-    // Enhanced earthy palette with more diversity
-    return [
-      // a: offset vector - varied brightness
-      [
-        redOffset,
-        greenOffset,
-        blueOffset,
-        1, // Alpha always 1
-      ] as [number, number, number, 1],
-
-      // b: amplitude vector - varied saturation
-      [
-        redAmp,
-        greenAmp,
-        blueAmp,
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // c: frequency vector - controls color cycling
-      [
-        redFreq,
-        greenFreq,
-        blueFreq,
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-
-      // d: phase vector - controls hue shifting
-      [
-        basePhase,
-        basePhase + (Math.random() * phaseVariation - phaseVariation / 2),
-        basePhase + (Math.random() * phaseVariation - phaseVariation / 2),
-        1, // Alpha for serialization
-      ] as [number, number, number, 1],
-    ];
   }
 
   /**
