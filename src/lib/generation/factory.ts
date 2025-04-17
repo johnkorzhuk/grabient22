@@ -86,11 +86,11 @@ export class PaletteGeneratorFactory {
   }
 
   /**
-   * Create a generator for the specified categories
-   * @param categories Array of categories to generate
-   * @param options Generation options
-   * @returns A generator that can produce palettes matching all categories
+   * Updated segments of the PaletteGeneratorFactory class
+   * This focuses on the changes needed to support the enhanced Random generator
    */
+
+  // In the createGenerator method of the PaletteGeneratorFactory class
   public static createGenerator(
     categories: PaletteCategoryKey[],
     options: PaletteGenerationOptions = {},
@@ -172,7 +172,12 @@ export class PaletteGeneratorFactory {
       }
     }
 
-    // Single category case - use specific generator
+    // Handle Random category specially - our enhanced implementation
+    if (categories.length === 1 && categories[0] === 'Random') {
+      return new RandomGenerator(steps, options);
+    }
+
+    // Single category case (non-Random)
     if (categories.length === 1) {
       const category = categories[0];
 
@@ -204,8 +209,6 @@ export class PaletteGeneratorFactory {
           return new HighValueGenerator(steps, options);
         case 'Low-Value':
           return new LowValueGenerator(steps, options);
-
-        case 'Random':
         default:
           return new RandomGenerator(steps, options);
       }

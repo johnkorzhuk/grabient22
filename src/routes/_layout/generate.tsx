@@ -44,6 +44,7 @@ const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
   'Analogous,Earthy': ['Earthy', 'Analogous'],
   'Monochromatic,Pastel': ['Monochromatic', 'Pastel'],
   'Complementary,Pastel': ['Complementary', 'Pastel'],
+  'Pastel,Complementary': ['Complementary', 'Pastel'],
   'Tetradic,Pastel': ['Pastel', 'Tetradic'],
   'Pastel,Tetradic': ['Pastel', 'Tetradic'],
   'Pastel,SplitComplementary': ['Pastel', 'SplitComplementary'],
@@ -117,7 +118,11 @@ export const Route = createFileRoute('/_layout/generate')({
   component: GeneratePage,
 });
 
-// Component to display a single palette
+// Update to the PaletteDisplay component in generate.tsx
+// This modifies how categories are displayed when Random is used
+// Update to the PaletteDisplay component in generate.tsx
+// This modifies how categories are displayed when Random is used
+
 const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
   // Generate seed using palette's coeffs and globals
   let seed: string | undefined;
@@ -159,6 +164,7 @@ const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
         {/* Display category badges */}
         {palette.appliedCategories && palette.appliedCategories.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
+            {/* All badges are consistent regardless of source (Random or directly selected) */}
             {palette.appliedCategories.map((cat, i) => (
               <Badge key={i} variant="outline" className="text-xs">
                 {cat}
@@ -167,6 +173,8 @@ const PaletteDisplay = ({ palette, index }: PaletteDisplayProps) => {
           </div>
         )}
       </div>
+
+      {/* Rest of the component remains the same */}
       <div className="flex h-12 rounded overflow-hidden">
         {palette.colors.map((color, i) => (
           <div
@@ -281,7 +289,7 @@ function GeneratePage() {
   const [loading, setLoading] = useState(true);
 
   // Multi-category selection state
-  const [selectedCategories, setSelectedCategories] = useState<PaletteCategoryKey[]>(['Earthy']);
+  const [selectedCategories, setSelectedCategories] = useState<PaletteCategoryKey[]>(['Random']);
 
   // Generate palettes on component mount or when selection changes
   useEffect(() => {

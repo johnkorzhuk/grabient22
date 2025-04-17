@@ -120,7 +120,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [1.0, 1.8],
       frequency: [0.5, 1.2],
     },
-    exclusiveWith: ['Earthy', 'Pastel', 'Random'],
+    exclusiveWith: ['Earthy', 'Pastel', 'Random', 'High-Value', 'Low-Value'],
   },
 
   Analogous: {
