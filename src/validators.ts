@@ -1,5 +1,26 @@
 import * as v from 'valibot';
 
+/**
+ * All valid palette category keys
+ * These represent different color harmony and attribute patterns
+ * that can be generated for a color palette
+ */
+export type PaletteCategoryKey =
+  | 'Warm'
+  | 'Cool'
+  | 'Neon'
+  | 'Dark'
+  | 'Pastel'
+  | 'Earthy'
+  | 'Bright'
+  | 'Random'
+  | 'Neutral'
+  | 'Monochromatic'
+  | 'Analogous'
+  | 'Complementary'
+  | 'SplitComplementary'
+  | 'Tetradic';
+
 export const COLLECTION_STYLES = [
   'linearGradient',
   'linearSwatches',
@@ -25,24 +46,13 @@ export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator
 
 export const DEFAULT_ITEM_HEIGHT_ROW = 20;
 export const DEFAULT_ITEM_HEIGHT_GRID = 35;
-export const MIN_ITEM_HEIGHT = 5;
+export const MIN_ITEM_HEIGHT = 4;
 export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
 // Create row height validator with the provided min/max constraints
 export const rowHeightValidator = v.pipe(
   v.number(),
   v.minValue(MIN_ITEM_HEIGHT),
   v.maxValue(MAX_ITEM_HEIGHT),
-  v.transform((input) => Number(input.toFixed(1))),
-);
-
-export const DEFAULT_LIST_WIDTH = 50;
-export const MIN_LIST_WIDTH = 20;
-export const MAX_LIST_WIDTH = 60;
-// Create list width validator with the provided min/max constraints
-export const listWidthValidator = v.pipe(
-  v.number(),
-  v.minValue(MIN_LIST_WIDTH),
-  v.maxValue(MAX_LIST_WIDTH),
   v.transform((input) => Number(input.toFixed(1))),
 );
 
@@ -114,6 +124,9 @@ export const globalsSchema = v.tuple([
   globalPhaseSchema, // phase [-π, π]
 ]);
 
+// Default values for global modifiers [exposure, contrast, frequency, phase]
+export const DEFAULT_GLOBALS = [0, 1, 1, 0] as v.InferOutput<typeof globalsSchema>;
+
 /**
  * Cosine gradient collection validator
  * Validates the complete structure of a gradient collection
@@ -141,3 +154,39 @@ export const validatePanelValue = (min: number, max: number) => (input: number) 
 
   return input;
 };
+
+/**
+ * Palette category definitions
+ * These are the available categories for palette generation
+ */
+export const PALETTE_CATEGORIES: PaletteCategoryKey[] = [
+  'Random',
+  'Warm',
+  'Cool',
+  'Neon',
+  'Dark',
+  'Pastel',
+  'Earthy',
+  'Bright',
+  'Neutral',
+  'Monochromatic',
+  'Analogous',
+  'Complementary',
+  'SplitComplementary',
+  'Tetradic',
+];
+
+/**
+ * Helper function to get display name for a category
+ * With the simplified category names, this now just returns the category as-is
+ */
+export const getCategoryDisplayName = (category: PaletteCategoryKey): string => {
+  return category;
+};
+
+/**
+ * Valibot schema for category validation
+ */
+export const categoryValidator = v.union(PALETTE_CATEGORIES.map((category) => v.literal(category)));
+
+export const categoriesValidator = v.optional(v.array(categoryValidator), ['Random']);

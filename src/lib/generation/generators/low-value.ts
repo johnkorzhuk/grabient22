@@ -159,7 +159,7 @@ export function generateLowValueCoeffs(): CosineCoeffs {
 
 export class LowValueGenerator extends BasePaletteGenerator {
   constructor(steps: number, options = {}) {
-    super('Low-Value', steps, options);
+    super('Dark', steps, options);
   }
 
   /**

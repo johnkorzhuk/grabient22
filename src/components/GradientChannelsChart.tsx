@@ -17,26 +17,12 @@ import { uiTempStore$ } from '~/stores/ui';
 import { useHotkeys, useClipboard, useElementSize, useMediaQuery } from '@mantine/hooks';
 import { Copy, Check } from 'lucide-react';
 import { deserializeCoeffs } from '~/lib/serialization';
+import { rgbChannelConfig } from '~/constants/colors';
 
 interface GradientChannelsChartProps {
   steps: number;
   processedCoeffs: v.InferOutput<typeof coeffsSchema>;
 }
-
-const chartConfig = {
-  red: {
-    label: 'Red',
-    color: '#ef4444',
-  },
-  green: {
-    label: 'Green',
-    color: '#22c55e',
-  },
-  blue: {
-    label: 'Blue',
-    color: '#3b82f6',
-  },
-} as const;
 
 // Define proper types for the tooltip props
 interface CustomTooltipProps {
@@ -83,7 +69,7 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
             <span className="inline-flex items-center">
               <span
                 className="h-2 w-2 mx-0.5 rounded-sm"
-                style={{ backgroundColor: chartConfig.red.color }}
+                style={{ backgroundColor: rgbChannelConfig.red.color }}
               ></span>
               {r}
             </span>
@@ -91,7 +77,7 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
             <span className="inline-flex items-center">
               <span
                 className="h-2 w-2 mx-0.5 rounded-sm"
-                style={{ backgroundColor: chartConfig.green.color }}
+                style={{ backgroundColor: rgbChannelConfig.green.color }}
               ></span>
               {g}
             </span>
@@ -99,7 +85,7 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
             <span className="inline-flex items-center">
               <span
                 className="h-2 w-2 mx-0.5 rounded-sm"
-                style={{ backgroundColor: chartConfig.blue.color }}
+                style={{ backgroundColor: rgbChannelConfig.blue.color }}
               ></span>
               {b}
             </span>
@@ -108,9 +94,9 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
         </div>
         <div className="flex flex-col gap-1 border-t border-border/30 pt-1.5">
           {[
-            { channel: 'red', value: data.red, color: chartConfig.red.color },
-            { channel: 'green', value: data.green, color: chartConfig.green.color },
-            { channel: 'blue', value: data.blue, color: chartConfig.blue.color },
+            { channel: 'red', value: data.red, color: rgbChannelConfig.red.color },
+            { channel: 'green', value: data.green, color: rgbChannelConfig.green.color },
+            { channel: 'blue', value: data.blue, color: rgbChannelConfig.blue.color },
           ]
             .sort((a, b) => b.value - a.value)
             .map(({ channel, value, color }) => (
@@ -144,14 +130,14 @@ interface CustomXAxisTickProps {
 
 function CustomXAxisTick(props: CustomXAxisTickProps) {
   const { y, gradientColors, isVertical = false } = props;
-  const barHeight = 25; // Reduced height from 40px to 25px
+  const barHeight = 25;
   // Position the bar based on vertical/horizontal orientation
   // For horizontal mode with large negative margin, position the bar at the bottom of the visible area
   const barY = isVertical ? y - barHeight - 2 : y - 25; // Adjusted position to account for smaller height
 
   return (
     <g>
-      <foreignObject x={isVertical ? 10 : 20} y={barY} width="calc(100% - 56px)" height={barHeight}>
+      <foreignObject x={isVertical ? 10 : 16} y={barY} width="calc(100% - 42px)" height={barHeight}>
         <div
           style={{
             width: '100%',
@@ -251,8 +237,8 @@ const Chart = lazy(() =>
                 height={isVertical && height ? height - 20 : undefined}
                 margin={{
                   left: -56,
-                  right: 10,
-                  top: -6,
+                  right: 2,
+                  top: -12,
                   bottom: 0,
                 }}
                 onMouseMove={(state) => {
@@ -271,7 +257,12 @@ const Chart = lazy(() =>
                   dataKey="t"
                   type="number"
                   domain={[0, 1]}
-                  ticks={[0, 0.25, 0.5, 0.75, 1]}
+                  ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+                  tickFormatter={(value) =>
+                    value === 0 || value === 1
+                      ? value.toString()
+                      : `.${String(value).split('.')[1]}`
+                  }
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
@@ -291,7 +282,8 @@ const Chart = lazy(() =>
                 <XAxis
                   type="number"
                   domain={[-0.15, 1]}
-                  ticks={[0, 0.25, 0.5, 0.75, 1]}
+                  ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+                  tickFormatter={(value) => value.toString()}
                   tickLine={false}
                   axisLine={false}
                   orientation="top"
@@ -302,10 +294,10 @@ const Chart = lazy(() =>
                   type="linear"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.red.color }}
+                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.red.color }}
                   isAnimationActive={false}
                   animationDuration={200}
-                  stroke={chartConfig.red.color}
+                  stroke={rgbChannelConfig.red.color}
                   strokeOpacity={1}
                 />
                 <Line
@@ -313,10 +305,10 @@ const Chart = lazy(() =>
                   type="linear"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.green.color }}
+                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.green.color }}
                   isAnimationActive={false}
                   animationDuration={200}
-                  stroke={chartConfig.green.color}
+                  stroke={rgbChannelConfig.green.color}
                   strokeOpacity={1}
                 />
                 <Line
@@ -324,10 +316,10 @@ const Chart = lazy(() =>
                   type="linear"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.blue.color }}
+                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.blue.color }}
                   isAnimationActive={false}
                   animationDuration={200}
-                  stroke={chartConfig.blue.color}
+                  stroke={rgbChannelConfig.blue.color}
                   strokeOpacity={1}
                 />
               </LineChart>
@@ -339,9 +331,9 @@ const Chart = lazy(() =>
                 width={!isVertical && width ? width - 40 : undefined}
                 height={!isVertical && height ? height - 40 : undefined}
                 margin={{
-                  left: 20,
-                  right: -24,
-                  top: 0,
+                  left: 16,
+                  right: -36,
+                  top: 16,
                   bottom: -40,
                 }}
                 onMouseMove={(state) => {
@@ -358,6 +350,12 @@ const Chart = lazy(() =>
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="t"
+                  ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
+                  tickFormatter={(value) =>
+                    value === 0 || value === 1
+                      ? value.toString()
+                      : `.${String(value).split('.')[1]}`
+                  }
                   tickLine={false}
                   axisLine={false}
                   tickMargin={2}
@@ -381,7 +379,8 @@ const Chart = lazy(() =>
                   axisLine={false}
                   tickMargin={0}
                   domain={[-0.1, 1]} // Reverted back to original domain without negative values
-                  ticks={[0, 0.25, 0.5, 0.75, 1]}
+                  ticks={[0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}
+                  tickFormatter={(value) => value.toString()}
                 />
                 <Tooltip
                   content={<CustomTooltip copied={copied} />}
@@ -394,10 +393,10 @@ const Chart = lazy(() =>
                   type="linear"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.red.color }}
+                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.red.color }}
                   isAnimationActive={false}
                   animationDuration={200}
-                  stroke={chartConfig.red.color}
+                  stroke={rgbChannelConfig.red.color}
                   strokeOpacity={1}
                 />
                 <Line
@@ -405,10 +404,10 @@ const Chart = lazy(() =>
                   type="linear"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.green.color }}
+                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.green.color }}
                   isAnimationActive={false}
                   animationDuration={200}
-                  stroke={chartConfig.green.color}
+                  stroke={rgbChannelConfig.green.color}
                   strokeOpacity={1}
                 />
                 <Line
@@ -416,10 +415,10 @@ const Chart = lazy(() =>
                   type="linear"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: chartConfig.blue.color }}
+                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.blue.color }}
                   isAnimationActive={false}
                   animationDuration={200}
-                  stroke={chartConfig.blue.color}
+                  stroke={rgbChannelConfig.blue.color}
                   strokeOpacity={1}
                 />
               </LineChart>
@@ -447,14 +446,14 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   const activeIndex = use$(uiTempStore$.previewColorIndex);
   const clipboard = useClipboard({ timeout: 1500 });
   const { ref, width, height } = useElementSize();
-  const isMobile = useMediaQuery('(max-width: 800px)');
+  const is1000px = useMediaQuery('(max-width: 1000px)');
 
   // Determine if the chart should be rendered vertically based on width and viewport
   // Only render vertically if the viewport is less than 700px AND either:
   // 1. Width is explicitly measured and less than 500, OR
   // 2. The height is at least 1.3x the width (very tall portrait orientation)
   const isVertical = Boolean(
-    isMobile && ((width ? width < 500 : false) || (width && height && height > width * 1.3)),
+    is1000px && ((width ? width < 500 : false) || (width && height && height > width * 1.3)),
   );
 
   const handleChartIndexChange = (index: number | null) => {
@@ -487,7 +486,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
         style={{ minHeight: '150px', height: '100%' }}
       >
         <ChartContainer
-          config={chartConfig}
+          config={rgbChannelConfig}
           className="absolute inset-0 h-full w-full"
           style={{ opacity: 0.33 }}
         >
@@ -502,7 +501,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
             />
           </Suspense>
         </ChartContainer>
-        <ChartContainer config={chartConfig} className="absolute inset-0 h-full w-full">
+        <ChartContainer config={rgbChannelConfig} className="absolute inset-0 h-full w-full">
           <Suspense fallback={<div className="w-full h-full" />}>
             <Chart
               data={chartData}

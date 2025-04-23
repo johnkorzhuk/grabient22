@@ -1,15 +1,10 @@
-import {
-  createFileRoute,
-  retainSearchParams,
-  stripSearchParams,
-  useParams,
-  useSearch,
-} from '@tanstack/react-router';
+import { createFileRoute, useParams, useSearch } from '@tanstack/react-router';
 import type { AppCollection, CosineCoeffs, GlobalModifierType } from '~/types';
 import { useRef, useState, useEffect } from 'react';
+import { cn } from '~/lib/utils';
+import { useThrottledCallback } from '@mantine/hooks';
 import { deserializeCoeffs, serializeCoeffs } from '~/lib/serialization';
 import { redirect, useNavigate } from '@tanstack/react-router';
-import { useThrottledCallback } from '@mantine/hooks';
 
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import {
@@ -21,47 +16,30 @@ import {
   generatePhaseVariations,
   updateCoeffWithInverseGlobal,
 } from '~/lib/cosineGradient';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
+
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import { RGBChannelSliders } from '~/components/RGBChannelSliders';
-import * as v from 'valibot';
 import {
   COEFF_PRECISION,
-  coeffsSchema,
   DEFAULT_ANGLE,
-  DEFAULT_LIST_WIDTH,
+  DEFAULT_GLOBALS,
   DEFAULT_STEPS,
   DEFAULT_STYLE,
-  listWidthValidator,
-  MAX_LIST_WIDTH,
-  MIN_LIST_WIDTH,
   PI,
-  validatePanelValue,
 } from '~/validators';
 import { GradientPreview } from '~/components/GradientPreview';
+
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
+import { paletteStore$ } from '~/stores/palette';
 import { CollectionModifierRangeInput } from '~/components/CollectionModifierRangeInput';
-import { cn } from '~/lib/utils';
 import { useElementSize } from '@mantine/hooks';
-
-export const SEARCH_DEFAULTS = {
-  listWidth: DEFAULT_LIST_WIDTH,
-};
-
-export const searchValidatorSchema = v.object({
-  listWidth: v.optional(
-    v.fallback(listWidthValidator, SEARCH_DEFAULTS.listWidth),
-    SEARCH_DEFAULTS.listWidth,
-  ),
-});
+import type { Id } from '../../../convex/_generated/dataModel';
+import { LikeButton } from '~/components/LikeButton';
+import { generateGradientColors } from '~/lib/cosineGradient';
 
 export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
-  validateSearch: searchValidatorSchema,
-  search: {
-    middlewares: [stripSearchParams(SEARCH_DEFAULTS), retainSearchParams(['listWidth'])],
-  },
   beforeLoad: ({ params, search }) => {
     try {
       // Try to deserialize the data - if it fails, redirect to home
@@ -75,43 +53,10 @@ export const Route = createFileRoute('/_layout/$seed')({
 
 function Home() {
   const { style, steps, angle } = useSearch({ from: '/_layout' });
-  const navigate = useNavigate({ from: '/$seed' });
-
-  const { listWidth } = useSearch({ from: '/_layout/$seed' });
-  const [localListWidth, setLocalListWidth] = useState(listWidth);
-
   const { seed: encodedSeedData } = useParams({
     from: '/_layout/$seed',
   });
 
-  useEffect(() => {
-    setLocalListWidth(listWidth);
-  }, [listWidth]);
-
-  const handleResize = (newWidth: number) => {
-    const truncatedValue = Number(newWidth.toFixed(1));
-    const finalWidth = validatePanelValue(MIN_LIST_WIDTH, MAX_LIST_WIDTH)(truncatedValue);
-
-    // Update local state immediately for responsive UI
-    setLocalListWidth(finalWidth);
-
-    // Throttled update to URL and persisted store
-    throttledUpdateURL(finalWidth);
-  };
-
-  const throttledUpdateURL = useThrottledCallback((width: number) => {
-    // Update URL
-    navigate({
-      search: (prev) => ({
-        ...prev,
-        listWidth: width,
-      }),
-      replace: true,
-    });
-  }, 150);
-
-  // TODO: we should do something similar in StepsInput, AngleInput instead of hard coded defaults
-  // so the value rendered in the input is the actual default value when select === 'auto'
   const initialSearchDataRef = useRef({
     style: style === 'auto' ? DEFAULT_STYLE : style,
     steps: steps === 'auto' ? DEFAULT_STEPS : steps,
@@ -127,7 +72,7 @@ function Home() {
     style: style === 'auto' ? initialSearchDataRef.current.style : style,
     steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
     angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
-    _id: 'seed-_tN8YaBv4LmFsqR2',
+    _id: encodedSeedData as Id<'collections'>,
     seed: encodedSeedData,
   };
 
@@ -139,36 +84,29 @@ function Home() {
     ...generatePhaseVariations(seedCollection, { stepSize: 0.02, steps: 5 }).reverse(),
   ];
 
-  // redundant validation. w/e fixes a ts error
-  const processedCoeffs = v.parse(
-    coeffsSchema,
-    applyGlobals(seedCollection.coeffs, seedCollection.globals),
-  );
+  const processedCoeffs = applyGlobals(seedCollection.coeffs, seedCollection.globals);
+
+  // Generate colors for the palette analyzer
+  const stepsValue = steps === 'auto' ? seedCollection.steps : steps;
+  const paletteColors = generateGradientColors(processedCoeffs, stepsValue);
+
+  // Update palette store with colors for the header component
+  useEffect(() => {
+    paletteStore$.seedPaletteColors.set(paletteColors);
+  }, [paletteColors]);
 
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel
-        minSize={MIN_LIST_WIDTH}
-        maxSize={MAX_LIST_WIDTH}
-        onResize={handleResize}
-        defaultSize={localListWidth}
-        className="min-w-[200px]"
-      >
+    <div className="flex h-full w-full">
+      <div className="w-2/3 h-full">
         <CollectionsDisplay collections={collections} isSeedRoute />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel
-        defaultSize={100 - localListWidth}
-        minSize={100 - MAX_LIST_WIDTH}
-        maxSize={100 - MIN_LIST_WIDTH}
-        className="min-w-[250px]"
-      >
+      </div>
+      <div className="w-1/3 h-full min-w-[250px]">
         <SeedChartAndPreviewPanel
           seedCollection={seedCollection}
           processedCoeffs={processedCoeffs}
         />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+      </div>
+    </div>
   );
 }
 
@@ -208,8 +146,7 @@ const GlobalModifierItem = ({
         'hover:bg-gray-50 dark:hover:bg-gray-900/30',
         activeModifier === name && 'bg-gray-50 dark:bg-gray-900/30',
         'transition-all',
-        'gap-5 p-2 pl-3 -ml-3',
-        '2xl:gap-4 2xl:p-2 2xl:pl-4 2xl:-ml-4',
+        'gap-3 p-1.5 pl-3 -ml-3', // use 2xl spacing for all
       )}
     >
       {activeModifier === name && (
@@ -277,8 +214,7 @@ const GlobalModifiersGrid = ({
     <div
       className={cn(
         'grid grid-cols-1',
-        'gap-3',
-        '2xl:gap-5',
+        'gap-3', // use 2xl gap for all
         activeModifier && containerWidth <= 450 ? 'w-full px-0' : '',
       )}
     >
@@ -310,7 +246,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   processedCoeffs: CosineCoeffs;
 }) {
   const search = useSearch({ from: '/_layout' });
-  const { steps } = search;
+  const { steps, angle, style } = search;
   // Get preview steps from store
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewSeed = use$(uiTempStore$.previewSeed);
@@ -321,6 +257,14 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   const previewCoeffs = previewData
     ? applyGlobals(previewData.coeffs, previewData.globals)
     : processedCoeffs;
+
+  const isDefaultGlobals = seedCollection.globals.every(
+    (val, index) => val === DEFAULT_GLOBALS[index],
+  );
+
+  const currentSeed = isDefaultGlobals
+    ? seedCollection.seed
+    : serializeCoeffs(applyGlobals(seedCollection.coeffs, seedCollection.globals), DEFAULT_GLOBALS);
 
   // Track container width to determine if we have room for RGB controls
   const { ref: containerRef, width: containerWidth } = useElementSize();
@@ -426,16 +370,18 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
 
   return (
     <div className="flex flex-col w-full h-full relative" ref={containerRef}>
-      {/* Graph section - fixed at 35% */}
-      <div className="relative w-full h-[35%]">
-        <GradientChannelsChart
-          processedCoeffs={processedCoeffs}
-          steps={stepsToUse === 'auto' ? DEFAULT_STEPS : stepsToUse}
+      {/* Details Header */}
+      <div className="w-full flex items-center justify-between px-4 py-1.5 border-b border-gray-200 dark:border-gray-800">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Details</h2>
+        <LikeButton
+          steps={steps === 'auto' ? DEFAULT_STEPS : steps}
+          angle={angle === 'auto' ? DEFAULT_ANGLE : angle}
+          style={style === 'auto' ? DEFAULT_STYLE : style}
+          seed={currentSeed}
         />
       </div>
-
       {/* GradientPreview - remaining height */}
-      <div className="w-full flex-grow mt-4">
+      <div className="w-full flex-grow lg:mb-0 mb-2">
         <GradientPreview
           initialStyle={seedCollection.style}
           initialSteps={seedCollection.steps}
@@ -445,15 +391,16 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
         />
       </div>
 
+      {/* Graph section - fixed at 35% */}
+      <div className="relative w-full h-[35%]">
+        <GradientChannelsChart
+          processedCoeffs={processedCoeffs}
+          steps={stepsToUse === 'auto' ? DEFAULT_STEPS : stepsToUse}
+        />
+      </div>
+
       {/* Inputs section - auto height */}
-      <div
-        className={cn(
-          'w-full',
-          'border-y border-gray-200 dark:border-gray-800',
-          'px-4 py-3',
-          '2xl:px-6 2xl:py-4',
-        )}
-      >
+      <div className={cn('w-full', 'border-y border-gray-200 dark:border-gray-800', 'px-4 py-2')}>
         {/* Mobile layout (≤ 450px) */}
         {containerWidth <= 450 && (
           <div className={cn('flex flex-col gap-2', '2xl:gap-4')}>
@@ -492,7 +439,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             {/* Container with fixed height for consistent layout */}
             <div className="flex flex-col">
               {/* Mobile: Show only active modifier or all modifiers */}
-              <div className="flex-grow" style={{ minHeight: activeModifier ? '66px' : '272px' }}>
+              <div className="flex-grow">
                 <GlobalModifiersGrid
                   globals={renderPreviewGlobals ? previewData!.globals : globals}
                   activeModifier={activeModifier}
@@ -523,8 +470,8 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
         {containerWidth > 450 && (
           <div className="flex flex-row gap-6">
             {/* Desktop: Global modifiers column */}
-            <div className="flex flex-col gap-2 w-1/2 2xl:gap-6">
-              <h3 className="text-lg font-medium">
+            <div className="flex flex-col gap-2 w-1/2">
+              <h3 className="text-base font-medium">
                 {activeModifier
                   ? `${activeModifier.charAt(0).toUpperCase() + activeModifier.slice(1)} Modifiers`
                   : 'Global Modifiers'}
@@ -540,7 +487,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
             </div>
 
             {/* Desktop: RGB channels column */}
-            <div className="w-1/2 mt-10 pl-2 2xl:mt-13">
+            <div className="w-1/2 pl-2 mt-[32px]">
               {activeModifier && (
                 <RGBChannelSliders
                   coeffs={previewData ? previewData.coeffs : seedCollection.coeffs}

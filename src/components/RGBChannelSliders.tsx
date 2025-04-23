@@ -101,18 +101,17 @@ export function RGBChannelSliders({
   ];
 
   return (
-    <div className={cn('flex flex-col', 'gap-6')}>
+    <div className={cn('flex flex-col', 'gap-2')}>
       {/* <h3 className={cn('text-lg font-medium')}>RGB Channel Controls</h3> */}
 
-      <div className={cn('flex flex-col', 'gap-4')}>
+      <div className={cn('flex flex-col', 'gap-2')}>
         {channels.map((channel, channelIndex) => (
           <div
             key={channel.key}
             className={cn(
               'flex flex-col relative',
               'rounded',
-              'gap-4 p-2 pl-3 -ml-3',
-              '2xl:pl-4 2xl:-ml-4',
+              'gap-3 p-1.5 pl-3 -ml-3', // use 2xl spacing for all
             )}
           >
             <div

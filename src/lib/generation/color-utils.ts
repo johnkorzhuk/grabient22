@@ -222,7 +222,7 @@ export function getValue(color: RGBAVector): number {
 }
 
 /**
- * Determine if a color is warm (reds, oranges, yellows)
+ * Determine if a color is warm (reds, oranges, yellows, red-purples)
  */
 export function isWarmColor(color: RGBAVector | HSVVector): boolean {
   const hsv =
@@ -233,12 +233,17 @@ export function isWarmColor(color: RGBAVector | HSVVector): boolean {
   // If the saturation is too low, it's considered neutral
   if (hsv[1] < 0.15) return false;
 
-  // Warm colors are roughly between 0.95-0.2 on the hue wheel
-  return hsv[0] >= 0.95 || hsv[0] <= 0.2;
+  // Warm colors include:
+  // - Reds (0.95-1.0 and 0.0-0.05)
+  // - Oranges (0.05-0.11)
+  // - Yellows (0.11-0.17)
+  // - Yellow-greens (0.17-0.2)
+  // - Red-purples/magentas (0.8-0.95)
+  return (hsv[0] >= 0.95 || hsv[0] <= 0.2) || (hsv[0] >= 0.8 && hsv[0] < 0.95);
 }
 
 /**
- * Determine if a color is cool (greens, blues, purples)
+ * Determine if a color is cool (greens, blues, blue-purples)
  */
 export function isCoolColor(color: RGBAVector | HSVVector): boolean {
   const hsv =
@@ -249,8 +254,12 @@ export function isCoolColor(color: RGBAVector | HSVVector): boolean {
   // If the saturation is too low, it's considered neutral
   if (hsv[1] < 0.15) return false;
 
-  // Cool colors are roughly between 0.3-0.85 on the hue wheel
-  return hsv[0] >= 0.3 && hsv[0] <= 0.85;
+  // Cool colors include:
+  // - Greens (0.3-0.4)
+  // - Teals and Cyans (0.4-0.55)
+  // - Blues (0.55-0.7)
+  // - Blue-purples (0.7-0.8)
+  return hsv[0] >= 0.3 && hsv[0] <= 0.8;
 }
 
 /**

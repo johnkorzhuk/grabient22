@@ -44,8 +44,8 @@ export function generateHighValueCoeffs(): CosineCoeffs {
       // Select specific pastel-friendly hue
       primaryHue = selectRandomValue(BRIGHT_COLORS);
       secondaryHue = (primaryHue + 0.1) % 1.0; // Slight variation
-      offsetRange = [0.5, 0.65]; // Lower for more color visibility
-      amplitudeRange = [0.25, 0.35]; // HIGHER for visible color
+      offsetRange = [0.4, 0.55]; // REDUCED to prevent too much brightness
+      amplitudeRange = [0.3, 0.4]; // INCREASED for more color saturation
       frequencyRange = [0.3, 0.5];
       phaseDistribution = 'pastel';
       break;
@@ -54,8 +54,8 @@ export function generateHighValueCoeffs(): CosineCoeffs {
       // Select two complementary bright hues
       primaryHue = selectRandomValue(BRIGHT_COLORS);
       secondaryHue = (primaryHue + 0.5) % 1.0; // Complement
-      offsetRange = [0.45, 0.6]; // Even lower for more color visibility
-      amplitudeRange = [0.3, 0.4]; // Much higher for strong color contrast
+      offsetRange = [0.35, 0.5]; // REDUCED to prevent too much brightness
+      amplitudeRange = [0.35, 0.45]; // INCREASED for stronger color contrast
       frequencyRange = [0.4, 0.6];
       phaseDistribution = 'dual';
       break;
@@ -63,8 +63,8 @@ export function generateHighValueCoeffs(): CosineCoeffs {
     case 2: // Triadic bright
       primaryHue = selectRandomValue(BRIGHT_COLORS);
       secondaryHue = (primaryHue + 0.33) % 1.0; // +120°
-      offsetRange = [0.45, 0.6]; // Lower for color visibility
-      amplitudeRange = [0.3, 0.4]; // Higher for color contrast
+      offsetRange = [0.35, 0.5]; // REDUCED to prevent too much brightness
+      amplitudeRange = [0.35, 0.45]; // INCREASED for stronger color contrast
       frequencyRange = [0.5, 0.7];
       phaseDistribution = 'triad';
       break;
@@ -72,8 +72,8 @@ export function generateHighValueCoeffs(): CosineCoeffs {
     case 3: // Rainbow bright
       primaryHue = 0; // Start at red
       secondaryHue = 0; // Not used for rainbow
-      offsetRange = [0.45, 0.6]; // Lower for color visibility
-      amplitudeRange = [0.3, 0.4]; // Higher for color contrast
+      offsetRange = [0.35, 0.5]; // REDUCED to prevent too much brightness
+      amplitudeRange = [0.35, 0.45]; // INCREASED for stronger color contrast
       frequencyRange = [0.8, 1.0]; // Higher for more hue variation
       phaseDistribution = 'rainbow';
       break;
@@ -88,8 +88,8 @@ export function generateHighValueCoeffs(): CosineCoeffs {
       const theme = themes[Math.floor(Math.random() * themes.length)];
       primaryHue = theme[0];
       secondaryHue = theme[1];
-      offsetRange = [0.45, 0.6]; // Lower for color visibility
-      amplitudeRange = [0.25, 0.35]; // Higher for color contrast
+      offsetRange = [0.35, 0.5]; // REDUCED to prevent too much brightness
+      amplitudeRange = [0.3, 0.4]; // INCREASED for stronger color contrast
       frequencyRange = [0.3, 0.5]; // Moderate for smooth transitions
       phaseDistribution = 'themed';
       break;
@@ -97,8 +97,8 @@ export function generateHighValueCoeffs(): CosineCoeffs {
     default: // Fallback to pastel with color
       primaryHue = BRIGHT_COLORS.MINT;
       secondaryHue = BRIGHT_COLORS.SKY;
-      offsetRange = [0.5, 0.65];
-      amplitudeRange = [0.25, 0.35];
+      offsetRange = [0.4, 0.55]; // REDUCED to prevent too much brightness
+      amplitudeRange = [0.3, 0.4]; // INCREASED for more color saturation
       frequencyRange = [0.3, 0.5];
       phaseDistribution = 'pastel';
   }
@@ -295,7 +295,7 @@ export function generateHighValueCoeffs(): CosineCoeffs {
 
 export class HighValueGenerator extends BasePaletteGenerator {
   constructor(steps: number, options = {}) {
-    super('High-Value', steps, options);
+    super('Bright', steps, options);
   }
 
   /**
@@ -324,8 +324,8 @@ export function validateHighValuePalette(colors: RGBAVector[]): boolean {
   let colorfulCount = 0;
 
   // Define high-value quality thresholds
-  const HIGH_VALUE_MIN = 0.6; // Minimum brightness to qualify as high-value
-  const WHITE_THRESHOLD = 0.95; // Threshold for considering a color "pure white"
+  const HIGH_VALUE_MIN = 0.55; // Minimum brightness to qualify as high-value (slightly reduced)
+  const WHITE_THRESHOLD = 0.9; // LOWERED threshold for considering a color "pure white"
 
   // Check each color for brightness and colorfulness
   for (const color of colors) {
@@ -353,23 +353,22 @@ export function validateHighValuePalette(colors: RGBAVector[]): boolean {
   const pureWhitePercentage = pureWhiteCount / colors.length;
   const colorfulPercentage = colorfulCount / colors.length;
 
-  // MAXIMALLY RELAXED VALIDATION:
+  // STRICTER VALIDATION TO REDUCE WHITES:
   // 1. At least 70% of colors should be high-value (bright)
-  // 2. No more than 50% should be pure white
-  // 3. At least 30% should have visible color
+  // 2. No more than 30% should be pure white (REDUCED from 50%)
+  // 3. At least 50% should have visible color (INCREASED from 30%)
   const hasHighValue = highValuePercentage >= 0.7;
-  const notTooWhite = pureWhitePercentage <= 0.5;
-  const hasEnoughColor = colorfulPercentage >= 0.3;
+  const notTooWhite = pureWhitePercentage <= 0.3; // STRICTER limit on whites
+  const hasEnoughColor = colorfulPercentage >= 0.5; // REQUIRE more color
 
-  // Calculate average brightness - should be bright overall
+  // Calculate average brightness - should be bright but not too bright
   const avgBrightness = colors.reduce((sum, c) => sum + rgbToHsv(c)[2], 0) / colors.length;
-  const isBrightOverall = avgBrightness >= 0.6;
+  const isBrightOverall = avgBrightness >= 0.55 && avgBrightness <= 0.85; // CAPPED maximum brightness
 
-  // SUPER RELAXED CONDITIONS:
-  // Only require most conditions to pass
+  // STRICTER CONDITIONS TO ENSURE COLORFUL RESULTS:
+  // Require more conditions to pass
   return (
-    (hasHighValue && notTooWhite && isBrightOverall) || // Typical case
-    (hasHighValue && hasEnoughColor) || // Colorful case
-    (isBrightOverall && hasEnoughColor)
-  ); // Bright and colorful backup
+    (hasHighValue && notTooWhite && isBrightOverall && hasEnoughColor) || // Ideal case
+    (hasHighValue && notTooWhite && hasEnoughColor) // Fallback case
+  );
 }

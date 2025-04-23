@@ -1,42 +1,37 @@
 import { useNavigate, useParams, useSearch, Link } from '@tanstack/react-router';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { useThrottledCallback } from '@mantine/hooks';
-import { useEffect, useRef, useState } from 'react';
-import { CollectionRow } from '~/components/CollectionRow';
+import { useState } from 'react';
 import type { AppCollection } from '~/types';
-import { APP_HEADER_HEIGHT } from '~/components/AppHeader';
 
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';
+import { applyGlobals } from '~/lib/cosineGradient';
+import { GradientPreview } from './GradientPreview';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
   isSeedRoute?: boolean;
+  isRandomRoute?: boolean;
 };
 
 export const CollectionsDisplay = observer(function CollectionsDisplay({
   collections,
   isSeedRoute,
+  isRandomRoute,
 }: CollectionsDisplayProps) {
   const paramsResult = useParams({
-    from: isSeedRoute ? '/_layout/$seed' : '/_layout/',
+    from: isRandomRoute ? '/_layout/random' : isSeedRoute ? '/_layout/$seed' : '/_layout/',
   });
   const { seed } = paramsResult && 'seed' in paramsResult ? paramsResult : { seed: undefined };
-  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : isRandomRoute ? '/random' : '/' });
   const { rowHeight } = useSearch({
     from: '/_layout',
   });
 
-  const scrollContainerRef = useRef<HTMLUListElement>(null);
-
   const previewSeed = use$(uiTempStore$.previewSeed);
-  const [localRowHeight, setLocalRowHeight] = useState<number>(rowHeight);
-
-  // Effect to sync URL state to local state when URL changes
-  useEffect(() => {
-    setLocalRowHeight(rowHeight);
-  }, [rowHeight]);
+  const [localRowHeight, setLocalRowHeight] = useState(rowHeight);
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
@@ -61,56 +56,72 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   }, 150);
 
   return (
-    <section className="h-full w-full overflow-auto relative">
+    <section
+      className="h-full w-full overflow-auto relative"
+      onMouseLeave={() => {
+        if (!previewSeed) return;
+        uiTempStore$.previewSeed.set(null);
+      }}
+    >
       <ul
-        ref={scrollContainerRef}
-        onMouseLeave={() => {
-          if (!previewSeed) return;
-          uiTempStore$.previewSeed.set(null);
-        }}
+        className="h-full w-full relative"
+        style={
+          {
+            '--row-height': `${localRowHeight}%`,
+          } as React.CSSProperties
+        }
       >
         {collections.map((collection, index) => {
           const isCurrentSeed = seed !== undefined && collection.seed === seed;
+          // Make sure coeffs and globals exist before applying
+          const processedCoeffs = collection.coeffs && collection.globals ? 
+            applyGlobals(collection.coeffs, collection.globals) : 
+            null;
+            
+          if (!processedCoeffs) {
+            return null; // Skip rendering this item
+          }
 
           if (isCurrentSeed) {
             return (
-              <CollectionRow
-                key={collection._id}
-                collection={collection}
-                rowHeight={localRowHeight}
-              />
+              <li key={collection._id} className="h-[var(--row-height)] w-full">
+                <GradientPreview
+                  processedCoeffs={processedCoeffs}
+                  initialStyle={collection.style}
+                  initialAngle={collection.angle}
+                  initialSteps={collection.steps}
+                />
+              </li>
             );
           }
 
           return (
-            <li key={collection._id} className="contents" style={{ display: 'contents' }}>
+            <li key={collection._id} className="h-[var(--row-height)] w-full">
               <Link
                 to="/$seed"
                 params={{
                   seed: collection.seed,
                 }}
-                search={(search) => {
+                search={({ categories, ...search }) => {
                   return search;
                 }}
                 replace={isSeedRoute}
                 aria-label={`Gradient ${index + 1}`}
-                className="block"
               >
-                <CollectionRow collection={collection} rowHeight={localRowHeight} />
+                <GradientPreview
+                  processedCoeffs={processedCoeffs}
+                  initialStyle={collection.style}
+                  initialAngle={collection.angle}
+                  initialSteps={collection.steps}
+                />
               </Link>
             </li>
           );
         })}
       </ul>
-      {/* Resizable panel overlay - only affects the first item */}
+
       {collections.length > 0 && (
-        <div
-          className="absolute top-0 left-0 right-0 pointer-events-none"
-          style={{
-            height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
-            overflow: 'hidden',
-          }}
-        >
+        <div className="absolute inset-0 pointer-events-none">
           <ResizablePanelGroup direction="vertical" className="h-full">
             <ResizablePanel
               defaultSize={localRowHeight}
@@ -119,7 +130,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               onResize={handleResize}
               className="pointer-events-none"
             >
-              <div className="h-full relative"></div>
+              <div className="h-full"></div>
             </ResizablePanel>
 
             <ResizableHandle className="cursor-ns-resize pointer-events-auto z-10" withHandle />

@@ -3,7 +3,8 @@
  * Makes it easier to access and manage validators for multi-category support
  */
 
-import type { CategoryValidator, PaletteCategoryKey } from './types';
+import type { CategoryValidator } from './types';
+import type { PaletteCategoryKey } from '~/validators';
 import type { RGBAVector } from '~/types';
 
 // Import all validator functions from generators
@@ -31,15 +32,15 @@ export const CATEGORY_VALIDATORS: Record<PaletteCategoryKey, CategoryValidator> 
   Pastel: validatePastelPalette,
   Earthy: validateEarthyPalette,
   Complementary: validateComplementaryPalette,
-  WarmDominant: validateWarmDominantPalette,
-  CoolDominant: validateCoolDominantPalette,
+  Warm: validateWarmDominantPalette,
+  Cool: validateCoolDominantPalette,
   SplitComplementary: validateSplitComplementaryPalette,
   Tetradic: validateTetradicPalette,
   Neon: validateNeonPalette,
   Analogous: validateAnalogousPalette,
   Neutral: validateNeutralPalette,
-  'High-Value': validateHighValuePalette,
-  'Low-Value': validateLowValuePalette,
+  Bright: validateHighValuePalette,
+  Dark: validateLowValuePalette,
 
   // Random has no specific constraints - it's valid for any palette
   Random: () => true,

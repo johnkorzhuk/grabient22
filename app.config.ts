@@ -1,19 +1,19 @@
 import { defineConfig } from '@tanstack/react-start/config';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
+import { cloudflare } from 'unenv';
+import comlink from 'vite-plugin-comlink';
 
 export default defineConfig({
+  server: {
+    preset: 'cloudflare-pages',
+    unenv: cloudflare,
+  },
   tsr: {
     appDirectory: 'src',
   },
-  server: {
-    preset: 'netlify',
-    // prerender: {
-    //   routes: ['/'],
-    //   crawlLinks: false,
-    // },
-  },
   vite: {
     plugins: [
+      comlink(),
       // this is the plugin that enables path aliases
       viteTsConfigPaths({
         projects: ['./tsconfig.json'],

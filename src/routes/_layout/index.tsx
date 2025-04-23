@@ -1,40 +1,47 @@
-import { createFileRoute, useLoaderData } from '@tanstack/react-router';
-import { fetchCollections } from '~/lib/fetchCollections';
-import type { AppCollection } from '~/types';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
+import { convexQuery } from '@convex-dev/react-query';
+import { api } from '../../../convex/_generated/api';
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
+import seedData from '../../../seed.json';
+import { applyGlobals } from '~/lib/cosineGradient';
 
-// export const DEFAULT_ITEM_HEIGHT_ROW = 15;
-// export const DEFAULT_ITEM_HEIGHT_GRID = 35;
-// export const MIN_ITEM_HEIGHT = 10;
-// export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
-
-// // Use the factory function to create the search validator schema
-// export const searchValidatorSchema = createSearchValidatorSchemaFactory({
-//   defaultItemHeightRow: DEFAULT_ITEM_HEIGHT_ROW,
-//   minItemHeight: MIN_ITEM_HEIGHT,
-//   maxItemHeight: MAX_ITEM_HEIGHT,
+// // Process seed data by applying globals to coeffs and removing globals field
+// const processedSeedData = (seedData as unknown as Array<{
+//   coeffs: number[][];
+//   globals: number[];
+//   steps: number;
+//   angle: number;
+//   style: string;
+// }>).map((item) => {
+//   const { globals, ...rest } = item;
+//   // Use type assertion to match the expected type for applyGlobals
+//   const newCoeffs = applyGlobals(item.coeffs as any, globals as any);
+//   return {
+//     ...rest,
+//     coeffs: newCoeffs
+//   };
 // });
+
+// // Output stringified JSON without globals field
+// console.log(JSON.stringify(processedSeedData, null, 2));
 
 export const Route = createFileRoute('/_layout/')({
   component: Home,
-
-  loader: async () => {
-    const data = await fetchCollections();
-    return data;
-  },
-  headers: () => {
-    return {
-      'cache-control': 'public, max-age=3600, must-revalidate', // 1 hour
-      'cdn-cache-control': 'public, max-age=3600, stale-while-revalidate=1800, durable', // 1 hour + 30min stale
-      // from https://github.com/TanStack/tanstack.com/blob/5ee97b505d0f9ef3fdbff12a5f70cfaad60a795a/app/routes/%24libraryId/%24version.docs.tsx#L37
-      // 'cache-control': 'public, max-age=0, must-revalidate',
-      // 'cdn-cache-control': 'max-age=300, stale-while-revalidate=300, durable',
-    };
+  // pendingComponent: () => <Loader />,
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData({
+      ...convexQuery(api.collections.list, {}),
+      gcTime: 2000,
+    });
   },
 });
 
 function Home() {
-  const collections = useLoaderData({ from: '/_layout/' }) as AppCollection[];
+  const { data: collections } = useSuspenseQuery({
+    ...convexQuery(api.collections.list, {}),
+    gcTime: Number.POSITIVE_INFINITY,
+  });
 
-  return <CollectionsDisplay collections={collections} />;
+  return <CollectionsDisplay collections={collections} isSeedRoute={false} />;
 }

@@ -8,11 +8,11 @@ import type { CosineCoeffs, RGBAVector } from '~/types';
 import { cosineGradient } from '../cosineGradient';
 import { analyzeBasicColors, isPaletteValid } from './color-utils';
 import type {
-  PaletteCategoryKey,
   PaletteGenerationOptions,
   PaletteGenerationResult,
   BasicColorResult,
 } from './types';
+import type { PaletteCategoryKey } from '~/validators';
 import { PaletteCategories } from './color-constants';
 import { validateMultiCategoryPalette } from './category-validators';
 

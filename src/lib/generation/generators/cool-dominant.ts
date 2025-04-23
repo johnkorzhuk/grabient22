@@ -148,7 +148,7 @@ export function generateCoolDominantCoeffs(): CosineCoeffs {
 
 export class CoolDominantGenerator extends BasePaletteGenerator {
   constructor(steps: number, options = {}) {
-    super('CoolDominant', steps, options);
+    super('Cool', steps, options);
   }
 
   /**
@@ -204,6 +204,12 @@ export function validateCoolDominantPalette(colors: RGBAVector[]): boolean {
   // Skip validation if too many colors are neutral or too dark
   if (meaningfulColors < colors.length * 0.5) {
     // At least half the colors should have meaningful hue
+    return false;
+  }
+  
+  // Critical check: If there are more warm colors than cool colors,
+  // this is definitely not a cool-dominant palette
+  if (warmCount > coolCount) {
     return false;
   }
 

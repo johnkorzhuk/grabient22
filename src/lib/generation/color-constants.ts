@@ -4,13 +4,8 @@
  * to ensure complete coverage of the color space
  */
 
-import type {
-  PaletteCategory,
-  PaletteCategoryKey,
-  BasicColor,
-  BasicColorName,
-  GlobalModifierBounds,
-} from './types';
+import type { PaletteCategory, BasicColor, BasicColorName, GlobalModifierBounds } from './types';
+import type { PaletteCategoryKey } from '../../validators';
 
 /**
  * Predefined palette categories with their properties
@@ -36,7 +31,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: null,
       frequency: [0.75, 1.25],
     },
-    exclusiveWith: ['Earthy', 'Random'],
+    exclusiveWith: ['Earthy', 'Random', 'Dark', 'Bright'],
   },
   Earthy: {
     key: 'Earthy',
@@ -49,8 +44,8 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
     },
     exclusiveWith: ['Pastel', 'Random'],
   },
-  WarmDominant: {
-    key: 'WarmDominant',
+  Warm: {
+    key: 'Warm',
     description: 'Dominated by warm colors (reds, oranges, yellows).',
     recommendedColorStops: 7,
     initialGlobalsBounds: {
@@ -58,10 +53,10 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.7, 1.6],
       frequency: [0.4, 1.2],
     },
-    exclusiveWith: ['Random', 'Complementary', 'SplitComplementary', 'Tetradic'],
+    exclusiveWith: ['Random', 'Cool', 'Complementary', 'SplitComplementary', 'Tetradic'],
   },
-  CoolDominant: {
-    key: 'CoolDominant',
+  Cool: {
+    key: 'Cool',
     description: 'Dominated by cool colors (blues, greens, purples).',
     recommendedColorStops: 7,
     initialGlobalsBounds: {
@@ -69,7 +64,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.7, 1.6],
       frequency: [0.4, 1.2],
     },
-    exclusiveWith: ['Random', 'WarmDominant', 'Complementary', 'SplitComplementary', 'Tetradic'],
+    exclusiveWith: ['Random', 'Warm', 'Complementary', 'SplitComplementary', 'Tetradic'],
   },
   Complementary: {
     key: 'Complementary',
@@ -80,7 +75,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.8, 1.5],
       frequency: [0.5, 1.2],
     },
-    exclusiveWith: ['Monochromatic', 'Random', 'Tetradic'],
+    exclusiveWith: ['Monochromatic', 'Random', 'Tetradic', 'SplitComplementary'],
   },
   SplitComplementary: {
     key: 'SplitComplementary',
@@ -91,7 +86,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.8, 1.5],
       frequency: [0.5, 1.2],
     },
-    exclusiveWith: ['Monochromatic', 'Random'],
+    exclusiveWith: ['Monochromatic', 'Random', 'Analogous'],
   },
   Tetradic: {
     key: 'Tetradic',
@@ -107,8 +102,8 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       'Random',
       'Complementary',
       'SplitComplementary',
-      'WarmDominant',
-      'CoolDominant',
+      'Warm',
+      'Cool',
     ],
   },
   Neon: {
@@ -120,7 +115,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [1.0, 1.8],
       frequency: [0.5, 1.2],
     },
-    exclusiveWith: ['Earthy', 'Pastel', 'Random', 'High-Value', 'Low-Value'],
+    exclusiveWith: ['Earthy', 'Pastel', 'Random', 'Bright', 'Dark'],
   },
 
   Analogous: {
@@ -132,7 +127,14 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.8, 1.5],
       frequency: [0.5, 1.2],
     },
-    exclusiveWith: ['Monochromatic', 'Random', 'Tetradic', 'SplitComplementary'],
+    exclusiveWith: [
+      'Monochromatic',
+      'Random',
+      'Tetradic',
+      'SplitComplementary',
+      'Analogous',
+      'Complementary',
+    ],
   },
 
   Neutral: {
@@ -147,9 +149,8 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
     exclusiveWith: ['Neon', 'Random', 'Complementary', 'SplitComplementary', 'Tetradic', 'Neon'],
   },
 
-  // High-Value category
-  'High-Value': {
-    key: 'High-Value',
+  Bright: {
+    key: 'Bright',
     description: 'Bright, luminous colors with high brightness values.',
     recommendedColorStops: 7,
     initialGlobalsBounds: {
@@ -157,12 +158,11 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.5, 1.2],
       frequency: [0.3, 1.0],
     },
-    exclusiveWith: ['Low-Value', 'Random', 'Pastel'],
+    exclusiveWith: ['Dark', 'Random', 'Neon'],
   },
 
-  // Low-Value category
-  'Low-Value': {
-    key: 'Low-Value',
+  Dark: {
+    key: 'Dark',
     description: 'Dark, rich colors with low brightness values.',
     recommendedColorStops: 7,
     initialGlobalsBounds: {
@@ -170,7 +170,7 @@ export const PaletteCategories: Record<PaletteCategoryKey, PaletteCategory> = {
       contrast: [0.7, 1.5],
       frequency: [0.3, 1.0],
     },
-    exclusiveWith: ['High-Value', 'Random', 'Pastel'],
+    exclusiveWith: ['Bright', 'Random', 'Neon'],
   },
 
   Random: {

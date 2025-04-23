@@ -1,17 +1,17 @@
 import { observer, use$ } from '@legendapp/state/react';
 import { useSearch } from '@tanstack/react-router';
-import { uiTempStore$ } from '~/stores/ui';
+// import { uiTempStore$ } from '~/stores/ui';
 import { getCollectionStyleCSS, cosineGradient } from '~/lib/cosineGradient';
 import type { CollectionStyle } from '~/types';
 import * as v from 'valibot';
 import { coeffsSchema } from '~/validators';
+import { uiTempStore$ } from '~/stores/ui';
 
 export const GradientPreview = observer(function GradientPreview({
   initialStyle,
   initialSteps,
   initialAngle,
   processedCoeffs,
-  className = 'relative h-full',
   activeIndex,
 }: {
   initialStyle: CollectionStyle;
@@ -49,7 +49,7 @@ export const GradientPreview = observer(function GradientPreview({
 
   return (
     <div
-      className={className}
+      className="relative h-full w-full"
       style={{
         ...getCollectionStyleCSS(styleToUse, gradientColors, angleToUse, activeIndex),
       }}

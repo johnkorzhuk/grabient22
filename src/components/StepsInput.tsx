@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useMatches } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
@@ -24,7 +24,9 @@ export const StepsInput = observer(function NumberInputWithPresets({
   className?: string;
   popoverClassName?: string;
 }) {
-  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
+  const matches = useMatches();
+  const isRandomRoute = matches.some(match => match.routeId === '/_layout/random');
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : (isRandomRoute ? '/random' : '/') });
   const previousValue = usePrevious(value);
   const previewValue = use$(uiTempStore$.previewSteps);
 
@@ -237,6 +239,11 @@ export const StepsInput = observer(function NumberInputWithPresets({
 
   // Determine the display value
   const displayValue = () => {
+    // Handle undefined or null value
+    if (value === undefined || value === null) {
+      return DEFAULT_STEPS.toString();
+    }
+
     if (isFocused) {
       return value === 'auto' ? DEFAULT_STEPS.toString() : value.toString();
     } else {

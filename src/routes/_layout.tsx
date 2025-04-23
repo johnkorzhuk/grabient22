@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, stripSearchParams, useMatches } from '@tanstack/react-router';
-import { AppHeader, APP_HEADER_HEIGHT } from '~/components/AppHeader';
 import * as v from 'valibot';
+import { AppHeader } from '~/components/AppHeader';
+import { Sidebar } from '~/components/Sidebar';
 import {
   rowHeightValidator,
   styleWithAutoValidator,
@@ -8,6 +9,7 @@ import {
   angleWithAutoValidator,
   DEFAULT_ITEM_HEIGHT_ROW,
 } from '~/validators';
+import { Route as SeedRoute } from './_layout/$seed';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -45,20 +47,19 @@ export const Route = createFileRoute('/_layout')({
 
 function RouteComponent() {
   const matches = useMatches();
-  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+  const isSeedRoute = matches.some((match) => match.routeId === SeedRoute.id);
 
   return (
-    <>
-      <AppHeader isSeedRoute={isSeedRoute} />
-      <main
-        className="mx-auto w-full relative overflow-hidden"
-        style={{
-          marginTop: `${APP_HEADER_HEIGHT}px`,
-          height: `calc(100vh - ${APP_HEADER_HEIGHT}px)`,
-        }}
-      >
-        <Outlet />
-      </main>
-    </>
+    <div className="flex flex-col h-screen">
+      <AppHeader />
+      <div className="flex flex-1 overflow-hidden">
+        <div className="hidden md:block">
+          <Sidebar isSeedRoute={isSeedRoute} />
+        </div>
+        <main className="flex-1 overflow-auto">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 }

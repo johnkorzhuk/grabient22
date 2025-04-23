@@ -4,11 +4,8 @@
  * With support for multi-category palette generation
  */
 
-import type {
-  PaletteCategoryKey,
-  PaletteGenerationOptions,
-  PaletteGenerationResult,
-} from './types';
+import type { PaletteGenerationOptions, PaletteGenerationResult } from './types';
+import type { PaletteCategoryKey } from '~/validators';
 import { PaletteCategories, mergeGlobalsBounds, getRecommendedStops } from './color-constants';
 import { DEFAULT_MAX_ATTEMPTS } from './base-generator';
 import type { BasePaletteGenerator } from './base-generator';
@@ -193,9 +190,9 @@ export class PaletteGeneratorFactory {
           return new ComplementaryGenerator(steps, options);
         case 'SplitComplementary':
           return new SplitComplementaryGenerator(steps, options);
-        case 'WarmDominant':
+        case 'Warm':
           return new WarmDominantGenerator(steps, options);
-        case 'CoolDominant':
+        case 'Cool':
           return new CoolDominantGenerator(steps, options);
         case 'Tetradic':
           return new TetradicGenerator(steps, options);
@@ -205,9 +202,9 @@ export class PaletteGeneratorFactory {
           return new AnalogousGenerator(steps, options);
         case 'Neutral':
           return new NeutralGenerator(steps, options);
-        case 'High-Value':
+        case 'Bright':
           return new HighValueGenerator(steps, options);
-        case 'Low-Value':
+        case 'Dark':
           return new LowValueGenerator(steps, options);
         default:
           return new RandomGenerator(steps, options);
@@ -356,4 +353,54 @@ export function validateCategorySet(categories: PaletteCategoryKey[]): boolean {
  */
 export function getIncompatibleCategories(categories: PaletteCategoryKey[]): PaletteCategoryKey[] {
   return PaletteGeneratorFactory.getIncompatibleCategories(categories);
+}
+
+/**
+ * Filter out incompatible categories, preserving priority order
+ * @param categoryList List of categories to filter
+ * @returns Filtered list with incompatible categories removed
+ */
+export function filterIncompatibleCategories(categoryList: PaletteCategoryKey[]): PaletteCategoryKey[] {
+  if (categoryList.length <= 1) {
+    return categoryList; // No conflicts with 0 or 1 category
+  }
+
+  // Create a copy to avoid mutating the original
+  const filteredCategories = [...categoryList];
+  
+  // First, filter out any categories that don't exist in PaletteCategories
+  // This prevents errors when trying to access properties of undefined categories
+  const validCategories = filteredCategories.filter(category => 
+    category && PaletteCategories[category] !== undefined
+  );
+  
+  // If no valid categories remain, return default
+  if (validCategories.length === 0) {
+    return ['Random'];
+  }
+  
+  // Check each pair of categories for compatibility
+  for (let i = 0; i < validCategories.length; i++) {
+    const category = validCategories[i];
+    // We've already filtered out invalid categories, but add a safety check
+    if (!category || !PaletteCategories[category]) continue;
+    
+    // Get exclusivity list for this category
+    const exclusiveWith = PaletteCategories[category].exclusiveWith || [];
+    
+    // Remove any categories that conflict with this one
+    // We prioritize categories that appear earlier in the list
+    for (let j = i + 1; j < validCategories.length; j++) {
+      const otherCategory = validCategories[j];
+      if (!otherCategory) continue; // Skip if undefined or null
+      
+      if (exclusiveWith.includes(otherCategory)) {
+        // Remove the conflicting category
+        validCategories.splice(j, 1);
+        j--; // Adjust index since we removed an element
+      }
+    }
+  }
+  
+  return validCategories.length > 0 ? validCategories : ['Random'];
 }

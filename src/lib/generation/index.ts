@@ -49,6 +49,7 @@ export {
   getGlobalBoundsForCategories,
   validateCategorySet,
   getIncompatibleCategories,
+  filterIncompatibleCategories,
 } from './factory';
 
 // Export base generator class

@@ -1,10 +1,10 @@
-import type { CoeffsRanges, CollectionPreset, CollectionStyle, CosineCoeffs } from '../types';
-import type { Tuple } from '@thi.ng/api';
+import type { CollectionPreset, CollectionStyle, CosineCoeffs } from '../types';
 import type { AppCollection } from '../types';
 import { nanoid } from 'nanoid';
 import { COEFF_PRECISION, PI, coeffsSchema } from '../validators';
 import { serializeCoeffs } from './serialization';
 import * as v from 'valibot';
+import type { Id } from '../../convex/_generated/dataModel';
 
 export const applyGlobals = (
   cosCoeffs: CollectionPreset['coeffs'],
@@ -81,13 +81,13 @@ export const updateCoeffWithInverseGlobal = (
   return newCoeffs;
 };
 
-export const getRandomCoeffsFromRanges = (ranges: CoeffsRanges, showAlpha: boolean = false) => {
-  return ranges.map((range: Tuple<number, 2>) =>
-    Array.from({ length: showAlpha ? 4 : 3 }).map(
-      () => Math.random() * (range[1] - range[0]) + range[0],
-    ),
-  );
-};
+// export const getRandomCoeffsFromRanges = (ranges: CoeffsRanges, showAlpha: boolean = false) => {
+//   return ranges.map((range: Tuple<number, 2>) =>
+//     Array.from({ length: showAlpha ? 4 : 3 }).map(
+//       () => Math.random() * (range[1] - range[0]) + range[0],
+//     ),
+//   );
+// };
 
 export function getCollectionStyleCSS(
   type: CollectionStyle = 'linearGradient',
@@ -473,7 +473,7 @@ function generateModifierVariationsRecursive(
     const collection = {
       ...baseCollection,
       globals: newGlobals,
-      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}`,
+      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}` as Id<'collections'>,
     };
     const colors = cosineGradient(steps, applyGlobals(coeffs, newGlobals));
     return { collection, colors };
@@ -502,7 +502,6 @@ function generateModifierVariationsRecursive(
       // If we've tried both directions 10 times, return best effort
       return collections.map(({ collection }) => ({
         ...collection,
-        // @ts-ignore-next-line
         seed: serializeCoeffs(collection.coeffs, collection.globals),
         style,
         steps,
@@ -524,7 +523,6 @@ function generateModifierVariationsRecursive(
 
   return collections.map(({ collection }) => ({
     ...collection,
-    // @ts-ignore-next-line
     seed: serializeCoeffs(collection.coeffs, collection.globals),
     style,
     steps,
@@ -671,4 +669,24 @@ export function compareGlobals(
   }
 
   return true;
+}
+
+/**
+ * Generates an array of RGBA color vectors from cosine gradient coefficients
+ * 
+ * @param coeffs - The processed cosine gradient coefficients
+ * @param steps - The number of color steps to generate
+ * @returns An array of RGBA vectors with values in the 0-1 range
+ */
+export function generateGradientColors(coeffs: CosineCoeffs, steps: number): [number, number, number, number][] {
+  // Use the cosineGradient function to generate the colors
+  const colors = cosineGradient(steps, coeffs);
+  
+  // Ensure all colors have an alpha value of 1
+  return colors.map(color => {
+    if (color.length === 3) {
+      return [...color, 1] as [number, number, number, number];
+    }
+    return color as [number, number, number, number];
+  });
 }

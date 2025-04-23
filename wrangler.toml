@@ -1,0 +1,12 @@
+# wrangler.toml for Cloudflare Pages deployment
+
+name = "grabient2"
+
+# Pages build output directory - CHANGE THIS LINE
+pages_build_output_dir = "dist"
+
+# Enable Node.js compatibility APIs if your app or dependencies need them
+compatibility_flags = ["nodejs_compat"]
+
+# Use a recent compatibility date
+compatibility_date = "2024-04-18"

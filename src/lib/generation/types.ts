@@ -2,27 +2,7 @@
  * Core types for the palette generation system
  */
 import type { CosineCoeffs, RGBAVector } from '~/types';
-
-/**
- * All valid palette category keys
- * These represent different color harmony and attribute patterns
- * that can be generated for a color palette
- */
-export type PaletteCategoryKey =
-  | 'Monochromatic'
-  | 'Earthy'
-  | 'Pastel'
-  | 'Complementary'
-  | 'Tetradic'
-  | 'Random'
-  | 'WarmDominant'
-  | 'CoolDominant'
-  | 'SplitComplementary'
-  | 'Neon'
-  | 'Analogous'
-  | 'Neutral'
-  | 'High-Value'
-  | 'Low-Value';
+import type { PaletteCategoryKey } from '../../validators';
 
 /**
  * Basic color names for simplified color approximation

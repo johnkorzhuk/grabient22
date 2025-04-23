@@ -19,34 +19,46 @@ export const styleSchema = z.enum(COLLECTION_STYLES);
 export const stepsSchema = z.number().min(2).max(50);
 export const angleSchema = z.number().min(0).max(360);
 
-// Global modifier schemas with constraints
-export const globalModifiersSchema = z
-  .tuple([
-    z.number().min(-1).max(1), // exposure [-1, 1]
-    z.number().min(0).max(2), // contrast [0, 2]
-    z.number().min(0).max(2), // frequency [0, 2]
-    z.number().min(-Math.PI).max(Math.PI), // phase [-π, π]
-  ])
-  .describe('Global modifiers.');
+// // Global modifier schemas with constraints
+// export const globalModifiersSchema = z
+//   .tuple([
+//     z.number().min(-1).max(1), // exposure [-1, 1]
+//     z.number().min(0).max(2), // contrast [0, 2]
+//     z.number().min(0).max(2), // frequency [0, 2]
+//     z.number().min(-Math.PI).max(Math.PI), // phase [-π, π]
+//   ])
+//   .describe('Global modifiers.');
 
 export const collectionSchema = z.object({
   coeffs: gradientCoeffsSchema.describe(
     'Four coefficient vectors: offset (a), amplitude (b), frequency (c), phase (d)',
   ),
-  globals: globalModifiersSchema,
   style: styleSchema.describe('Gradient rendering style (linear/angular, gradient/swatches)'),
   steps: stepsSchema.describe('Number of color stops (2-50)'),
   angle: angleSchema.describe('Gradient rotation in degrees (0-360)'),
 });
 
+export const stepsValidator = zodToConvex(stepsSchema);
+export const styleValidator = zodToConvex(styleSchema);
+export const angleValidator = zodToConvex(angleSchema);
+
 export const Collections = Table('collections', {
   coeffs: zodToConvex(gradientCoeffsSchema),
-  globals: zodToConvex(globalModifiersSchema),
-  steps: zodToConvex(stepsSchema),
-  style: zodToConvex(styleSchema),
-  angle: zodToConvex(angleSchema),
+  steps: stepsValidator,
+  style: styleValidator,
+  angle: angleValidator,
+  seed: v.string(),
+});
+
+export const Likes = Table('likes', {
+  seed: v.string(),
+  userId: v.string(),
+  steps: stepsValidator,
+  style: styleValidator,
+  angle: angleValidator,
 });
 
 export default defineSchema({
-  collections: Collections.table,
+  collections: Collections.table.index('seed', ['seed']),
+  likes: Likes.table.index('userId', ['userId']).index('byUserIdAndSeed', ['userId', 'seed']),
 });

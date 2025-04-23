@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useMatches } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
@@ -24,7 +24,9 @@ export const AngleInput = observer(function AngleInput({
   className?: string;
   popoverClassName?: string;
 }) {
-  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : '/' });
+  const matches = useMatches();
+  const isRandomRoute = matches.some(match => match.routeId === '/_layout/random');
+  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : (isRandomRoute ? '/random' : '/') });
   const previousValue = usePrevious(value);
   const previewAngle = use$(uiTempStore$.previewAngle);
 
@@ -250,6 +252,11 @@ export const AngleInput = observer(function AngleInput({
 
   // Determine the display value
   const displayValue = () => {
+    // Handle undefined or null value
+    if (value === undefined || value === null) {
+      return DEFAULT_ANGLE.toString();
+    }
+    
     if (isFocused) {
       return value === 'auto' ? DEFAULT_ANGLE.toString() : value.toString();
     } else {

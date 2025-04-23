@@ -4,7 +4,8 @@
  */
 
 import type { CosineCoeffs, RGBAVector } from '~/types';
-import type { PaletteCategoryKey, CategoryValidator, PaletteGenerationOptions } from './types';
+import type { CategoryValidator, PaletteGenerationOptions } from './types';
+import type { PaletteCategoryKey } from '~/validators';
 import { BasePaletteGenerator } from './base-generator';
 
 // Import coefficient generation functions from each generator
@@ -14,6 +15,7 @@ import { generateEarthyCoeffs } from './generators/earthy';
 import { generateComplementaryCoeffs } from './generators/complementary';
 import { generateRandomCoeffs } from './color-utils';
 import { generateWarmDominantCoeffs } from './generators/warm-dominant';
+import { generateCoolDominantCoeffs } from './generators/cool-dominant';
 import { generateSplitComplementaryCoeffs } from './generators/split-complementary';
 import { generateTetradicCoeffs } from './generators/tetradic';
 import { generateNeonCoeffs } from './generators/neon';
@@ -72,10 +74,10 @@ export class MultiCategoryGenerator extends BasePaletteGenerator {
     }
 
     if (
-      this.allCategories.includes('WarmDominant') &&
+      this.allCategories.includes('Warm') &&
       this.allCategories.includes('Monochromatic')
     ) {
-      // For WarmDominant+Monochromatic, use Monochromatic as the base
+      // For Warm+Monochromatic, use Monochromatic as the base
       return generateMonochromaticCoeffs();
     }
 
@@ -88,8 +90,10 @@ export class MultiCategoryGenerator extends BasePaletteGenerator {
         return generateEarthyCoeffs();
       case 'Complementary':
         return generateComplementaryCoeffs();
-      case 'WarmDominant':
+      case 'Warm':
         return generateWarmDominantCoeffs();
+      case 'Cool':
+        return generateCoolDominantCoeffs();
       case 'SplitComplementary':
         return generateSplitComplementaryCoeffs();
       case 'Tetradic':
@@ -100,9 +104,9 @@ export class MultiCategoryGenerator extends BasePaletteGenerator {
         return generateAnalogousCoeffs();
       case 'Neutral':
         return generateNeutralCoeffs();
-      case 'High-Value':
+      case 'Bright':
         return generateHighValueCoeffs();
-      case 'Low-Value':
+      case 'Dark':
         return generateLowValueCoeffs();
       case 'Random':
       default:

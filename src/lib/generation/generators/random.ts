@@ -4,7 +4,7 @@
  */
 
 import type { CosineCoeffs, RGBAVector } from '~/types';
-import type { PaletteCategoryKey } from '../types';
+import type { PaletteCategoryKey } from '~/validators';
 import { BasePaletteGenerator } from '../base-generator';
 import { validateMultiCategoryPalette } from '../category-validators';
 import { PaletteCategories } from '../color-constants';
@@ -35,15 +35,15 @@ function selectRandomCategories(): PaletteCategoryKey[] {
     'Pastel',
     'Earthy',
     'Complementary',
-    'WarmDominant',
-    'CoolDominant',
+    'Warm',
+    'Cool',
     'SplitComplementary',
     'Tetradic',
     'Neon',
     'Analogous',
     'Neutral',
-    'High-Value',
-    'Low-Value',
+    'Bright',
+    'Dark',
   ];
 
   // Decide how many categories to use (1-3)
@@ -117,9 +117,9 @@ function getCoefficientGenerator(category: PaletteCategoryKey): () => CosineCoef
       return generateEarthyCoeffs;
     case 'Complementary':
       return generateComplementaryCoeffs;
-    case 'WarmDominant':
+    case 'Warm':
       return generateWarmDominantCoeffs;
-    case 'CoolDominant':
+    case 'Cool':
       return generateCoolDominantCoeffs;
     case 'SplitComplementary':
       return generateSplitComplementaryCoeffs;
@@ -131,9 +131,9 @@ function getCoefficientGenerator(category: PaletteCategoryKey): () => CosineCoef
       return generateAnalogousCoeffs;
     case 'Neutral':
       return generateNeutralCoeffs;
-    case 'High-Value':
+    case 'Bright':
       return generateHighValueCoeffs;
-    case 'Low-Value':
+    case 'Dark':
       return generateLowValueCoeffs;
     default:
       // Fallback to monochromatic
@@ -197,15 +197,15 @@ export function generateRandomCoeffs(): CosineCoeffs {
     'Pastel',
     'Earthy',
     'Complementary',
-    'WarmDominant',
-    'CoolDominant',
+    'Warm',
+    'Cool',
     'SplitComplementary',
     'Tetradic',
     'Neon',
     'Analogous',
     'Neutral',
-    'High-Value',
-    'Low-Value',
+    'Bright',
+    'Dark',
   ];
 
   const randomIndex = Math.floor(Math.random() * allCategories.length);

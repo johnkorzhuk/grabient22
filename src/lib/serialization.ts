@@ -28,7 +28,7 @@ function formatNumber(num: number): string {
 }
 
 /**
- * Serializes coefficient data to a URL-friendly string using Valibot validation and LZ-String compression
+ * Serializes coefficient data to a URL-friendly string
  */
 export function serializeCoeffs(coeffs: CosineCoeffs, globals: GlobalModifiers): string {
   const validatedCoeffs = v.parse(coeffsSchema, coeffs);
