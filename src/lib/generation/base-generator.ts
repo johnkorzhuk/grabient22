@@ -189,9 +189,6 @@ export abstract class BasePaletteGenerator {
       }
     }
 
-    // Could not generate a valid palette with the given constraints
-    console.warn(`Failed to generate ${this.category} palette after ${this.maxAttempts} attempts.`);
-
     return null;
   }
 
