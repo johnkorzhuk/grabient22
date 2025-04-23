@@ -235,49 +235,47 @@ export const AppHeader = observer(function AppHeader() {
 
       {/* Mobile controls - only visible below md breakpoint */}
       <div className="md:hidden px-4 pb-2 pt-1">
-        {/* Mobile controls layout - only visible below md breakpoint */}
-        {shouldShowControls && (
-          <div className="flex items-center justify-between w-full">
-            {/* Category carousel for mobile - only show on random route */}
-            {isRandomRoute && (
-              <div className="flex-grow overflow-hidden mr-2">
-                <CategorySelector />
-              </div>
-            )}
+        <div className="flex items-center justify-between w-full">
+          {/* Category carousel for mobile - only show on random route */}
+          {shouldShowControls && isRandomRoute && (
+            <div className="flex-grow overflow-hidden mr-2">
+              <CategorySelector />
+            </div>
+          )}
 
-            {/* Palette categories for seed route */}
-            {isSeedRoute && !isRandomRoute && seedPaletteColors.length > 0 && (
-              <div className="flex-grow overflow-hidden mr-2">
-                <PaletteCategoryDisplay colors={seedPaletteColors} />
-              </div>
-            )}
+          {/* Palette categories for seed route */}
+          {shouldShowControls && isSeedRoute && !isRandomRoute && seedPaletteColors.length > 0 && (
+            <div className="flex-grow overflow-hidden mr-2">
+              <PaletteCategoryDisplay colors={seedPaletteColors} />
+            </div>
+          )}
 
-            {/* Control buttons in a flex container */}
-            <div
-              className={cn('flex items-center gap-2 flex-shrink-0', {
-                'ml-auto': isSeedRoute && !isRandomRoute, // Push to right when on seed route
-              })}
-            >
-              {/* Regenerate button with tooltip - only show on random route */}
-              {isRandomRoute && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRegenerate}
-                        className="cursor-pointer h-8 w-8 p-1"
-                      >
-                        <RefreshCw className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Regenerate Palettes</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+          {/* Control buttons in a flex container */}
+          <div
+            className={cn('flex items-center gap-2 flex-shrink-0', {
+              'ml-auto': !shouldShowControls || (isSeedRoute && !isRandomRoute), // Push to right when on seed route or non-control routes
+            })}
+          >
+            {/* Regenerate button with tooltip - only show on random route */}
+            {shouldShowControls && isRandomRoute && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRegenerate}
+                      className="cursor-pointer h-8 w-8 p-1"
+                    >
+                      <RefreshCw className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Regenerate Palettes</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
 
               {/* Settings button with tooltip */}
               <Popover open={open} onOpenChange={setOpen}>
@@ -325,7 +323,6 @@ export const AppHeader = observer(function AppHeader() {
               </Popover>
             </div>
           </div>
-        )}
       </div>
     </header>
   );

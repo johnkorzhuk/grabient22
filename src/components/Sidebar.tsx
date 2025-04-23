@@ -18,12 +18,12 @@ type SidebarProps = {
 
 // Category selector component
 const CategorySelector = observer(function CategorySelector() {
-  const search = useSearch({
+  const randomSearch = useSearch({
     from: '/_layout/random',
   });
 
   let selectedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
-  const searchCategories = search.categories ?? DEFAULT_CATEGORIES;
+  const searchCategories = randomSearch.categories ?? DEFAULT_CATEGORIES;
   const isCategoriesEqual =
     selectedCategories.length === searchCategories.length &&
     selectedCategories.every((c, i) => c === searchCategories[i]);
@@ -123,10 +123,7 @@ const CategorySelector = observer(function CategorySelector() {
 
     // Update URL with new categories using TanStack Router
     navigate({
-      search: {
-        ...search,
-        categories: newCategories,
-      },
+      search: (s) => s,
       replace: true,
     });
   };

@@ -79,11 +79,11 @@ function CollectionRoute() {
   }, [likedSeeds, processLikedSeeds]);
 
   // Manual function to load more
-  const handleLoadMore = () => {
-    if (status === 'CanLoadMore') {
-      loadMore(PAGE_SIZE);
-    }
-  };
+  // const handleLoadMore = () => {
+  //   if (status === 'CanLoadMore') {
+  //     loadMore(PAGE_SIZE);
+  //   }
+  // };
 
   // if (isLoading || status === 'LoadingFirstPage') {
   //   return (
@@ -115,25 +115,6 @@ function CollectionRoute() {
           isCollectionRoute={true}
         />
       </div>
-
-      {/* Manual load more button instead of auto-loading */}
-      {status !== 'Exhausted' && (
-        <div className="py-6 text-center">
-          {status === 'LoadingMore' ? (
-            <div className="flex flex-col items-center">
-              <div className="spinner mb-2"></div>
-              <p>Loading more collections...</p>
-            </div>
-          ) : (
-            <button
-              onClick={handleLoadMore}
-              className="px-6 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md transition-colors"
-            >
-              Load More Collections
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

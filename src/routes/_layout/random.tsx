@@ -85,12 +85,10 @@ const GeneratePage = observer(function GeneratePage() {
   useEffect(() => {
     // Always update the route search parameters to match stored categories
     navigate({
-      search: {
+      search: (s) => ({
+        ...s,
         categories: storedCategories,
-        steps: steps,
-        angle: angle,
-        style: style,
-      },
+      }),
       replace: true,
     });
   }, [storedCategories]);
