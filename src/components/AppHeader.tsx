@@ -1,5 +1,5 @@
 import { ThemeToggle } from './theme/ThemeToggle';
-import { Link, useLocation, useSearch, useNavigate } from '@tanstack/react-router';
+import { Link, useLocation, useNavigate, useSearch } from '@tanstack/react-router';
 import { StyleSelect } from './StyleSelect';
 import { StepsInput } from './StepsInput';
 import { AngleInput } from './AngleInput';
@@ -15,7 +15,7 @@ import { Badge } from './ui/badge';
 import { cn } from '~/lib/utils';
 import { PALETTE_CATEGORIES, getCategoryDisplayName } from '~/validators';
 import type { PaletteCategoryKey } from '~/validators';
-import { paletteStore$, REGENERATE_PALETTES_EVENT } from '~/stores/palette';
+import { DEFAULT_CATEGORIES, paletteStore$, REGENERATE_PALETTES_EVENT } from '~/stores/palette';
 import { observer, use$ } from '@legendapp/state/react';
 import { PaletteCategories } from '~/lib/generation';
 import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
@@ -46,26 +46,16 @@ function CategoryBadge({
 }
 // Category selector component with carousel for mobile
 const CategorySelector = observer(function CategorySelector() {
-  const location = useLocation();
-  const isRandomRoute = location.pathname === '/random';
+  const search = useSearch({
+    from: '/_layout/random',
+  });
 
-  // Only try to get categories when on the random route
-  let selectedCategories: PaletteCategoryKey[] = ['Random'];
-
-  if (isRandomRoute) {
-    try {
-      const { categories } = useSearch({
-        from: '/_layout/random',
-      });
-      if (categories) {
-        selectedCategories = categories;
-      }
-    } catch (error) {
-      // Fallback to default if there's an error
-      console.debug('Random route not active yet, using default categories');
-    }
-  }
-
+  let selectedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
+  const searchCategories = search.categories ?? DEFAULT_CATEGORIES;
+  const isCategoriesEqual =
+    selectedCategories.length === searchCategories.length &&
+    selectedCategories.every((c, i) => c === searchCategories[i]);
+  if (!isCategoriesEqual) selectedCategories = searchCategories;
   // Use the correct route for navigation
   const navigate = useNavigate({
     from: '/random',
@@ -138,6 +128,7 @@ const CategorySelector = observer(function CategorySelector() {
     // Update URL with new categories using TanStack Router
     navigate({
       search: {
+        // ...search,
         categories: newCategories,
       },
       replace: true,

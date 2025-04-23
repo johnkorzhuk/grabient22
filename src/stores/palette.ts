@@ -27,6 +27,8 @@ interface WorkerAPI {
   >;
 }
 
+export const DEFAULT_CATEGORIES = ['Random'] as PaletteCategoryKey[];
+
 // Known optimal category orderings for consistent results
 // The key is a comma-separated list of categories, sorted alphabetically
 const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {

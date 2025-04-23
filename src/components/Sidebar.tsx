@@ -7,7 +7,7 @@ import { PaletteCategories } from '~/lib/generation';
 import { PALETTE_CATEGORIES } from '~/validators';
 import type { PaletteCategoryKey } from '~/validators';
 import { observer, use$ } from '@legendapp/state/react';
-import { paletteStore$, REGENERATE_PALETTES_EVENT } from '~/stores/palette';
+import { DEFAULT_CATEGORIES, paletteStore$, REGENERATE_PALETTES_EVENT } from '~/stores/palette';
 import { PaletteCategorySidebar } from './PaletteCategorySidebar';
 import { CategoryBadge } from './CategoryBadge';
 import { Navigation } from './Navigation';
@@ -18,25 +18,34 @@ type SidebarProps = {
 
 // Category selector component
 const CategorySelector = observer(function CategorySelector() {
-  const location = useLocation();
-  const isRandomRoute = location.pathname === '/random';
+  const search = useSearch({
+    from: '/_layout/random',
+  });
 
-  // Only try to get categories when on the random route
-  let selectedCategories: PaletteCategoryKey[] = ['Random'];
+  let selectedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
+  const searchCategories = search.categories ?? DEFAULT_CATEGORIES;
+  const isCategoriesEqual =
+    selectedCategories.length === searchCategories.length &&
+    selectedCategories.every((c, i) => c === searchCategories[i]);
+  if (!isCategoriesEqual) selectedCategories = searchCategories;
+  // const searchIsDefault = search.categories.length === 1 && search.categories[0] === 'Random';
+  // if (search.categories.every((c) => c === 'Random')) {
+  //   selectedCategories = DEFAULT_CATEGORY_ORDER;
+  // }
 
-  if (isRandomRoute) {
-    try {
-      const { categories } = useSearch({
-        from: '/_layout/random',
-      });
-      if (categories) {
-        selectedCategories = categories;
-      }
-    } catch (error) {
-      // Fallback to default if there's an error
-      console.debug('Random route not active yet, using default categories');
-    }
-  }
+  // if (isRandomRoute) {
+  //   try {
+  //     const { categories } = useSearch({
+  //       from: '/_layout/random',
+  //     });
+  //     if (categories) {
+  //       selectedCategories = categories;
+  //     }
+  //   } catch (error) {
+  //     // Fallback to default if there's an error
+  //     console.debug('Random route not active yet, using default categories');
+  //   }
+  // }
 
   const navigate = useNavigate({
     from: '/random',
@@ -110,12 +119,14 @@ const CategorySelector = observer(function CategorySelector() {
       }
     }
 
+    paletteStore$.categories.set(newCategories);
+
     // Update URL with new categories using TanStack Router
     navigate({
-      search: (prev) => ({
-        ...prev,
+      search: {
+        ...search,
         categories: newCategories,
-      }),
+      },
       replace: true,
     });
   };

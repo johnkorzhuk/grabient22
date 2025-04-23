@@ -19,6 +19,7 @@ import {
   paletteStore$,
   generatePalettesForCategories,
   REGENERATE_PALETTES_EVENT,
+  DEFAULT_CATEGORIES,
 } from '~/stores/palette';
 import type { WorkerApi } from '~/workers/palette-generator.worker';
 
@@ -37,21 +38,13 @@ export const Route = createFileRoute('/_layout/random')({
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
-  beforeLoad() {
-    // Validate categories
-    // const { categories = [] } = search;
-    // // If no categories are selected, redirect to default
-    // if (categories.length === 0) {
-    //   throw redirect({
-    //     to: '/random',
-    //     search: {
-    //       categories: ['Random'],
-    //     },
-    //   });
-    // }
+  beforeLoad({ search }) {
+    // Always ensure categories are set in the store
+    paletteStore$.categories.set(search.categories || DEFAULT_CATEGORIES);
   },
   onLeave: ({ search }) => {
-    paletteStore$.categories.set(search.categories);
+    // Ensure categories are preserved when leaving
+    paletteStore$.categories.set(search.categories || DEFAULT_CATEGORIES);
   },
 });
 
@@ -66,7 +59,6 @@ const GeneratePage = observer(function GeneratePage() {
   const layoutSearch = useSearch({
     from: '/_layout',
   });
-  const storedCategories = use$(paletteStore$.categories);
   // Get categories from the current route's search params
   const routeSearch = useSearch({
     from: Route.id,
@@ -75,26 +67,36 @@ const GeneratePage = observer(function GeneratePage() {
     from: '/random',
   });
 
-  const { categories = ['Random'] } = routeSearch;
+  // During initial render, use the URL state to initialize the store
+  useEffect(() => {
+    paletteStore$.categories.set(routeSearch.categories || DEFAULT_CATEGORIES);
+  }, []);
+
+  const storedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
+  const { categories = storedCategories } = routeSearch;
   const angle = layoutSearch.angle === 'auto' ? DEFAULT_ANGLE : layoutSearch.angle;
   const steps = layoutSearch.steps === 'auto' ? DEFAULT_STEPS : layoutSearch.steps;
   const style = layoutSearch.style === 'auto' ? DEFAULT_STYLE : layoutSearch.style;
 
   // Use the cached palettes from the store
-  const cacheKey = [...categories].sort().join(',');
+  // For Random category, always use 'Random' as the cache key to ensure consistent caching
+  const cacheKey =
+    categories.length === 1 && categories[0] === 'Random'
+      ? 'Random'
+      : [...categories].sort().join(',');
   const cachedPalettes = use$(paletteStore$.cachedPalettes[cacheKey]) || [];
 
   // Keep local state for collections to ensure proper rendering
   const [collections, setCollections] = useState<AppCollection[]>([]);
 
   useEffect(() => {
-    if (storedCategories.length === 1 && storedCategories[0] === 'Random') {
-      return;
-    }
-
+    // Always update the route search parameters to match stored categories
     navigate({
       search: {
         categories: storedCategories,
+        steps: steps,
+        angle: angle,
+        style: style,
       },
       replace: true,
     });
@@ -107,9 +109,9 @@ const GeneratePage = observer(function GeneratePage() {
       const processedPalettes = cachedPalettes.map((palette) => ({
         ...palette,
         // Ensure these properties exist with defaults if they're undefined
-        steps: palette.steps ?? steps,
-        angle: palette.angle ?? angle,
-        style: palette.style ?? style,
+        steps,
+        angle,
+        style,
       }));
       setCollections(processedPalettes);
     }

@@ -360,40 +360,42 @@ export function getIncompatibleCategories(categories: PaletteCategoryKey[]): Pal
  * @param categoryList List of categories to filter
  * @returns Filtered list with incompatible categories removed
  */
-export function filterIncompatibleCategories(categoryList: PaletteCategoryKey[]): PaletteCategoryKey[] {
+export function filterIncompatibleCategories(
+  categoryList: PaletteCategoryKey[],
+): PaletteCategoryKey[] {
   if (categoryList.length <= 1) {
     return categoryList; // No conflicts with 0 or 1 category
   }
 
   // Create a copy to avoid mutating the original
   const filteredCategories = [...categoryList];
-  
+
   // First, filter out any categories that don't exist in PaletteCategories
   // This prevents errors when trying to access properties of undefined categories
-  const validCategories = filteredCategories.filter(category => 
-    category && PaletteCategories[category] !== undefined
+  const validCategories = filteredCategories.filter(
+    (category) => category && PaletteCategories[category] !== undefined,
   );
-  
+
   // If no valid categories remain, return default
   if (validCategories.length === 0) {
     return ['Random'];
   }
-  
+
   // Check each pair of categories for compatibility
   for (let i = 0; i < validCategories.length; i++) {
     const category = validCategories[i];
     // We've already filtered out invalid categories, but add a safety check
     if (!category || !PaletteCategories[category]) continue;
-    
+
     // Get exclusivity list for this category
     const exclusiveWith = PaletteCategories[category].exclusiveWith || [];
-    
+
     // Remove any categories that conflict with this one
     // We prioritize categories that appear earlier in the list
     for (let j = i + 1; j < validCategories.length; j++) {
       const otherCategory = validCategories[j];
       if (!otherCategory) continue; // Skip if undefined or null
-      
+
       if (exclusiveWith.includes(otherCategory)) {
         // Remove the conflicting category
         validCategories.splice(j, 1);
@@ -401,6 +403,6 @@ export function filterIncompatibleCategories(categoryList: PaletteCategoryKey[])
       }
     }
   }
-  
+
   return validCategories.length > 0 ? validCategories : ['Random'];
 }
