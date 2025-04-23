@@ -1,11 +1,4 @@
-import {
-  createFileRoute,
-  redirect,
-  retainSearchParams,
-  stripSearchParams,
-  useNavigate,
-  useSearch,
-} from '@tanstack/react-router';
+import { createFileRoute, stripSearchParams, useNavigate, useSearch } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import type { PaletteCategoryKey } from '~/validators';
 import * as v from 'valibot';
@@ -27,7 +20,7 @@ import type { WorkerApi } from '~/workers/palette-generator.worker';
 
 // Define search defaults specific to the random route
 const SEARCH_DEFAULTS = {
-  categories: ['Random'] as PaletteCategoryKey[],
+  categories: DEFAULT_CATEGORIES,
 };
 
 export const Route = createFileRoute('/_layout/random')({

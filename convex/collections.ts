@@ -14,6 +14,7 @@ import { deserializeCoeffs, serializeCoeffs } from '../src/lib/serialization';
 import type { CosineCoeffs } from '../src/types';
 
 import schema, { angleValidator, stepsValidator, styleValidator } from './schema';
+import { paginationOptsValidator } from 'convex/server';
 
 export const list = query({
   handler: async (ctx) => {
@@ -94,14 +95,14 @@ export const checkUserLikedSeed = query({
 export const getAllLikedSeedsByUser = query({
   args: {
     userId: v.string(),
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    const likes = await ctx.db
+    return await ctx.db
       .query('likes')
       .withIndex('userId', (q) => q.eq('userId', args.userId))
-      .collect();
-
-    return likes;
+      .order('desc') // Most recent first
+      .paginate(args.paginationOpts);
   },
 });
 

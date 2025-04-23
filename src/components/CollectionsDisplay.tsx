@@ -14,21 +14,33 @@ type CollectionsDisplayProps = {
   collections: AppCollection[];
   isSeedRoute?: boolean;
   isRandomRoute?: boolean;
+  isCollectionRoute?: boolean;
 };
 
 export const CollectionsDisplay = observer(function CollectionsDisplay({
   collections,
   isSeedRoute,
   isRandomRoute,
+  isCollectionRoute,
 }: CollectionsDisplayProps) {
-  const paramsResult = useParams({
-    from: isRandomRoute ? '/_layout/random' : isSeedRoute ? '/_layout/$seed' : '/_layout/',
-  });
-  const { seed } = paramsResult && 'seed' in paramsResult ? paramsResult : { seed: undefined };
-  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : isRandomRoute ? '/random' : '/' });
-  const { rowHeight } = useSearch({
-    from: '/_layout',
-  });
+  // We need to handle each case separately to satisfy TypeScript's type checking
+  let seed: string | undefined = undefined;
+  let navigate;
+
+  if (isSeedRoute) {
+    const params = useParams({ from: '/_layout/$seed' });
+    seed = params.seed;
+    navigate = useNavigate({ from: '/$seed' });
+  } else if (isRandomRoute) {
+    navigate = useNavigate({ from: '/random' });
+  } else if (isCollectionRoute) {
+    navigate = useNavigate({ from: '/collection' });
+  } else {
+    // Default to the root route
+    navigate = useNavigate({ from: '/' });
+  }
+
+  const { rowHeight } = useSearch({ from: '/_layout' });
 
   const previewSeed = use$(uiTempStore$.previewSeed);
   const [localRowHeight, setLocalRowHeight] = useState(rowHeight);
@@ -74,10 +86,11 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
         {collections.map((collection, index) => {
           const isCurrentSeed = seed !== undefined && collection.seed === seed;
           // Make sure coeffs and globals exist before applying
-          const processedCoeffs = collection.coeffs && collection.globals ? 
-            applyGlobals(collection.coeffs, collection.globals) : 
-            null;
-            
+          const processedCoeffs =
+            collection.coeffs && collection.globals
+              ? applyGlobals(collection.coeffs, collection.globals)
+              : null;
+
           if (!processedCoeffs) {
             return null; // Skip rendering this item
           }

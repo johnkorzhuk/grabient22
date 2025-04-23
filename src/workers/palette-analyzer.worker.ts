@@ -10,9 +10,7 @@ export interface PaletteAnalyzerResult {
 }
 
 export interface WorkerApi {
-  analyzePalette: (
-    colors: RGBAVector[],
-  ) => PaletteAnalyzerResult;
+  analyzePalette: (colors: RGBAVector[]) => PaletteAnalyzerResult;
 }
 
 /**
@@ -23,24 +21,24 @@ export interface WorkerApi {
 function analyzePalette(colors: RGBAVector[]): PaletteAnalyzerResult {
   // Skip the Random category since it's not a real category (always returns true)
   const categoriesToCheck = Object.keys(CATEGORY_VALIDATORS).filter(
-    key => key !== 'Random'
+    (key) => key !== 'Random',
   ) as PaletteCategoryKey[];
-  
+
   const matchingCategories: PaletteCategoryKey[] = [];
   const matchScores: Record<PaletteCategoryKey, number> = {} as Record<PaletteCategoryKey, number>;
-  
+
   // Check each category validator
   for (const category of categoriesToCheck) {
     const validator = CATEGORY_VALIDATORS[category];
-    
+
     try {
       // For binary validators, we get a simple true/false
       const isMatch = validator(colors);
-      
+
       // Store the result (1 for match, 0 for no match)
       const score = isMatch ? 1 : 0;
       matchScores[category] = score;
-      
+
       // If it's a match, add to matching categories
       if (isMatch) {
         matchingCategories.push(category);
@@ -50,10 +48,10 @@ function analyzePalette(colors: RGBAVector[]): PaletteAnalyzerResult {
       matchScores[category] = 0;
     }
   }
-  
+
   return {
     categories: matchingCategories,
-    matchScores
+    matchScores,
   };
 }
 
