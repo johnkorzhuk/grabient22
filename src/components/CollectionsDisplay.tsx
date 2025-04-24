@@ -42,7 +42,6 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   }
 
   const { rowHeight, layout = 'row' } = useSearch({ from: '/_layout' });
-
   const previewSeed = use$(uiTempStore$.previewSeed);
   const [localRowHeight, setLocalRowHeight] = useState(rowHeight);
 
@@ -97,16 +96,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
         {collections.map((collection, index) => {
           const isCurrentSeed = seed !== undefined && collection.seed === seed;
           // Make sure coeffs and globals exist before applying
-          const processedCoeffs =
-            collection.coeffs && collection.globals
-              ? applyGlobals(collection.coeffs, collection.globals)
-              : null;
+          const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
 
-          if (!processedCoeffs) {
-            return null; // Skip rendering this item
-          }
-
-          if (isCurrentSeed && !isGridLayout) {
+          if (isCurrentSeed) {
             return (
               <li
                 key={collection._id}
@@ -135,7 +127,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 search={({ categories, ...search }) => {
                   return search;
                 }}
-                replace={isSeedRoute}
+                // replace={isSeedRoute}
                 aria-label={`Gradient ${index + 1}`}
                 className="block h-full"
               >
