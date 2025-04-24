@@ -4,32 +4,23 @@ import { Button } from '~/components/ui/button';
 import { COLLECTION_LAYOUTS } from '~/validators';
 import { LayoutGrid, Rows } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
-import { Route as SeedRoute } from '~/routes/_layout/$seed';
+
 
 export function LayoutToggle() {
   const { layout } = useSearch({ from: '/_layout' });
-  let navigateOptions = { from: '/' };
   const location = useLocation();
-
   const matches = useMatches();
-  const isSeedRoute = matches.some((match) => match.routeId === SeedRoute.id);
-  // // Keep the current pathname but update the search params
-  if (location.pathname === '/random') {
-    navigateOptions = {
-      from: '/random',
-    };
-  } else if (location.pathname === '/collection') {
-    navigateOptions = {
-      from: '/collection',
-    };
-  } else if (isSeedRoute) {
-    navigateOptions = {
-      from: '/$seed',
-    };
-  }
+  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
 
-  //  @ts-ignore-next-line TODO: do this right
-  const navigate = useNavigate(navigateOptions);
+  const from = isSeedRoute
+    ? '/$seed'
+    : location.pathname === '/random'
+    ? '/random'
+    : location.pathname === '/collection'
+    ? '/collection'
+    : '/';
+
+  const navigate = useNavigate({ from });
 
   // Handle layout toggle
   const handleLayoutChange = (newLayout: (typeof COLLECTION_LAYOUTS)[number]) => {

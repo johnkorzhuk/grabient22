@@ -177,18 +177,18 @@ export const Sidebar = observer(function Sidebar({ isSeedRoute }: SidebarProps) 
       <div className="space-y-1">
         <h3 className="text-xs font-medium text-muted-foreground mb-2">Style</h3>
         <div>
-          <StyleSelect value={style} isSeedRoute={isSeedRoute} />
+          <StyleSelect value={style} />
         </div>
       </div>
 
       <div className="flex gap-2">
         <div className="w-1/2 space-y-1">
           <h3 className="text-xs font-medium text-muted-foreground mb-2">Steps</h3>
-          <StepsInput value={steps} isSeedRoute={isSeedRoute} />
+          <StepsInput value={steps} />
         </div>
         <div className="w-1/2 space-y-1">
           <h3 className="text-xs font-medium text-muted-foreground mb-2">Angle</h3>
-          <AngleInput value={angle} isSeedRoute={isSeedRoute} />
+          <AngleInput value={angle} />
         </div>
       </div>
 

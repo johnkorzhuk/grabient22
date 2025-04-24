@@ -46,7 +46,7 @@ export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator
 
 // Define display layout options
 export const COLLECTION_LAYOUTS = ['row', 'grid'] as const;
-export const DEFAULT_LAYOUT: (typeof COLLECTION_LAYOUTS)[number] = 'row';
+export const DEFAULT_LAYOUT = 'grid' as const;
 export const layoutValidator = v.union(COLLECTION_LAYOUTS.map((l) => v.literal(l)));
 
 export const DEFAULT_ITEM_HEIGHT_ROW = 20;

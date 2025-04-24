@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate, useMatches } from '@tanstack/react-router';
+import { useNavigate, useMatches, useLocation } from '@tanstack/react-router';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
@@ -7,26 +7,35 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
-import { DEFAULT_STEPS, MAX_STEPS, MIN_STEPS, stepsWithAutoValidator } from '~/validators';
-import * as v from 'valibot';
+import { DEFAULT_STEPS, MAX_STEPS, MIN_STEPS } from '~/validators';
 
 const presets = [3, 5, 8, 13, 21, 34];
 const step = 1;
 
-export const StepsInput = observer(function NumberInputWithPresets({
-  value,
-  isSeedRoute = false,
-  className,
-  popoverClassName,
-}: {
-  value: v.InferOutput<typeof stepsWithAutoValidator>;
-  isSeedRoute: boolean;
+type StepsInputProps = {
+  value: number | 'auto';
   className?: string;
   popoverClassName?: string;
-}) {
+};
+
+export const StepsInput = observer(function NumberInputWithPresets({
+  value,
+  className,
+  popoverClassName,
+}: StepsInputProps) {
+  const location = useLocation();
   const matches = useMatches();
-  const isRandomRoute = matches.some(match => match.routeId === '/_layout/random');
-  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : (isRandomRoute ? '/random' : '/') });
+  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+
+  const from = isSeedRoute
+    ? '/$seed'
+    : location.pathname === '/random'
+    ? '/random'
+    : location.pathname === '/collection'
+    ? '/collection'
+    : '/';
+
+  const navigate = useNavigate({ from });
   const previousValue = usePrevious(value);
   const previewValue = use$(uiTempStore$.previewSteps);
 

@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate, useMatches } from '@tanstack/react-router';
+import { useNavigate, useMatches, useLocation } from '@tanstack/react-router';
 import * as v from 'valibot';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
@@ -19,20 +19,30 @@ const STYLE_LABELS: Record<CollectionStyle, string> = {
   angularSwatches: 'Angular Swatches',
 };
 
-export const StyleSelect = observer(function TypeSelect({
-  value,
-  isSeedRoute = false,
-  className,
-  popoverClassName,
-}: {
+type StyleSelectProps = {
   value: SelectCollectionStyle;
-  isSeedRoute: boolean;
   className?: string;
   popoverClassName?: string;
-}) {
+};
+
+export const StyleSelect = observer(function StyleSelect({
+  value,
+  className,
+  popoverClassName,
+}: StyleSelectProps) {
+  const location = useLocation();
   const matches = useMatches();
-  const isRandomRoute = matches.some(match => match.routeId === '/_layout/random');
-  const navigate = useNavigate({ from: isSeedRoute ? '/$seed' : (isRandomRoute ? '/random' : '/') });
+  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+
+  const from = isSeedRoute
+    ? '/$seed'
+    : location.pathname === '/random'
+    ? '/random'
+    : location.pathname === '/collection'
+    ? '/collection'
+    : '/';
+
+  const navigate = useNavigate({ from });
   const previewValue = use$(uiTempStore$.previewStyle);
 
   const handleValueClick = (clickedStyle: SelectCollectionStyle) => {
