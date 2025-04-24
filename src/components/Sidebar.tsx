@@ -11,10 +11,7 @@ import { DEFAULT_CATEGORIES, paletteStore$, REGENERATE_PALETTES_EVENT } from '~/
 import { PaletteCategorySidebar } from './PaletteCategorySidebar';
 import { CategoryBadge } from './CategoryBadge';
 import { Navigation } from './Navigation';
-
-type SidebarProps = {
-  isSeedRoute: boolean;
-};
+import { LayoutToggle } from '~/components/LayoutToggle';
 
 // Category selector component
 const CategorySelector = observer(function CategorySelector() {
@@ -154,6 +151,10 @@ const CategorySelector = observer(function CategorySelector() {
   );
 });
 
+type SidebarProps = {
+  isSeedRoute: boolean;
+};
+
 export const Sidebar = observer(function Sidebar({ isSeedRoute }: SidebarProps) {
   const { style, steps, angle } = useSearch({
     from: '/_layout',
@@ -167,7 +168,7 @@ export const Sidebar = observer(function Sidebar({ isSeedRoute }: SidebarProps) 
   const seedPaletteColors = use$(paletteStore$.seedPaletteColors);
 
   return (
-    <aside className="w-[200px] border-r border-border bg-background px-4 py-2 flex flex-col gap-2">
+    <aside className="w-[200px] h-full border-r border-border bg-background px-4 py-2 flex flex-col gap-2">
       {/* Navigation Links */}
       <div className="space-y-1">
         <Navigation />

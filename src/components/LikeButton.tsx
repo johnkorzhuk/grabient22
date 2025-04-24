@@ -1,7 +1,7 @@
 import type { CollectionStyle } from '~/types';
 import React, { useState } from 'react';
 import { cn } from '~/lib/utils';
-import { useDebouncedCallback } from '@mantine/hooks';
+import { useDebouncedCallback, useMounted } from '@mantine/hooks';
 import { Heart } from 'lucide-react';
 import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
 import { convexQuery } from '@convex-dev/react-query';
@@ -21,6 +21,7 @@ export function LikeButton({
   seed: string;
 }) {
   const { userId } = useAuth();
+  const mounted = useMounted();
 
   //  TODO: this code sucks. we are making an extra query while auth is loading
   const { data: isLikedData, isPending: isLikedPending } = useQuery({
@@ -48,14 +49,14 @@ export function LikeButton({
       style,
       angle,
     });
-  }, 500);
+  }, 300);
 
   // Keep local state in sync with server state
   React.useEffect(() => {
     setLocallyLiked(isLiked);
   }, [isLiked]);
 
-  if (!userId) {
+  if (!userId && mounted) {
     return (
       <SignInButton mode="modal">
         <button

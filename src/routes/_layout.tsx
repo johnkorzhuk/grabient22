@@ -8,6 +8,8 @@ import {
   stepsWithAutoValidator,
   angleWithAutoValidator,
   DEFAULT_ITEM_HEIGHT_ROW,
+  layoutValidator,
+  DEFAULT_LAYOUT,
 } from '~/validators';
 import { Route as SeedRoute } from './_layout/$seed';
 
@@ -16,6 +18,7 @@ export const SEARCH_DEFAULTS = {
   steps: 'auto' as const,
   angle: 'auto' as const,
   rowHeight: DEFAULT_ITEM_HEIGHT_ROW,
+  layout: DEFAULT_LAYOUT,
 };
 
 export const searchValidatorSchema = v.object({
@@ -35,6 +38,7 @@ export const searchValidatorSchema = v.object({
     v.fallback(angleWithAutoValidator, SEARCH_DEFAULTS.angle),
     SEARCH_DEFAULTS.angle,
   ),
+  layout: v.optional(v.fallback(layoutValidator, SEARCH_DEFAULTS.layout), SEARCH_DEFAULTS.layout),
 });
 
 export const Route = createFileRoute('/_layout')({

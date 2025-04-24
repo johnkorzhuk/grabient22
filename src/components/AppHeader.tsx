@@ -9,7 +9,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover
 import { Button } from '~/components/ui/button';
 import { Settings2, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/tanstack-react-start';
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+  SignInButton,
+  useAuth,
+} from '@clerk/tanstack-react-start';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { Badge } from './ui/badge';
 import { cn } from '~/lib/utils';
@@ -20,6 +26,8 @@ import { observer, use$ } from '@legendapp/state/react';
 import { PaletteCategories } from '~/lib/generation';
 import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
 import { PaletteCategoryDisplay } from './PaletteCategoryDisplay';
+import { useMounted } from '@mantine/hooks';
+import { LayoutToggle } from './LayoutToggle';
 
 // Category badge component for selection
 function CategoryBadge({
@@ -48,6 +56,9 @@ function CategoryBadge({
 const CategorySelector = observer(function CategorySelector() {
   const search = useSearch({
     from: '/_layout/random',
+  });
+  const layoutSearch = useSearch({
+    from: '/_layout',
   });
 
   let selectedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
@@ -128,7 +139,7 @@ const CategorySelector = observer(function CategorySelector() {
     // Update URL with new categories using TanStack Router
     navigate({
       search: {
-        // ...search,
+        ...layoutSearch,
         categories: newCategories,
       },
       replace: true,
@@ -160,6 +171,7 @@ export const AppHeader = observer(function AppHeader() {
   const { style, steps, angle } = useSearch({
     from: '/_layout',
   });
+  const mounted = useMounted();
 
   // Get palette colors from the store
   const seedPaletteColors = use$(paletteStore$.seedPaletteColors);
@@ -187,8 +199,10 @@ export const AppHeader = observer(function AppHeader() {
               return search;
             }}
           >
-            <h1 className="text-xl font-bold">Grabient</h1>
+            <h1 className="text-xl font-bold md:w-[166px]">Grabient</h1>
           </Link>
+
+          <LayoutToggle />
         </div>
         <div className="flex items-center gap-4">
           <a
@@ -218,17 +232,23 @@ export const AppHeader = observer(function AppHeader() {
             </svg>
           </a>
           <ThemeToggle />
-          <div className="flex items-center">
-            <SignedIn>
-              <UserButton afterSignOutUrl={location.pathname} />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button size="sm" variant="outline">
-                  Sign in
-                </Button>
-              </SignInButton>
-            </SignedOut>
+          <div className="flex items-center justify-end w-[32px]">
+            {mounted ? (
+              <>
+                <SignedIn>
+                  <UserButton afterSignOutUrl={location.pathname} />
+                </SignedIn>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <Button size="sm" variant="outline">
+                      Sign in
+                    </Button>
+                  </SignInButton>
+                </SignedOut>
+              </>
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+            )}
           </div>
         </div>
       </div>
@@ -277,52 +297,52 @@ export const AppHeader = observer(function AppHeader() {
               </TooltipProvider>
             )}
 
-              {/* Settings button with tooltip */}
-              <Popover open={open} onOpenChange={setOpen}>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          aria-label="Open gradient settings"
-                          className="cursor-pointer h-8 w-8 p-1"
-                        >
-                          <Settings2 className="h-5 w-5" />
-                        </Button>
-                      </PopoverTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Gradient Settings</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <PopoverContent className="w-[220px] p-3 bg-background border-border">
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Style</h3>
-                      <div>
-                        <StyleSelect value={style} isSeedRoute={isSeedRoute} />
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <div className="w-1/2 space-y-1">
-                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Steps</h3>
-                        <StepsInput value={steps} isSeedRoute={isSeedRoute} />
-                      </div>
-
-                      <div className="w-1/2 space-y-1">
-                        <h3 className="text-xs font-medium text-muted-foreground mb-2">Angle</h3>
-                        <AngleInput value={angle} isSeedRoute={isSeedRoute} />
-                      </div>
+            {/* Settings button with tooltip */}
+            <Popover open={open} onOpenChange={setOpen}>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label="Open gradient settings"
+                        className="cursor-pointer h-8 w-8 p-1"
+                      >
+                        <Settings2 className="h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Gradient Settings</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <PopoverContent className="w-[220px] p-3 bg-background border-border">
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Style</h3>
+                    <div>
+                      <StyleSelect value={style} isSeedRoute={isSeedRoute} />
                     </div>
                   </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+
+                  <div className="flex gap-2">
+                    <div className="w-1/2 space-y-1">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Steps</h3>
+                      <StepsInput value={steps} isSeedRoute={isSeedRoute} />
+                    </div>
+
+                    <div className="w-1/2 space-y-1">
+                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Angle</h3>
+                      <AngleInput value={angle} isSeedRoute={isSeedRoute} />
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
+        </div>
       </div>
     </header>
   );

@@ -3,6 +3,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/componen
 import { useThrottledCallback } from '@mantine/hooks';
 import { useState } from 'react';
 import type { AppCollection } from '~/types';
+import { cn } from '~/lib/utils';
 
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
@@ -40,7 +41,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     navigate = useNavigate({ from: '/' });
   }
 
-  const { rowHeight } = useSearch({ from: '/_layout' });
+  const { rowHeight, layout = 'row' } = useSearch({ from: '/_layout' });
 
   const previewSeed = use$(uiTempStore$.previewSeed);
   const [localRowHeight, setLocalRowHeight] = useState(rowHeight);
@@ -67,6 +68,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     });
   }, 150);
 
+  // Determine if we should use grid or row layout
+  const isGridLayout = layout === 'grid';
+
   return (
     <section
       className="h-full w-full overflow-auto relative"
@@ -76,7 +80,14 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
       }}
     >
       <ul
-        className="h-full w-full relative"
+        className={cn(
+          'h-full w-full relative',
+          isSeedRoute
+            ? isGridLayout &&
+                `grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 auto-rows-[var(--row-height)]`
+            : isGridLayout &&
+                `grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 auto-rows-[var(--row-height)]`,
+        )}
         style={
           {
             '--row-height': `${localRowHeight}%`,
@@ -95,9 +106,12 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
             return null; // Skip rendering this item
           }
 
-          if (isCurrentSeed) {
+          if (isCurrentSeed && !isGridLayout) {
             return (
-              <li key={collection._id} className="h-[var(--row-height)] w-full">
+              <li
+                key={collection._id}
+                className={cn(isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full')}
+              >
                 <GradientPreview
                   processedCoeffs={processedCoeffs}
                   initialStyle={collection.style}
@@ -109,7 +123,10 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
           }
 
           return (
-            <li key={collection._id} className="h-[var(--row-height)] w-full">
+            <li
+              key={collection._id}
+              className={cn(isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full')}
+            >
               <Link
                 to="/$seed"
                 params={{
@@ -120,6 +137,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 }}
                 replace={isSeedRoute}
                 aria-label={`Gradient ${index + 1}`}
+                className="block h-full"
               >
                 <GradientPreview
                   processedCoeffs={processedCoeffs}

@@ -14,7 +14,7 @@ export type PaletteCategoryKey =
   | 'Earthy'
   | 'Bright'
   | 'Random'
-  | 'Neutral'
+  // | 'Neutral'
   | 'Monochromatic'
   | 'Analogous'
   | 'Complementary'
@@ -43,6 +43,11 @@ export const MIN_ANGLE = 0;
 export const MAX_ANGLE = 360;
 export const angleValidator = v.pipe(v.number(), v.minValue(MIN_ANGLE), v.maxValue(MAX_ANGLE));
 export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
+
+// Define display layout options
+export const COLLECTION_LAYOUTS = ['row', 'grid'] as const;
+export const DEFAULT_LAYOUT: (typeof COLLECTION_LAYOUTS)[number] = 'row';
+export const layoutValidator = v.union(COLLECTION_LAYOUTS.map((l) => v.literal(l)));
 
 export const DEFAULT_ITEM_HEIGHT_ROW = 20;
 export const DEFAULT_ITEM_HEIGHT_GRID = 35;
@@ -168,7 +173,7 @@ export const PALETTE_CATEGORIES: PaletteCategoryKey[] = [
   'Pastel',
   'Earthy',
   'Bright',
-  'Neutral',
+  // 'Neutral',
   'Monochromatic',
   'Analogous',
   'Complementary',
