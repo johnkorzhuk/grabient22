@@ -37,6 +37,11 @@ import { useElementSize } from '@mantine/hooks';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { LikeButton } from '~/components/LikeButton';
 import { generateGradientColors } from '~/lib/cosineGradient';
+import { RGBTabs } from '~/components/RGBTabs';
+import { convexQuery } from '@convex-dev/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@clerk/tanstack-react-start';
+import { api } from '../../../convex/_generated/api';
 
 export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
@@ -257,7 +262,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   const previewCoeffs = previewData
     ? applyGlobals(previewData.coeffs, previewData.globals)
     : processedCoeffs;
-
+  const { userId } = useAuth();
   const isDefaultGlobals = seedCollection.globals.every(
     (val, index) => val === DEFAULT_GLOBALS[index],
   );
@@ -368,17 +373,33 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
     previewData && !compareGlobals(previewData.globals, globals),
   );
 
+  //  TODO: this code sucks. we are making an extra query while auth is loading
+  const { data: isLikedData, isPending: isLikedPending } = useQuery({
+    ...convexQuery(api.collections.checkUserLikedSeed, {
+      userId: userId!,
+      seed: currentSeed,
+    }),
+    // this doesnt work for whatever reason
+    enabled: Boolean(userId),
+  });
+
+  const isLiked = Boolean(isLikedData && !isLikedPending);
+
   return (
     <div className="flex flex-col w-full h-full relative" ref={containerRef}>
       {/* Details Header */}
       <div className="w-full flex items-center justify-between px-4 py-1.5 border-b border-gray-200 dark:border-gray-800">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Details</h2>
-        <LikeButton
-          steps={steps === 'auto' ? DEFAULT_STEPS : steps}
-          angle={angle === 'auto' ? DEFAULT_ANGLE : angle}
-          style={style === 'auto' ? DEFAULT_STYLE : style}
-          seed={currentSeed}
+        <RGBTabs
+          collection={seedCollection}
+          onOrderChange={(newCoeffs: CosineCoeffs) => {
+            const newSeed = serializeCoeffs(newCoeffs, globals);
+            navigate({
+              params: { seed: newSeed },
+              search,
+            });
+          }}
         />
+        <LikeButton pending={isLikedPending} isLiked={isLiked} seed={currentSeed} />
       </div>
       {/* GradientPreview - remaining height */}
       <div className="w-full flex-grow lg:mb-0 mb-2">

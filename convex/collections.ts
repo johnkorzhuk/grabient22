@@ -92,6 +92,55 @@ export const checkUserLikedSeed = query({
   },
 });
 
+// export const checkUserLikedSeeds = query({
+//   args: {
+//     userId: v.optional(v.union(v.string(), v.null())),
+//     seeds: v.array(v.string()),
+//   },
+//   handler: async (ctx, args) => {
+//     if (!args.userId || args.seeds.length === 0) {
+//       return {};
+//     }
+
+//     const likes = await ctx.db
+//       .query('likes')
+//       .withIndex('byUserIdAndSeed')
+//       .filter((q) =>
+//         q.and(q.eq('userId', args.userId!), q.or(...args.seeds.map((seed) => q.eq('seed', seed)))),
+//       )
+//       .collect();
+
+//     // Create a map of seed -> liked status
+//     return Object.fromEntries(
+//       args.seeds.map((seed) => [seed, likes.some((like) => like.seed === seed)]),
+//     );
+//   },
+// });
+
+export const checkUserLikedSeeds = query({
+  args: {
+    userId: v.optional(v.union(v.string(), v.null())),
+    seeds: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (!args.userId || args.seeds.length === 0) {
+      return {};
+    }
+
+    const results = await Promise.all(
+      args.seeds.map(async (seed) => {
+        const like = await ctx.db
+          .query('likes')
+          .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', seed))
+          .unique();
+        return [seed, like !== null] as [string, boolean];
+      }),
+    );
+
+    return Object.fromEntries(results);
+  },
+});
+
 export const getAllLikedSeedsByUser = query({
   args: {
     userId: v.string(),

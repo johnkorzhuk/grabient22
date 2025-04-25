@@ -1,40 +1,33 @@
-import type { CollectionStyle } from '~/types';
-import React, { useState } from 'react';
 import { cn } from '~/lib/utils';
 import { useDebouncedCallback, useMounted } from '@mantine/hooks';
 import { Heart } from 'lucide-react';
 import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
-import { convexQuery } from '@convex-dev/react-query';
-import { useQuery } from '@tanstack/react-query';
 import { useLikeSeedMutation } from '~/queries';
-import { api } from '../../convex/_generated/api';
+import { useEffect, useState } from 'react';
+import { useLocation, useSearch } from '@tanstack/react-router';
+import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
+import { Route as CollectionRoute } from '~/routes/_layout/collection';
 
 export function LikeButton({
-  steps,
-  angle,
-  style,
   seed,
+  isLiked: _isLiked,
+  pending,
+  className,
 }: {
-  steps: number;
-  angle: number;
-  style: CollectionStyle;
   seed: string;
+  isLiked: boolean;
+  pending: boolean;
+  className?: string;
 }) {
+  const location = useLocation();
+  const likedRoute = location.pathname === CollectionRoute.fullPath;
+  const isLiked = likedRoute ? true : _isLiked;
   const { userId } = useAuth();
   const mounted = useMounted();
-
-  //  TODO: this code sucks. we are making an extra query while auth is loading
-  const { data: isLikedData, isPending: isLikedPending } = useQuery({
-    ...convexQuery(api.collections.checkUserLikedSeed, {
-      userId: userId!,
-      seed,
-    }),
-    // this doesnt work for whatever reason
-    enabled: Boolean(userId),
-  });
-
-  const isLiked = Boolean(isLikedData && !isLikedPending);
-
+  const search = useSearch({ from: '/_layout' });
+  const steps = search.steps === 'auto' ? DEFAULT_STEPS : search.steps;
+  const angle = search.angle === 'auto' ? DEFAULT_ANGLE : search.angle;
+  const style = search.style === 'auto' ? DEFAULT_STYLE : search.style;
   const likedSeedMutation = useLikeSeedMutation();
   // Local state for immediate UI feedback
   const [locallyLiked, setLocallyLiked] = useState(isLiked);
@@ -52,7 +45,7 @@ export function LikeButton({
   }, 300);
 
   // Keep local state in sync with server state
-  React.useEffect(() => {
+  useEffect(() => {
     setLocallyLiked(isLiked);
   }, [isLiked]);
 
@@ -61,7 +54,7 @@ export function LikeButton({
       <SignInButton mode="modal">
         <button
           type="button"
-          className="p-1 rounded-full transition-colors cursor-pointer"
+          className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
           aria-label="Favorite"
         >
           <Heart
@@ -81,11 +74,11 @@ export function LikeButton({
   return (
     <button
       type="button"
-      className="p-1 rounded-full transition-colors cursor-pointer"
+      className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
       aria-label="Favorite"
-      disabled={isLikedPending}
+      disabled={pending}
       onClick={() => {
-        if (isLikedPending || !userId) return;
+        if (pending || !userId) return;
         setLocallyLiked((prev) => {
           const next = !prev;
           debouncedMutate(next);

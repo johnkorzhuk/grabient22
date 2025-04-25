@@ -10,12 +10,14 @@ import { observer, use$ } from '@legendapp/state/react';
 import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { GradientPreview } from './GradientPreview';
+import { LikeButton } from './LikeButton';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
   isSeedRoute?: boolean;
   isRandomRoute?: boolean;
   isCollectionRoute?: boolean;
+  likedSeeds?: Record<string, boolean>;
 };
 
 export const CollectionsDisplay = observer(function CollectionsDisplay({
@@ -23,6 +25,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   isSeedRoute,
   isRandomRoute,
   isCollectionRoute,
+  likedSeeds,
 }: CollectionsDisplayProps) {
   // We need to handle each case separately to satisfy TypeScript's type checking
   let seed: string | undefined = undefined;
@@ -102,7 +105,10 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
             return (
               <li
                 key={collection._id}
-                className={cn(isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full')}
+                className={cn(
+                  'relative',
+                  isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
+                )}
               >
                 <GradientPreview
                   processedCoeffs={processedCoeffs}
@@ -117,27 +123,40 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
           return (
             <li
               key={collection._id}
-              className={cn(isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full')}
+              className={cn(
+                'relative group',
+                isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
+              )}
             >
-              <Link
-                to="/$seed"
-                params={{
-                  seed: collection.seed,
-                }}
-                search={({ categories, ...search }) => {
-                  return search;
-                }}
-                // replace={isSeedRoute}
-                aria-label={`Gradient ${index + 1}`}
-                className="block h-full"
-              >
-                <GradientPreview
-                  processedCoeffs={processedCoeffs}
-                  initialStyle={collection.style}
-                  initialAngle={collection.angle}
-                  initialSteps={collection.steps}
+              <GradientPreview
+                processedCoeffs={processedCoeffs}
+                initialStyle={collection.style}
+                initialAngle={collection.angle}
+                initialSteps={collection.steps}
+              />
+              <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                <Link
+                  to="/$seed"
+                  params={{
+                    seed: collection.seed,
+                  }}
+                  search={({ categories, ...search }) => {
+                    return search;
+                  }}
+                  className="block px-2 py-1 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+                  aria-label={`View details for gradient ${index + 1}`}
+                >
+                  <span className="relative bottom-[1.5px] font-medium">Details</span>
+                </Link>
+              </div>
+              <div className="absolute top-2 right-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                <LikeButton
+                  className="relative -bottom-[1px]"
+                  seed={collection.seed}
+                  isLiked={Boolean(likedSeeds?.[collection.seed])}
+                  pending={false}
                 />
-              </Link>
+              </div>
             </li>
           );
         })}
