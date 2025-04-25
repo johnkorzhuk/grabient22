@@ -8,6 +8,12 @@ dependencies:
   '@clerk/tanstack-react-start':
     specifier: ^0.13.7
     version: 0.13.7(@tanstack/react-router@1.116.0)(@tanstack/react-start@1.116.1)(react-dom@19.1.0)(react@19.1.0)
+  '@convex-dev/aggregate':
+    specifier: ^0.1.20
+    version: 0.1.20(convex@1.23.0)
+  '@convex-dev/crons':
+    specifier: ^0.1.7
+    version: 0.1.7(convex@1.23.0)
   '@convex-dev/migrations':
     specifier: ^0.2.5
     version: 0.2.5(convex@1.23.0)
@@ -660,6 +666,23 @@ packages:
   /@colors/colors@1.6.0:
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
     engines: {node: '>=0.1.90'}
+    dev: false
+
+  /@convex-dev/aggregate@0.1.20(convex@1.23.0):
+    resolution: {integrity: sha512-9Y39K9U3pSR8QoskaQrUknz4Iln9Oh53o/MMM+sbsNeTMu8Oqc1c7lFlp9Gxj/aJoyGe0UuT37RdpG9fm6Wn9w==}
+    peerDependencies:
+      convex: ~1.16.5 || >=1.17.0 <1.25.0
+    dependencies:
+      convex: 1.23.0(react-dom@19.1.0)(react@19.1.0)
+    dev: false
+
+  /@convex-dev/crons@0.1.7(convex@1.23.0):
+    resolution: {integrity: sha512-GUgqJCA9lca1pl/L6YGdJQkLvpIvlu3TySxJaPcCkaYoEH8g2O6FvUSv8BHZkc6Jd16lzP5QhJsuIfvgfqkG5A==}
+    peerDependencies:
+      convex: ~1.16.5 || >=1.17.0 <1.25.0
+    dependencies:
+      convex: 1.23.0(react-dom@19.1.0)(react@19.1.0)
+      cron-parser: 4.9.0
     dev: false
 
   /@convex-dev/migrations@0.2.5(convex@1.23.0):

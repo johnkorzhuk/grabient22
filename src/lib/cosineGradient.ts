@@ -473,7 +473,7 @@ function generateModifierVariationsRecursive(
     const collection = {
       ...baseCollection,
       globals: newGlobals,
-      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}` as Id<'collections'>,
+      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}` as Id<'popular'>,
     };
     const colors = cosineGradient(steps, applyGlobals(coeffs, newGlobals));
     return { collection, colors };
@@ -505,6 +505,7 @@ function generateModifierVariationsRecursive(
         seed: serializeCoeffs(collection.coeffs, collection.globals),
         style,
         steps,
+        likes: 0,
       }));
     }
 
@@ -526,6 +527,7 @@ function generateModifierVariationsRecursive(
     seed: serializeCoeffs(collection.coeffs, collection.globals),
     style,
     steps,
+    likes: 0,
   }));
 }
 
@@ -673,17 +675,20 @@ export function compareGlobals(
 
 /**
  * Generates an array of RGBA color vectors from cosine gradient coefficients
- * 
+ *
  * @param coeffs - The processed cosine gradient coefficients
  * @param steps - The number of color steps to generate
  * @returns An array of RGBA vectors with values in the 0-1 range
  */
-export function generateGradientColors(coeffs: CosineCoeffs, steps: number): [number, number, number, number][] {
+export function generateGradientColors(
+  coeffs: CosineCoeffs,
+  steps: number,
+): [number, number, number, number][] {
   // Use the cosineGradient function to generate the colors
   const colors = cosineGradient(steps, coeffs);
-  
+
   // Ensure all colors have an alpha value of 1
-  return colors.map(color => {
+  return colors.map((color) => {
     if (color.length === 3) {
       return [...color, 1] as [number, number, number, number];
     }

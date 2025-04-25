@@ -32,7 +32,7 @@ export const Route = createFileRoute('/_layout/')({
   // pendingComponent: () => <Loader />,
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
-      ...convexQuery(api.collections.list, {}),
+      ...convexQuery(api.collections.listPopular, {}),
       gcTime: 2000,
     });
   },
@@ -40,14 +40,14 @@ export const Route = createFileRoute('/_layout/')({
 
 function Home() {
   const { data: collections } = useSuspenseQuery({
-    ...convexQuery(api.collections.list, {}),
+    ...convexQuery(api.collections.listPopular, {}),
     gcTime: Number.POSITIVE_INFINITY,
   });
 
   const { userId } = useAuth();
 
   const { data: likedSeeds } = useQuery({
-    ...convexQuery(api.collections.checkUserLikedSeeds, {
+    ...convexQuery(api.likes.checkUserLikedSeeds, {
       userId,
       seeds: collections.map((c) => c.seed),
     }),

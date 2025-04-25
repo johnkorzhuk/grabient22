@@ -1,24 +1,101 @@
-import { mutation, query, internalMutation } from './_generated/server';
+import { query, internalMutation } from './_generated/server';
 import { v } from 'convex/values';
 import seedData from '../seed.json';
 import * as vb from 'valibot';
 import {
   collectionSchema,
   componentSchema,
-  DEFAULT_ANGLE,
   DEFAULT_GLOBALS,
   DEFAULT_STEPS,
   DEFAULT_STYLE,
+  DEFAULT_ANGLE,
 } from '../src/validators';
 import { deserializeCoeffs, serializeCoeffs } from '../src/lib/serialization';
 import type { CosineCoeffs } from '../src/types';
+import { applyGlobals } from '../src/lib/cosineGradient';
+import { publicLikesBySeed } from './likes';
 
-import schema, { angleValidator, stepsValidator, styleValidator } from './schema';
-import { paginationOptsValidator } from 'convex/server';
+export const updatePopularCollections = internalMutation({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Set a default limit of 1000 if not provided
+    const limit = args.limit ?? 1000;
+
+    // Collect all namespaces (seeds) using iterNamespaces
+    const allNamespaces = [];
+    for await (const namespace of publicLikesBySeed.iterNamespaces(ctx)) {
+      allNamespaces.push(namespace);
+    }
+
+    // Get the count for each namespace (seed)
+    const seedCounts = await Promise.all(
+      allNamespaces.map(async (seed) => {
+        const count = await publicLikesBySeed.count(ctx, { namespace: seed, bounds: {} });
+        return { seed, count };
+      }),
+    );
+
+    // Sort by count in descending order and take the top ones based on limit
+    const topSeeds = seedCounts.sort((a, b) => b.count - a.count).slice(0, limit);
+
+    // Clear the existing popular collections table
+    const existingPopular = await ctx.db.query('popular').collect();
+    await Promise.all(
+      existingPopular.map(async (doc) => {
+        await ctx.db.delete(doc._id);
+      }),
+    );
+
+    // Fetch and insert the collection details for each top seed in parallel
+    await Promise.all(
+      topSeeds.map(async ({ seed, count }) => {
+        // Get the original collection data
+        const collection = await ctx.db
+          .query('collections')
+          .withIndex('seed', (q) => q.eq('seed', seed))
+          .unique();
+
+        if (collection) {
+          // Insert into the popular collections table
+          await ctx.db.insert('popular', {
+            seed: collection.seed,
+            likes: count,
+            coeffs: collection.coeffs,
+            steps: collection.steps,
+            style: collection.style,
+            angle: collection.angle,
+          });
+        } else {
+          // If collection not found, try to deserialize the coefficients from the seed
+          try {
+            const { coeffs } = deserializeCoeffs(seed);
+
+            await ctx.db.insert('popular', {
+              seed,
+              likes: count,
+              coeffs,
+              steps: DEFAULT_STEPS,
+              style: DEFAULT_STYLE,
+              angle: DEFAULT_ANGLE,
+            });
+          } catch (error) {
+            console.error(`Failed to deserialize seed ${seed}:`, error);
+            // Skip this seed if deserialization fails
+          }
+        }
+      }),
+    );
+
+    return null;
+  },
+});
 
 export const list = query({
   handler: async (ctx) => {
-    const collections = await ctx.db
+    return await ctx.db
       .query('collections')
       .take(100)
       .then((collections) => {
@@ -28,10 +105,17 @@ export const list = query({
           globals: DEFAULT_GLOBALS,
         }));
       });
+  },
+});
 
-    return collections.map((collection) => ({
+export const listPopular = query({
+  handler: async (ctx) => {
+    const collections = await ctx.db.query('popular').withIndex('likes').order('desc').take(96);
+
+    return collections.map(({ _creationTime, ...collection }) => ({
       ...collection,
-      seed: serializeCoeffs(collection.coeffs, collection.globals),
+      coeffs: collection.coeffs as CosineCoeffs,
+      globals: DEFAULT_GLOBALS,
     }));
   },
 });
@@ -72,51 +156,9 @@ export const seed = internalMutation({
   },
 });
 
-export const checkUserLikedSeed = query({
-  args: {
-    // TODO: this and LikeButton needs updating
-    userId: v.optional(v.union(v.string(), v.null())),
-    seed: v.string(),
-  },
-  handler: async (ctx, args) => {
-    if (!args.userId) {
-      return false;
-    }
-
-    const like = await ctx.db
-      .query('likes')
-      .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', args.seed))
-      .unique();
-
-    return like !== null;
-  },
-});
-
-// export const checkUserLikedSeeds = query({
-//   args: {
-//     userId: v.optional(v.union(v.string(), v.null())),
-//     seeds: v.array(v.string()),
-//   },
-//   handler: async (ctx, args) => {
-//     if (!args.userId || args.seeds.length === 0) {
-//       return {};
-//     }
-
-//     const likes = await ctx.db
-//       .query('likes')
-//       .withIndex('byUserIdAndSeed')
-//       .filter((q) =>
-//         q.and(q.eq('userId', args.userId!), q.or(...args.seeds.map((seed) => q.eq('seed', seed)))),
-//       )
-//       .collect();
-
-//     // Create a map of seed -> liked status
-//     return Object.fromEntries(
-//       args.seeds.map((seed) => [seed, likes.some((like) => like.seed === seed)]),
-//     );
-//   },
-// });
-
+// these are causing a convex deploy error if they dont exists in collections
+// even though api.collections.checkUserLikedSeeds/checkUserLikedSeed isn't referenced anywhere.
+// TODO: figure out why
 export const checkUserLikedSeeds = query({
   args: {
     userId: v.optional(v.union(v.string(), v.null())),
@@ -141,56 +183,22 @@ export const checkUserLikedSeeds = query({
   },
 });
 
-export const getAllLikedSeedsByUser = query({
+export const checkUserLikedSeed = query({
   args: {
-    userId: v.string(),
-    paginationOpts: paginationOptsValidator,
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query('likes')
-      .withIndex('userId', (q) => q.eq('userId', args.userId))
-      .order('desc') // Most recent first
-      .paginate(args.paginationOpts);
-  },
-});
-
-export const toggleLikeSeed = mutation({
-  args: {
-    userId: v.string(),
+    // TODO: this and LikeButton needs updating. auth is isnt set up correctly
+    userId: v.optional(v.union(v.string(), v.null())),
     seed: v.string(),
-    steps: v.optional(stepsValidator),
-    style: v.optional(styleValidator),
-    angle: v.optional(angleValidator),
   },
   handler: async (ctx, args) => {
-    // Validate the seed
-    deserializeCoeffs(args.seed);
-    // Check if the user has already liked this seed
-    const existingLike = await ctx.db
-      .query('likes')
-      .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId).eq('seed', args.seed))
-      .unique();
-
-    // If the user has already liked this seed, delete the like (toggle off)
-    if (existingLike !== null) {
-      await ctx.db.delete(existingLike._id);
-      return { success: true, deleted: true };
+    if (!args.userId) {
+      return false;
     }
 
-    const steps = args.steps || DEFAULT_STEPS;
-    const style = args.style || DEFAULT_STYLE;
-    const angle = args.angle || DEFAULT_ANGLE;
+    const like = await ctx.db
+      .query('likes')
+      .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', args.seed))
+      .unique();
 
-    // Create a new like
-    const likeId = await ctx.db.insert('likes', {
-      userId: args.userId,
-      seed: args.seed,
-      steps,
-      style,
-      angle,
-    });
-
-    return { success: true, likeId };
+    return like !== null;
   },
 });

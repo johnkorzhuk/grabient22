@@ -146,10 +146,15 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   className="block px-2 py-1 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
                   aria-label={`View details for gradient ${index + 1}`}
                 >
-                  <span className="relative bottom-[1.5px] font-medium">Details</span>
+                  <span className="relative bottom-[1px] font-medium">Details</span>
                 </Link>
               </div>
               <div className="absolute top-2 right-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                {Boolean(collection.likes) && (
+                  <span className="font-medium relative bottom-[5.5px] pl-2 pr-2">
+                    {collection.likes}
+                  </span>
+                )}
                 <LikeButton
                   className="relative -bottom-[1px]"
                   seed={collection.seed}

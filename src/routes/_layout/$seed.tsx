@@ -77,8 +77,9 @@ function Home() {
     style: style === 'auto' ? initialSearchDataRef.current.style : style,
     steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
     angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
-    _id: encodedSeedData as Id<'collections'>,
+    _id: encodedSeedData as Id<'popular'>,
     seed: encodedSeedData,
+    likes: 0,
   };
 
   // Generate variations
@@ -375,7 +376,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
 
   //  TODO: this code sucks. we are making an extra query while auth is loading
   const { data: isLikedData, isPending: isLikedPending } = useQuery({
-    ...convexQuery(api.collections.checkUserLikedSeed, {
+    ...convexQuery(api.likes.checkUserLikedSeed, {
       userId: userId!,
       seed: currentSeed,
     }),

@@ -23,7 +23,7 @@ function CollectionRoute() {
     status,
     loadMore,
   } = usePaginatedQuery(
-    api.collections.getAllLikedSeedsByUser,
+    api.likes.getAllLikedSeedsByUser,
     userId ? { userId } : 'skip',
     { initialNumItems: PAGE_SIZE }, // Start with just 10 items
   );
@@ -36,7 +36,7 @@ function CollectionRoute() {
   const [hasAutoLoaded, setHasAutoLoaded] = useState(false);
 
   // Transform the data into AppCollection format
-  const processLikedSeeds = useCallback(() => {
+  const processLikedSeeds = () => {
     if (!likedSeeds) {
       setCollections([]);
       setIsLoading(false);
@@ -56,8 +56,9 @@ function CollectionRoute() {
             style: like.style || DEFAULT_STYLE,
             steps: like.steps || DEFAULT_STEPS,
             angle: like.angle || DEFAULT_ANGLE,
-            _id: like._id as unknown as Id<'collections'>,
+            _id: like._id as unknown as Id<'popular'>,
             seed: like.seed,
+            likes: 0,
           };
 
           return collection;
@@ -71,7 +72,7 @@ function CollectionRoute() {
     setCollections(processedCollections);
     setIsLoading(false);
     setHasAutoLoaded(true);
-  }, [likedSeeds]);
+  };
 
   // Process the data when it changes
   useEffect(() => {

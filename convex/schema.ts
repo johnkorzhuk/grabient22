@@ -19,16 +19,6 @@ export const styleSchema = z.enum(COLLECTION_STYLES);
 export const stepsSchema = z.number().min(2).max(50);
 export const angleSchema = z.number().min(0).max(360);
 
-// // Global modifier schemas with constraints
-// export const globalModifiersSchema = z
-//   .tuple([
-//     z.number().min(-1).max(1), // exposure [-1, 1]
-//     z.number().min(0).max(2), // contrast [0, 2]
-//     z.number().min(0).max(2), // frequency [0, 2]
-//     z.number().min(-Math.PI).max(Math.PI), // phase [-π, π]
-//   ])
-//   .describe('Global modifiers.');
-
 export const collectionSchema = z.object({
   coeffs: gradientCoeffsSchema.describe(
     'Four coefficient vectors: offset (a), amplitude (b), frequency (c), phase (d)',
@@ -50,15 +40,29 @@ export const Collections = Table('collections', {
   seed: v.string(),
 });
 
+export const PopularCollections = Table('popular', {
+  seed: v.string(),
+  likes: v.number(),
+  coeffs: zodToConvex(gradientCoeffsSchema),
+  steps: stepsValidator,
+  style: styleValidator,
+  angle: angleValidator,
+});
+
 export const Likes = Table('likes', {
   seed: v.string(),
   userId: v.string(),
   steps: stepsValidator,
   style: styleValidator,
   angle: angleValidator,
+  isPublic: v.boolean(),
 });
 
 export default defineSchema({
   collections: Collections.table.index('seed', ['seed']),
-  likes: Likes.table.index('userId', ['userId']).index('byUserIdAndSeed', ['userId', 'seed']),
+  likes: Likes.table
+    .index('userId', ['userId'])
+    .index('byUserIdAndSeed', ['userId', 'seed'])
+    .index('isPublic', ['isPublic']),
+  popular: PopularCollections.table.index('likes', ['likes']),
 });

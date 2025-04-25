@@ -1,18 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
-import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
+import { useConvexMutation } from '@convex-dev/react-query';
 import { api } from '../convex/_generated/api';
 
 export function useLikeSeedMutation() {
-  const mutationFn = useConvexMutation(api.collections.toggleLikeSeed).withOptimisticUpdate(
+  const mutationFn = useConvexMutation(api.likes.toggleLikeSeed).withOptimisticUpdate(
     (localStore, args) => {
-      const like = localStore.getQuery(api.collections.checkUserLikedSeed, {
+      const like = localStore.getQuery(api.likes.checkUserLikedSeed, {
         userId: args.userId,
         seed: args.seed,
       });
       if (like !== null) return;
 
       localStore.setQuery(
-        api.collections.checkUserLikedSeed,
+        api.likes.checkUserLikedSeed,
         { userId: args.userId, seed: args.seed },
         true,
       );
