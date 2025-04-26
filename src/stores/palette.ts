@@ -49,14 +49,9 @@ const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
   'Neon,SplitComplementary': ['SplitComplementary', 'Neon'],
   'SplitComplementary,Neon': ['SplitComplementary', 'Neon'],
   'Monochromatic,Neon': ['Monochromatic', 'Neon'],
-  'Neutral,Monochromatic': ['Monochromatic', 'Neutral'],
-  'Monochromatic,Neutral': ['Monochromatic', 'Neutral'],
   'SplitComplementary,Earthy': ['Earthy', 'SplitComplementary'],
   'Earthy,SplitComplementary': ['Earthy', 'SplitComplementary'],
 
-  // Combinations with Dark
-  'Dark,Neutral': ['Dark', 'Neutral'],
-  'Neutral,Dark': ['Dark', 'Neutral'],
   'Dark,Earthy': ['Dark', 'Earthy'],
   'Earthy,Dark': ['Dark', 'Earthy'],
   'Dark,SplitComplementary': ['Dark', 'SplitComplementary'],
@@ -66,9 +61,6 @@ const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
   'Dark,Complementary': ['Dark', 'Complementary'],
   'Complementary,Dark': ['Dark', 'Complementary'],
 
-  // Combinations with Bright
-  'Bright,Neutral': ['Bright', 'Neutral'],
-  'Neutral,Bright': ['Bright', 'Neutral'],
   'Bright,Earthy': ['Bright', 'Earthy'],
   'Earthy,Bright': ['Bright', 'Earthy'],
   'Bright,SplitComplementary': ['Bright', 'SplitComplementary'],
@@ -76,9 +68,6 @@ const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
   'Bright,Tetradic': ['Bright', 'Tetradic'],
   'Tetradic,Bright': ['Bright', 'Tetradic'],
 
-  // Other combinations
-  'Analogous,Neutral': ['Neutral', 'Analogous'],
-  'Neutral,Analogous': ['Neutral', 'Analogous'],
   'Analogous,Neon': ['Neon', 'Analogous'],
   'Neon,Analogous': ['Neon', 'Analogous'],
   'Tetradic,Neon': ['Tetradic', 'Neon'],
@@ -89,8 +78,6 @@ const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
   'Warm,Cool': ['Warm', 'Cool'],
   'Warm,Earthy': ['Warm', 'Earthy'],
   'Earthy,Warm': ['Earthy', 'Warm'],
-  'Warm,Neutral': ['Warm', 'Neutral'],
-  'Neutral,Warm': ['Neutral', 'Warm'],
   'Warm,Bright': ['Warm', 'Bright'],
   'Bright,Warm': ['Bright', 'Warm'],
   'Warm,Dark': ['Warm', 'Dark'],
@@ -99,8 +86,6 @@ const OPTIMAL_CATEGORY_ORDERS: Record<string, PaletteCategoryKey[]> = {
   // Combinations with Cool
   'Cool,Earthy': ['Cool', 'Earthy'],
   'Earthy,Cool': ['Earthy', 'Cool'],
-  'Cool,Neutral': ['Cool', 'Neutral'],
-  'Neutral,Cool': ['Neutral', 'Cool'],
   'Cool,Bright': ['Cool', 'Bright'],
   'Bright,Cool': ['Bright', 'Cool'],
   'Cool,Dark': ['Cool', 'Dark'],
@@ -240,13 +225,14 @@ export async function generatePalettesForCategories(
 
         // Cast the coeffs and globals to the expected types for AppCollection
         return {
-          _id: id as Id<'collections'>,
+          _id: id as Id<'popular'>,
           seed: seed,
           coeffs: palette.coeffs,
           globals: palette.globals,
           style: style as CollectionStyle,
           steps,
           angle,
+          likes: 0,
         };
       });
 

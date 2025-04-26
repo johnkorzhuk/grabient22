@@ -3,12 +3,7 @@ import { useDebouncedCallback, useMounted } from '@mantine/hooks';
 import { Heart } from 'lucide-react';
 import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
 import { useLikeSeedMutation } from '~/queries';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { useEffect, useState } from 'react';
 import { useLocation, useSearch } from '@tanstack/react-router';
 import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
@@ -68,7 +63,7 @@ export function LikeButton({
               >
                 <Heart
                   className={cn(
-                    'w-6 h-6 transition-colors',
+                    'w-5.5 h-5.5 transition-colors',
                     'hover:text-[color:var(--liked)] focus:text-[color:var(--liked)] active:text-[color:var(--liked)]',
                   )}
                   style={{ transition: 'color 0.2s' }}
@@ -105,7 +100,7 @@ export function LikeButton({
           >
             <Heart
               className={cn(
-                'w-6 h-6 transition-colors',
+                'w-5.5 h-5.5 transition-colors',
                 locallyLiked && 'text-[color:var(--liked)]',
                 'hover:text-[color:var(--liked)] focus:text-[color:var(--liked)] active:text-[color:var(--liked)]',
               )}

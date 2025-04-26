@@ -5,17 +5,12 @@ import { useState, useRef } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
 import { Copy, Check } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '~/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';
-import { applyGlobals } from '~/lib/cosineGradient';
+import { applyGlobals, cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
 import { GradientPreview } from './GradientPreview';
 import { LikeButton } from './LikeButton';
 
@@ -51,9 +46,12 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     navigate = useNavigate({ from: '/' });
   }
 
-  const { rowHeight, layout = 'row' } = useSearch({ from: '/_layout' });
+  const { rowHeight, layout = 'row', style, steps, angle } = useSearch({ from: '/_layout' });
   const previewSeed = use$(uiTempStore$.previewSeed);
   const [localRowHeight, setLocalRowHeight] = useState(rowHeight);
+  const previewStyle = use$(uiTempStore$.previewStyle);
+  const previewSteps = use$(uiTempStore$.previewSteps);
+  const previewAngle = use$(uiTempStore$.previewAngle);
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
@@ -101,6 +99,27 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
           const isCurrentSeed = seed !== undefined && collection.seed === seed;
           // Make sure coeffs and globals exist before applying
           const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
+          // Determine steps to use (collection's native steps or from URL/preview)
+          const stepsToUse =
+            previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : collection.steps;
+
+          // Use our custom gradient generator with the determined number of steps
+          const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
+          const gradientColors = cosineGradient(numStops, processedCoeffs);
+
+          // Determine style to use (from URL/preview or default)
+          const styleToUse =
+            previewStyle !== null ? previewStyle : style === 'auto' ? collection.style : style;
+
+          // Determine angle to use (from URL/preview or default)
+          const angleToUse =
+            previewAngle !== null || angle !== 'auto'
+              ? (previewAngle ??
+                (typeof angle === 'number' ? parseFloat(angle.toFixed(1)) : collection.angle))
+              : collection.angle;
+
+          // Generate the CSS once and store it
+          const cssProps = getCollectionStyleCSS(styleToUse, gradientColors, angleToUse);
 
           if (isCurrentSeed) {
             return (
@@ -111,18 +130,10 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
                 )}
               >
-                <GradientPreview
-                  processedCoeffs={processedCoeffs}
-                  initialStyle={collection.style}
-                  initialAngle={collection.angle}
-                  initialSteps={collection.steps}
-                />
+                <GradientPreview cssProps={cssProps} />
               </li>
             );
           }
-
-          // Create a ref to store the current CSS for this gradient
-          const gradientCssRef = useRef<React.CSSProperties | null>(null);
 
           return (
             <li
@@ -136,15 +147,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 uiTempStore$.previewSeed.set(null);
               }}
             >
-              <GradientPreview
-                processedCoeffs={processedCoeffs}
-                initialStyle={collection.style}
-                initialAngle={collection.angle}
-                initialSteps={collection.steps}
-                onCssGenerated={(css) => {
-                  gradientCssRef.current = css;
-                }}
-              />
+              <GradientPreview cssProps={cssProps} />
               <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Link
                   to="/$seed"
@@ -164,7 +167,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 {/* Like button container - preserving original styling */}
                 <div className="bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                   {Boolean(collection.likes) && (
-                    <span className="font-medium relative bottom-[5.5px] pl-2 pr-2 select-none">
+                    <span className="font-medium relative bottom-[5px] pl-2 pr-2 select-none">
                       {collection.likes}
                     </span>
                   )}
@@ -176,7 +179,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   />
                 </div>
 
-                <CopyButton gradientCssRef={gradientCssRef} />
+                <CopyButton cssProps={cssProps} />
               </div>
             </li>
           );
@@ -214,15 +217,15 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 });
 
 interface CopyButtonProps {
-  gradientCssRef: React.RefObject<React.CSSProperties | null>;
+  cssProps: React.CSSProperties;
 }
 
-function CopyButton({ gradientCssRef }: CopyButtonProps) {
+function CopyButton({ cssProps }: CopyButtonProps) {
   const clipboard = useClipboard({ timeout: 1000 });
 
   const handleCopy = () => {
-    if (gradientCssRef.current && gradientCssRef.current.background) {
-      const cssString = `background: ${gradientCssRef.current.background};`;
+    if (cssProps.background) {
+      const cssString = `background: ${cssProps.background};`;
       clipboard.copy(cssString);
     }
   };

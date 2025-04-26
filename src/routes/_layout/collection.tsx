@@ -5,10 +5,9 @@ import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
 import type { AppCollection } from '~/types';
 import { usePaginatedQuery } from 'convex/react';
 import { useAuth } from '@clerk/tanstack-react-start';
-import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
-const PAGE_SIZE = 48 as const;
+const PAGE_SIZE = 96 as const;
 // Define the route
 export const Route = createFileRoute('/_layout/collection')({
   component: CollectionRoute,
@@ -28,56 +27,37 @@ function CollectionRoute() {
     { initialNumItems: PAGE_SIZE }, // Start with just 10 items
   );
 
-  // State to hold the processed collections
-  const [isLoading, setIsLoading] = useState(true);
-  const [collections, setCollections] = useState<AppCollection[]>([]);
+  // Process collections directly in the render function
+  const isLoading = status === 'LoadingFirstPage';
 
-  // Flag to prevent automatic loading
-  const [hasAutoLoaded, setHasAutoLoaded] = useState(false);
+  // Process the collections from likedSeeds
+  const collections = likedSeeds
+    ? (likedSeeds
+        .map((like) => {
+          try {
+            // Deserialize the seed to get coeffs and globals
+            const { coeffs, globals } = deserializeCoeffs(like.seed);
 
-  // Transform the data into AppCollection format
-  const processLikedSeeds = () => {
-    if (!likedSeeds) {
-      setCollections([]);
-      setIsLoading(false);
-      return;
-    }
+            // Create an AppCollection object
+            const collection: AppCollection = {
+              coeffs,
+              globals,
+              style: like.style || DEFAULT_STYLE,
+              steps: like.steps || DEFAULT_STEPS,
+              angle: like.angle || DEFAULT_ANGLE,
+              _id: like._id as unknown as Id<'popular'>,
+              seed: like.seed,
+              likes: 0,
+            };
 
-    const processedCollections = likedSeeds
-      .map((like) => {
-        try {
-          // Deserialize the seed to get coeffs and globals
-          const { coeffs, globals } = deserializeCoeffs(like.seed);
-
-          // Create an AppCollection object
-          const collection: AppCollection = {
-            coeffs,
-            globals,
-            style: like.style || DEFAULT_STYLE,
-            steps: like.steps || DEFAULT_STEPS,
-            angle: like.angle || DEFAULT_ANGLE,
-            _id: like._id as unknown as Id<'popular'>,
-            seed: like.seed,
-            likes: 0,
-          };
-
-          return collection;
-        } catch (error) {
-          console.error('Error deserializing seed:', error);
-          return null;
-        }
-      })
-      .filter(Boolean) as AppCollection[];
-
-    setCollections(processedCollections);
-    setIsLoading(false);
-    setHasAutoLoaded(true);
-  };
-
-  // Process the data when it changes
-  useEffect(() => {
-    processLikedSeeds();
-  }, [likedSeeds, processLikedSeeds]);
+            return collection;
+          } catch (error) {
+            console.error('Error deserializing seed:', error);
+            return null;
+          }
+        })
+        .filter(Boolean) as AppCollection[])
+    : [];
 
   // Manual function to load more
   // const handleLoadMore = () => {

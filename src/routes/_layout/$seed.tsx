@@ -14,6 +14,8 @@ import {
   generateFrequencyVariations,
   generatePhaseVariations,
   updateCoeffWithInverseGlobal,
+  getCollectionStyleCSS,
+  cosineGradient,
 } from '~/lib/cosineGradient';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import { RGBChannelSliders } from '~/components/RGBChannelSliders';
@@ -249,11 +251,33 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   processedCoeffs: CosineCoeffs;
 }) {
   const search = useSearch({ from: '/_layout' });
-  const { steps, angle, style } = search;
-  // Get preview steps from store
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewSeed = use$(uiTempStore$.previewSeed);
+  const previewAngle = use$(uiTempStore$.previewAngle);
+  const previewStyle = use$(uiTempStore$.previewStyle);
   const previewColorIndex = use$(uiTempStore$.previewColorIndex);
+  const { steps, angle, style } = search;
+  // Determine steps to use (collection's native steps or from URL/preview)
+  // Determine steps to use (preview -> URL -> initial)
+  const stepsToUse =
+    previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : seedCollection.steps;
+
+  // Use our custom gradient generator with the determined number of steps
+  const numStops = stepsToUse === 'auto' ? seedCollection.steps : stepsToUse;
+  const gradientColors = cosineGradient(numStops, processedCoeffs);
+
+  // Determine style to use (from URL/preview or default)
+  const styleToUse =
+    previewStyle !== null ? previewStyle : style === 'auto' ? seedCollection.style : style;
+
+  // Determine angle to use (from URL/preview or default)
+  const angleToUse =
+    previewAngle !== null || angle !== 'auto'
+      ? (previewAngle ??
+        (typeof angle === 'number' ? parseFloat(angle.toFixed(1)) : seedCollection.angle))
+      : seedCollection.angle;
+  // Get preview steps from store
+
   const activeModifier = use$(uiTempStore$.activeModifier);
   const navigate = useNavigate({ from: '/$seed' });
   const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
@@ -287,10 +311,6 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
       uiTempStore$.activeModifier.set('exposure');
     }
   }, [containerWidth, activeModifier]);
-
-  // Determine steps to use (preview -> URL -> initial)
-  const stepsToUse =
-    previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : seedCollection.steps;
 
   // Throttled function to update URL with new seed
   const updateUrlWithSeed = useThrottledCallback((newGlobals) => {
@@ -382,6 +402,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   });
 
   const isLiked = Boolean(isLikedData && !isLikedPending);
+  const cssProps = getCollectionStyleCSS(styleToUse, gradientColors, angleToUse, previewColorIndex);
 
   return (
     <div className="flex flex-col w-full h-full relative" ref={containerRef}>
@@ -401,13 +422,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
       </div>
       {/* GradientPreview - remaining height */}
       <div className="w-full flex-grow lg:mb-0 mb-2">
-        <GradientPreview
-          initialStyle={seedCollection.style}
-          initialSteps={seedCollection.steps}
-          initialAngle={seedCollection.angle}
-          processedCoeffs={previewCoeffs || processedCoeffs}
-          activeIndex={previewColorIndex}
-        />
+        <GradientPreview cssProps={cssProps} />
       </div>
 
       {/* Graph section - fixed at 35% */}
