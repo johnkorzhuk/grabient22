@@ -5,7 +5,6 @@ import { cn } from '~/lib/utils';
 import { useThrottledCallback } from '@mantine/hooks';
 import { deserializeCoeffs, serializeCoeffs } from '~/lib/serialization';
 import { redirect, useNavigate } from '@tanstack/react-router';
-
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import {
   applyGlobals,
@@ -16,7 +15,6 @@ import {
   generatePhaseVariations,
   updateCoeffWithInverseGlobal,
 } from '~/lib/cosineGradient';
-
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import { RGBChannelSliders } from '~/components/RGBChannelSliders';
 import {
@@ -28,7 +26,6 @@ import {
   PI,
 } from '~/validators';
 import { GradientPreview } from '~/components/GradientPreview';
-
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
 import { paletteStore$ } from '~/stores/palette';

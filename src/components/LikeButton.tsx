@@ -3,6 +3,12 @@ import { useDebouncedCallback, useMounted } from '@mantine/hooks';
 import { Heart } from 'lucide-react';
 import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
 import { useLikeSeedMutation } from '~/queries';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 import { useEffect, useState } from 'react';
 import { useLocation, useSearch } from '@tanstack/react-router';
 import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
@@ -51,50 +57,67 @@ export function LikeButton({
 
   if (!userId && mounted) {
     return (
-      <SignInButton mode="modal">
-        <button
-          type="button"
-          className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
-          aria-label="Favorite"
-        >
-          <Heart
-            className={cn(
-              'w-6 h-6 transition-colors',
-              'text-gray-500',
-              'hover:text-[color:var(--liked)] focus:text-[color:var(--liked)] active:text-[color:var(--liked)]',
-            )}
-            style={{ transition: 'color 0.2s' }}
-            fill="none"
-          />
-        </button>
-      </SignInButton>
+      <TooltipProvider>
+        <Tooltip>
+          <SignInButton mode="modal">
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
+                aria-label="Favorite"
+              >
+                <Heart
+                  className={cn(
+                    'w-6 h-6 transition-colors',
+                    'hover:text-[color:var(--liked)] focus:text-[color:var(--liked)] active:text-[color:var(--liked)]',
+                  )}
+                  style={{ transition: 'color 0.2s' }}
+                  fill="none"
+                />
+              </button>
+            </TooltipTrigger>
+          </SignInButton>
+          <TooltipContent>
+            <p>Sign in to like</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
   return (
-    <button
-      type="button"
-      className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
-      aria-label="Favorite"
-      disabled={pending}
-      onClick={() => {
-        if (pending || !userId) return;
-        setLocallyLiked((prev) => {
-          const next = !prev;
-          debouncedMutate(next);
-          return next;
-        });
-      }}
-    >
-      <Heart
-        className={cn(
-          'w-6 h-6 transition-colors',
-          locallyLiked ? 'text-[color:var(--liked)]' : 'text-gray-500',
-          'hover:text-[color:var(--liked)] focus:text-[color:var(--liked)] active:text-[color:var(--liked)]',
-        )}
-        style={{ transition: 'color 0.2s' }}
-        fill={locallyLiked ? 'currentColor' : 'none'}
-      />
-    </button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
+            aria-label="Favorite"
+            disabled={pending}
+            onClick={() => {
+              if (pending || !userId) return;
+              setLocallyLiked((prev) => {
+                const next = !prev;
+                debouncedMutate(next);
+                return next;
+              });
+            }}
+          >
+            <Heart
+              className={cn(
+                'w-6 h-6 transition-colors',
+                locallyLiked && 'text-[color:var(--liked)]',
+                'hover:text-[color:var(--liked)] focus:text-[color:var(--liked)] active:text-[color:var(--liked)]',
+              )}
+              style={{ transition: 'color 0.2s' }}
+              fill={locallyLiked ? 'currentColor' : 'none'}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{locallyLiked ? 'Unlike' : 'Like'}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

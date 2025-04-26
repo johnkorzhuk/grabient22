@@ -61,6 +61,7 @@ export const Likes = Table('likes', {
 export default defineSchema({
   collections: Collections.table.index('seed', ['seed']),
   likes: Likes.table
+    .index('seed', ['seed'])
     .index('userId', ['userId'])
     .index('byUserIdAndSeed', ['userId', 'seed'])
     .index('isPublic', ['isPublic']),

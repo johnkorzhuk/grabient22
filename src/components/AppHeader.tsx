@@ -172,16 +172,15 @@ export const AppHeader = observer(function AppHeader() {
     from: '/_layout',
   });
   const mounted = useMounted();
-
   // Get palette colors from the store
   const seedPaletteColors = use$(paletteStore$.seedPaletteColors);
-
   const location = useLocation();
   const matches = useMatches();
   const isSeedRoute = matches.some((match) => match.routeId === SeedRoute.id);
   const [open, setOpen] = useState(false);
   const isRandomRoute = location.pathname === '/random';
   const shouldShowControls = isRandomRoute || isSeedRoute;
+  const { isSignedIn } = useAuth();
 
   // Function to handle regeneration via event
   const handleRegenerate = () => {
@@ -232,7 +231,9 @@ export const AppHeader = observer(function AppHeader() {
             </svg>
           </a>
           <ThemeToggle />
-          <div className="flex items-center justify-end w-[32px]">
+          <div
+            className={cn('flex items-center justify-end', isSignedIn ? 'w-[30px]' : 'w-[60px]')}
+          >
             {mounted ? (
               <>
                 <SignedIn>
@@ -240,7 +241,11 @@ export const AppHeader = observer(function AppHeader() {
                 </SignedIn>
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <Button size="sm" variant="outline">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="cursor-pointer disable-animation-on-theme-change"
+                    >
                       Sign in
                     </Button>
                   </SignInButton>

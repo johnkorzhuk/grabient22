@@ -7,7 +7,7 @@ const crons = cronJobs();
 // Schedule the updatePopularCollections mutation to run every hour
 crons.interval(
   'update-popular-collections',
-  { hours: 1 },
+  { minutes: 15 },
   internal.collections.updatePopularCollections,
   { limit: 1000 },
 );

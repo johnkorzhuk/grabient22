@@ -1,7 +1,7 @@
 import { Migrations } from '@convex-dev/migrations';
-import { api, components, internal } from './_generated/api.js';
-import type { DataModel } from './_generated/dataModel.js';
-import { publicLikesBySeed } from './likes.js';
+import { api, components, internal } from './_generated/api';
+import type { DataModel } from './_generated/dataModel';
+import { publicLikesBySeed } from './likes';
 
 export const migrations = new Migrations<DataModel>(components.migrations);
 
@@ -12,7 +12,7 @@ export const addIsPublic = migrations.define({
 
 export const runAddPublic = migrations.runner(internal.migrations.addIsPublic);
 
-export const backfillPublicLikes = migrations.define({
+export const backfillPublicLikess = migrations.define({
   table: 'likes',
   // Only process public likes
   customRange: (query) => query.withIndex('isPublic', (q) => q.eq('isPublic', true)),
@@ -23,4 +23,4 @@ export const backfillPublicLikes = migrations.define({
 });
 
 // Export a function to run from CLI
-export const runBackfill = migrations.runner(internal.migrations.backfillPublicLikes);
+export const runBackfills = migrations.runner(internal.migrations.backfillPublicLikess);

@@ -24,22 +24,32 @@ export const updatePopularCollections = internalMutation({
     // Set a default limit of 1000 if not provided
     const limit = args.limit ?? 1000;
 
-    // Collect all namespaces (seeds) using iterNamespaces
-    const allNamespaces = [];
-    for await (const namespace of publicLikesBySeed.iterNamespaces(ctx)) {
-      allNamespaces.push(namespace);
-    }
+    // Instead of using iterNamespaces which might return undefined values,
+    // query likes table directly to get popular seeds
+    const allLikes = await ctx.db
+      .query('likes')
+      .withIndex('isPublic', (q) => q.eq('isPublic', true))
+      .collect();
 
-    // Get the count for each namespace (seed)
+    // Extract unique seeds
+    const uniqueSeeds = [...new Set(allLikes.map((like) => like.seed))];
+
+    // Get count for each seed
     const seedCounts = await Promise.all(
-      allNamespaces.map(async (seed) => {
-        const count = await publicLikesBySeed.count(ctx, { namespace: seed, bounds: {} });
-        return { seed, count };
+      uniqueSeeds.map(async (seed) => {
+        if (!seed) return null; // Skip any undefined/null seeds
+
+        // Count likes for this seed directly from the database
+        const likesForSeed = allLikes.filter((like) => like.seed === seed);
+        return { seed, count: likesForSeed.length };
       }),
     );
 
-    // Sort by count in descending order and take the top ones based on limit
-    const topSeeds = seedCounts.sort((a, b) => b.count - a.count).slice(0, limit);
+    // Filter out null entries and sort by count
+    const topSeeds = seedCounts
+      .filter((item) => item !== null)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
 
     // Clear the existing popular collections table
     const existingPopular = await ctx.db.query('popular').collect();
@@ -71,12 +81,13 @@ export const updatePopularCollections = internalMutation({
         } else {
           // If collection not found, try to deserialize the coefficients from the seed
           try {
-            const { coeffs } = deserializeCoeffs(seed);
+            const { coeffs, globals } = deserializeCoeffs(seed);
+            const appliedCoeffs = applyGlobals(coeffs, globals);
 
             await ctx.db.insert('popular', {
               seed,
               likes: count,
-              coeffs,
+              coeffs: appliedCoeffs,
               steps: DEFAULT_STEPS,
               style: DEFAULT_STYLE,
               angle: DEFAULT_ANGLE,
@@ -175,7 +186,7 @@ export const checkUserLikedSeeds = query({
           .query('likes')
           .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', seed))
           .unique();
-        return [seed, like !== null] as [string, boolean];
+        return [seed, like !== null];
       }),
     );
 

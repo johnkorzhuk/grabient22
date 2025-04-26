@@ -1,9 +1,16 @@
 import { useNavigate, useParams, useSearch, Link } from '@tanstack/react-router';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useThrottledCallback } from '@mantine/hooks';
-import { useState } from 'react';
+import { useClipboard, useThrottledCallback } from '@mantine/hooks';
+import { useState, useRef } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
+import { Copy, Check } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip';
 
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
@@ -74,13 +81,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   const isGridLayout = layout === 'grid';
 
   return (
-    <section
-      className="h-full w-full overflow-auto relative"
-      onMouseLeave={() => {
-        if (!previewSeed) return;
-        uiTempStore$.previewSeed.set(null);
-      }}
-    >
+    <section className="h-full w-full overflow-auto relative">
       <ul
         className={cn(
           'h-full w-full relative',
@@ -120,6 +121,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
             );
           }
 
+          // Create a ref to store the current CSS for this gradient
+          const gradientCssRef = useRef<React.CSSProperties | null>(null);
+
           return (
             <li
               key={collection._id}
@@ -127,12 +131,19 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 'relative group',
                 isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
               )}
+              onMouseLeave={() => {
+                if (!previewSeed) return;
+                uiTempStore$.previewSeed.set(null);
+              }}
             >
               <GradientPreview
                 processedCoeffs={processedCoeffs}
                 initialStyle={collection.style}
                 initialAngle={collection.angle}
                 initialSteps={collection.steps}
+                onCssGenerated={(css) => {
+                  gradientCssRef.current = css;
+                }}
               />
               <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Link
@@ -149,18 +160,23 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   <span className="relative bottom-[1px] font-medium">Details</span>
                 </Link>
               </div>
-              <div className="absolute top-2 right-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                {Boolean(collection.likes) && (
-                  <span className="font-medium relative bottom-[5.5px] pl-2 pr-2">
-                    {collection.likes}
-                  </span>
-                )}
-                <LikeButton
-                  className="relative -bottom-[1px]"
-                  seed={collection.seed}
-                  isLiked={Boolean(likedSeeds?.[collection.seed])}
-                  pending={false}
-                />
+              <div className="absolute top-2 right-2 z-10 flex gap-2">
+                {/* Like button container - preserving original styling */}
+                <div className="bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                  {Boolean(collection.likes) && (
+                    <span className="font-medium relative bottom-[5.5px] pl-2 pr-2 select-none">
+                      {collection.likes}
+                    </span>
+                  )}
+                  <LikeButton
+                    className="relative -bottom-[1px]"
+                    seed={collection.seed}
+                    isLiked={Boolean(likedSeeds?.[collection.seed])}
+                    pending={false}
+                  />
+                </div>
+
+                <CopyButton gradientCssRef={gradientCssRef} />
               </div>
             </li>
           );
@@ -196,3 +212,49 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     </section>
   );
 });
+
+interface CopyButtonProps {
+  gradientCssRef: React.RefObject<React.CSSProperties | null>;
+}
+
+function CopyButton({ gradientCssRef }: CopyButtonProps) {
+  const clipboard = useClipboard({ timeout: 1000 });
+
+  const handleCopy = () => {
+    if (gradientCssRef.current && gradientCssRef.current.background) {
+      const cssString = `background: ${gradientCssRef.current.background};`;
+      clipboard.copy(cssString);
+    }
+  };
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <div className="bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center px-0.5">
+          <TooltipTrigger asChild>
+            <button
+              onClick={handleCopy}
+              className="p-1 cursor-pointer"
+              aria-label="Copy gradient CSS"
+            >
+              {clipboard.copied ? (
+                <Check
+                  className="w-5 h-5 transition-colors hover:text-foreground focus:text-foreground active:text-foreground"
+                  style={{ transition: 'color 0.2s' }}
+                />
+              ) : (
+                <Copy
+                  className="w-5 h-5 transition-colors hover:text-foreground focus:text-foreground active:text-foreground"
+                  style={{ transition: 'color 0.2s' }}
+                />
+              )}
+            </button>
+          </TooltipTrigger>
+        </div>
+        <TooltipContent>
+          <p>{clipboard.copied ? 'Copied!' : 'Copy CSS'}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}

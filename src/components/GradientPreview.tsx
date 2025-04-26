@@ -1,11 +1,11 @@
 import { observer, use$ } from '@legendapp/state/react';
 import { useSearch } from '@tanstack/react-router';
-// import { uiTempStore$ } from '~/stores/ui';
 import { getCollectionStyleCSS, cosineGradient } from '~/lib/cosineGradient';
 import type { CollectionStyle } from '~/types';
 import * as v from 'valibot';
 import { coeffsSchema } from '~/validators';
 import { uiTempStore$ } from '~/stores/ui';
+import { useEffect } from 'react';
 
 export const GradientPreview = observer(function GradientPreview({
   initialStyle,
@@ -13,6 +13,7 @@ export const GradientPreview = observer(function GradientPreview({
   initialAngle,
   processedCoeffs,
   activeIndex,
+  onCssGenerated,
 }: {
   initialStyle: CollectionStyle;
   initialSteps: number;
@@ -20,6 +21,7 @@ export const GradientPreview = observer(function GradientPreview({
   processedCoeffs: v.InferOutput<typeof coeffsSchema>;
   className?: string;
   activeIndex?: number | null;
+  onCssGenerated?: (css: React.CSSProperties) => void;
 }) {
   const { style, steps, angle } = useSearch({
     from: '/_layout',
@@ -47,11 +49,21 @@ export const GradientPreview = observer(function GradientPreview({
       ? (previewAngle ?? (typeof angle === 'number' ? parseFloat(angle.toFixed(1)) : initialAngle))
       : initialAngle;
 
+  // Generate the CSS once and store it
+  const cssProps = getCollectionStyleCSS(styleToUse, gradientColors, angleToUse, activeIndex);
+  
+  // Call the callback with the generated CSS if provided
+  useEffect(() => {
+    if (onCssGenerated) {
+      onCssGenerated(cssProps);
+    }
+  }, [cssProps, onCssGenerated]);
+
   return (
     <div
       className="relative h-full w-full"
       style={{
-        ...getCollectionStyleCSS(styleToUse, gradientColors, angleToUse, activeIndex),
+        ...cssProps,
       }}
     />
   );
