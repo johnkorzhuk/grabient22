@@ -6,8 +6,8 @@ export function getCollectionStyleSVG(
   angle: number = 90,
   creditProps: { seed: string; href: string },
   activeIndex?: number | null,
-  width: number = 100,
-  height: number = 100,
+  width: number = 800,
+  height: number = 400,
 ): string {
   // Convert RGB values from 0-1 range to 0-255 range for SVG
   const getRgbString = (color: number[]) =>

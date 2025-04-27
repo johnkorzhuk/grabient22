@@ -22,6 +22,7 @@ import { ConvexProviderWithClerk } from 'convex/react-clerk';
 import type { ConvexReactClient } from 'convex/react';
 import type { ConvexQueryClient } from '@convex-dev/react-query';
 import { ThemeProvider } from '~/components/theme/ThemeProvider';
+import { PostHogProvider } from 'posthog-js/react';
 
 // const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
 //   const auth = await getAuth(getWebRequest());
@@ -32,6 +33,10 @@ import { ThemeProvider } from '~/components/theme/ThemeProvider';
 //     token,
 //   };
 // });
+
+const options = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+};
 
 export const Route = wrapCreateRootRouteWithSentry(
   createRootRouteWithContext<{
@@ -118,33 +123,35 @@ function RootComponent() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   const context = useRouteContext({ from: Route.id });
   return (
-    <ClerkProvider>
-      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <html suppressHydrationWarning lang="en">
-          <head>
-            <HeadContent />
-          </head>
-          <body>
-            <ThemeProvider>
-              <TooltipProvider>
-                <div className="h-screen flex flex-col min-h-0">
-                  <div className="flex-grow min-h-0 h-full flex flex-col">
-                    {children}
-                    {/* <Toaster /> */}
+    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY!} options={options}>
+      <ClerkProvider>
+        <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
+          <html suppressHydrationWarning lang="en">
+            <head>
+              <HeadContent />
+            </head>
+            <body>
+              <ThemeProvider>
+                <TooltipProvider>
+                  <div className="h-screen flex flex-col min-h-0">
+                    <div className="flex-grow min-h-0 h-full flex flex-col">
+                      {children}
+                      {/* <Toaster /> */}
+                    </div>
                   </div>
-                </div>
-              </TooltipProvider>
-            </ThemeProvider>
-            {import.meta.env.DEV && (
-              <>
-                <ReactQueryDevtools position="left" buttonPosition="bottom-left" />
-                <TanStackRouterDevtools position="bottom-left" />
-              </>
-            )}
-            <Scripts />
-          </body>
-        </html>
-      </ConvexProviderWithClerk>
-    </ClerkProvider>
+                </TooltipProvider>
+              </ThemeProvider>
+              {import.meta.env.DEV && (
+                <>
+                  <ReactQueryDevtools position="left" buttonPosition="bottom-left" />
+                  <TanStackRouterDevtools position="bottom-left" />
+                </>
+              )}
+              <Scripts />
+            </body>
+          </html>
+        </ConvexProviderWithClerk>
+      </ClerkProvider>
+    </PostHogProvider>
   );
 }

@@ -127,11 +127,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
             angleToUse,
             {
               seed: collection.seed,
-              href: href,
+              href,
             },
           );
-          // Create a ref to measure the dimensions
-          const { ref: itemRef, width: itemWidth, height: itemHeight } = useElementSize();
 
           // SVG string will be generated with the measured dimensions once available
           const svgString = getCollectionStyleSVG(
@@ -140,11 +138,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
             angleToUse,
             {
               seed: collection.seed,
-              href: href,
+              href,
             },
-            null, // No active index for regular display
-            itemWidth || 800, // Default width if measurement not yet available
-            itemHeight || 400, // Default height if measurement not yet available
+            null,
           );
 
           if (isCurrentSeed) {
@@ -156,7 +152,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
                 )}
               >
-                <div ref={itemRef} className="relative h-full w-full overflow-hidden">
+                <div className="relative h-full w-full overflow-hidden">
                   <GradientPreview cssProps={styles} />
                 </div>
               </li>
@@ -175,7 +171,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 uiTempStore$.previewSeed.set(null);
               }}
             >
-              <div ref={itemRef} className="group relative h-full w-full overflow-hidden">
+              <div className="group relative h-full w-full overflow-hidden">
                 <GradientPreview cssProps={styles} />
               </div>
               <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
@@ -244,7 +240,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               maxSize={MAX_ITEM_HEIGHT}
               className="pointer-events-none"
             >
-              <div className="h-full"></div>
+              <div className="h-full w-full"></div>
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>
