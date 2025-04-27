@@ -118,90 +118,90 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
 };
 
 // Custom X-axis tick component that renders a gradient color bar
-interface CustomXAxisTickProps {
-  x: number;
-  y: number;
-  payload: {
-    value: number;
-    coordinate: number;
-    index: number;
-    offset: number;
-  };
-  gradientColors: number[][];
-  isVertical?: boolean;
-  seed: string;
-}
+// interface CustomXAxisTickProps {
+//   x: number;
+//   y: number;
+//   payload: {
+//     value: number;
+//     coordinate: number;
+//     index: number;
+//     offset: number;
+//   };
+//   gradientColors: number[][];
+//   isVertical?: boolean;
+//   seed: string;
+// }
 
-function CustomXAxisTick(props: CustomXAxisTickProps) {
-  const { y, gradientColors, isVertical = false } = props;
-  const { href } = useLocation();
-  const barHeight = 25;
-  // Position the bar based on vertical/horizontal orientation
-  // For horizontal mode with large negative margin, position the bar at the bottom of the visible area
-  const barY = isVertical ? y - barHeight - 2 : y - 25; // Adjusted position to account for smaller height
+// function CustomXAxisTick(props: CustomXAxisTickProps) {
+//   const { y, gradientColors, isVertical = false } = props;
+//   const { href } = useLocation();
+//   const barHeight = 25;
+//   // Position the bar based on vertical/horizontal orientation
+//   // For horizontal mode with large negative margin, position the bar at the bottom of the visible area
+//   const barY = isVertical ? y - barHeight - 2 : y - 25; // Adjusted position to account for smaller height
 
-  return (
-    <g>
-      <foreignObject x={isVertical ? 10 : 16} y={barY} width="calc(100% - 42px)" height={barHeight}>
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
-              seed: props.seed,
-              href,
-            }),
-          }}
-        />
-      </foreignObject>
-    </g>
-  );
-}
+//   return (
+//     <g>
+//       <foreignObject x={isVertical ? 10 : 16} y={barY} width="calc(100% - 42px)" height={barHeight}>
+//         <div
+//           style={{
+//             width: '100%',
+//             height: '100%',
+//             ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
+//               seed: props.seed,
+//               href,
+//             }),
+//           }}
+//         />
+//       </foreignObject>
+//     </g>
+//   );
+// }
 
-// Custom Y-axis tick component for vertical chart
-interface CustomYAxisTickProps {
-  x: number;
-  y: number;
-  payload: {
-    value: number;
-    coordinate: number;
-    index: number;
-    offset: number;
-  };
-  gradientColors: number[][];
-  isVertical?: boolean;
-  seed: string;
-}
+// // Custom Y-axis tick component for vertical chart
+// interface CustomYAxisTickProps {
+//   x: number;
+//   y: number;
+//   payload: {
+//     value: number;
+//     coordinate: number;
+//     index: number;
+//     offset: number;
+//   };
+//   gradientColors: number[][];
+//   isVertical?: boolean;
+//   seed: string;
+// }
 
-function CustomYAxisTick(props: CustomYAxisTickProps) {
-  const { href } = useLocation();
-  const { x, gradientColors, isVertical = true } = props;
-  const barWidth = 25; // Reduced width from 40px to 25px
-  // Adjust position based on vertical/horizontal orientation
-  const barX = isVertical ? x - barWidth + 40 : x - barWidth - 5; // Adjusted position to account for smaller width
+// function CustomYAxisTick(props: CustomYAxisTickProps) {
+//   const { href } = useLocation();
+//   const { x, gradientColors, isVertical = true } = props;
+//   const barWidth = 25; // Reduced width from 40px to 25px
+//   // Adjust position based on vertical/horizontal orientation
+//   const barX = isVertical ? x - barWidth + 40 : x - barWidth - 5; // Adjusted position to account for smaller width
 
-  return (
-    <g>
-      <foreignObject
-        x={isVertical ? 0 : barX}
-        y={isVertical ? 24 : 18}
-        width={barWidth}
-        height={`calc(100% - ${isVertical ? 24 : 36}px)`}
-      >
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
-              seed: props.seed,
-              href,
-            }),
-          }}
-        />
-      </foreignObject>
-    </g>
-  );
-}
+//   return (
+//     <g>
+//       <foreignObject
+//         x={isVertical ? 0 : barX}
+//         y={isVertical ? 24 : 18}
+//         width={barWidth}
+//         height={`calc(100% - ${isVertical ? 24 : 36}px)`}
+//       >
+//         <div
+//           style={{
+//             width: '100%',
+//             height: '100%',
+//             ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
+//               seed: props.seed,
+//               href,
+//             }),
+//           }}
+//         />
+//       </foreignObject>
+//     </g>
+//   );
+// }
 
 interface ChartProps {
   data: Array<{
@@ -281,18 +281,18 @@ const Chart = lazy(() =>
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tick={
-                    !isPreview
-                      ? (props) => (
-                          <CustomYAxisTick
-                            {...props}
-                            gradientColors={gradientColors}
-                            isVertical={isVertical}
-                            seed={seed}
-                          />
-                        )
-                      : false
-                  }
+                  // tick={
+                  //   !isPreview
+                  //     ? (props) => (
+                  //         <CustomYAxisTick
+                  //           {...props}
+                  //           gradientColors={gradientColors}
+                  //           isVertical={isVertical}
+                  //           seed={seed}
+                  //         />
+                  //       )
+                  //     : false
+                  // }
                   width={55} // Reduced width from 70px to 55px
                 />
                 <XAxis
@@ -375,18 +375,18 @@ const Chart = lazy(() =>
                   tickLine={false}
                   axisLine={false}
                   tickMargin={2}
-                  tick={
-                    !isPreview
-                      ? (props) => (
-                          <CustomXAxisTick
-                            {...props}
-                            gradientColors={gradientColors}
-                            isVertical={isVertical}
-                            seed={seed}
-                          />
-                        )
-                      : false
-                  }
+                  // tick={
+                  //   !isPreview
+                  //     ? (props) => (
+                  //         <CustomXAxisTick
+                  //           {...props}
+                  //           gradientColors={gradientColors}
+                  //           isVertical={isVertical}
+                  //           seed={seed}
+                  //         />
+                  //       )
+                  //     : false
+                  // }
                   height={45} // Reduced height from 60px to 45px
                   padding={{ left: 0, right: 0 }}
                 />
