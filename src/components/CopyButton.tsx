@@ -1,5 +1,5 @@
 import { useClipboard } from '@mantine/hooks';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Download } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useState, useEffect } from 'react';
 import {
@@ -24,7 +24,7 @@ export function CopyButton({ cssString, svgString, copyClassName }: CopyButtonPr
   const handleCopyCss = () => {
     clipboard.copy(cssString);
     setCopiedType('css');
-    // Let the dropdown close naturally after a short delay
+    // Close the dropdown after a short delay to show the checkmark
     setTimeout(() => {
       // Use document.body.click() to simulate a click outside which will close the dropdown
       document.body.click();
@@ -34,9 +34,31 @@ export function CopyButton({ cssString, svgString, copyClassName }: CopyButtonPr
   const handleCopySvg = () => {
     clipboard.copy(svgString);
     setCopiedType('svg');
-    // Let the dropdown close naturally after a short delay
+    // Close the dropdown after a short delay to show the checkmark
     setTimeout(() => {
       // Use document.body.click() to simulate a click outside which will close the dropdown
+      document.body.click();
+    }, 300);
+  };
+
+  const handleDownloadSvg = () => {
+    // Create a Blob with the SVG content
+    const blob = new Blob([svgString], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link and trigger the download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'gradient.svg';
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Close the dropdown
+    setTimeout(() => {
       document.body.click();
     }, 300);
   };
@@ -104,6 +126,13 @@ export function CopyButton({ cssString, svgString, copyClassName }: CopyButtonPr
               >
                 <span>{copiedType === 'svg' ? 'Copied!' : 'Copy SVG'}</span>
                 {copiedType === 'svg' && <Check className="ml-auto h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleDownloadSvg}
+                className="focus:bg-background/30 hover:bg-background/30 dark:focus:bg-background/10 dark:hover:bg-background/10"
+              >
+                <Download className="ml-auto h-4 w-4" />
+                <span>Download SVG</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

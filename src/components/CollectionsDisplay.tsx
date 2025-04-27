@@ -1,6 +1,6 @@
 import { useNavigate, useParams, useSearch, Link, useLocation } from '@tanstack/react-router';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useThrottledCallback } from '@mantine/hooks';
+import { useThrottledCallback, useElementSize } from '@mantine/hooks';
 import { useState } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
@@ -130,10 +130,22 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               href: href,
             },
           );
-          const svgString = getCollectionStyleSVG(styleToUse, gradientColors, angleToUse, {
-            seed: collection.seed,
-            href: href,
-          });
+          // Create a ref to measure the dimensions
+          const { ref: itemRef, width: itemWidth, height: itemHeight } = useElementSize();
+
+          // SVG string will be generated with the measured dimensions once available
+          const svgString = getCollectionStyleSVG(
+            styleToUse,
+            gradientColors,
+            angleToUse,
+            {
+              seed: collection.seed,
+              href: href,
+            },
+            null, // No active index for regular display
+            itemWidth || 800, // Default width if measurement not yet available
+            itemHeight || 400, // Default height if measurement not yet available
+          );
 
           if (isCurrentSeed) {
             return (
@@ -144,7 +156,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
                 )}
               >
-                <GradientPreview cssProps={styles} />
+                <div ref={itemRef} className="relative h-full w-full overflow-hidden rounded-md">
+                  <GradientPreview cssProps={styles} />
+                </div>
               </li>
             );
           }
@@ -161,7 +175,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 uiTempStore$.previewSeed.set(null);
               }}
             >
-              <GradientPreview cssProps={styles} />
+              <div ref={itemRef} className="group relative h-full w-full overflow-hidden">
+                <GradientPreview cssProps={styles} />
+              </div>
               <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Link
                   to="/$seed"
