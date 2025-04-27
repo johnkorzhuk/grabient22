@@ -129,39 +129,112 @@ export function getCollectionStyleSVG(
     }
 
     case 'linearSwatches': {
-      // For linear swatches, we'll create horizontal rectangles then rotate the whole group
+      // For linear swatches, we'll calculate the exact band size needed
+
       let svgContent = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-            ${creditComment}
+            <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+              ${creditComment}
         `;
 
-      // Create a container group that will be rotated
-      svgContent += `<g transform="rotate(${angle.toFixed(3)}, ${(width / 2).toFixed(3)}, ${(height / 2).toFixed(3)})">`;
+      // Normalize the angle to 0-360 range
+      const normalizedAngle = ((angle % 360) + 360) % 360;
 
-      // Calculate segment size - creating segments along the horizontal axis initially
-      const segmentSize = (height / processedColors.length).toFixed(3);
+      // Determine if we need horizontal or diagonal bands
+      if (normalizedAngle === 0) {
+        // For horizontal bands (angle = 0), simply divide the height equally
+        const bandHeight = height / processedColors.length;
 
-      // The diagonal length ensures full coverage after rotation
-      const diagonal = Math.sqrt(width * width + height * height);
-      const extraWidth = (diagonal - width).toFixed(3);
-      const totalWidth = (width + Number(extraWidth)).toFixed(3);
-      const offsetX = (-Number(extraWidth) / 2).toFixed(3);
+        processedColors.forEach((color, index) => {
+          // Calculate band position
+          const y = index * bandHeight;
 
-      // Create a rectangle for each color segment
-      processedColors.forEach((color, index) => {
-        // Calculate segment position
-        const y = (index * Number(segmentSize)).toFixed(3);
+          // Determine alpha value based on activeIndex
+          const alpha =
+            typeof activeIndex === 'number' ? (index === activeIndex ? 1 : inactiveAlpha) : 1;
 
-        // Determine alpha value based on activeIndex
-        const alpha =
-          typeof activeIndex === 'number' ? (index === activeIndex ? 1 : inactiveAlpha) : 1;
+          // Add rectangle for this color band
+          svgContent += `<rect x="0" y="${y}" width="${width}" height="${bandHeight}" fill="rgb(${getRgbString(color)})" fill-opacity="${alpha}" />`;
+        });
+      } else if (normalizedAngle === 90) {
+        // For vertical bands (angle = 90), divide the width equally
+        const bandWidth = width / processedColors.length;
 
-        // Add rectangle segment
-        svgContent += `<rect x="${offsetX}" y="${y}" width="${totalWidth}" height="${segmentSize}" fill="rgb(${getRgbString(color)})" fill-opacity="${alpha.toFixed(3)}" />`;
-      });
+        processedColors.forEach((color, index) => {
+          // Calculate band position
+          const x = index * bandWidth;
 
-      // Close the group and SVG
-      svgContent += `</g></svg>`;
+          // Determine alpha value based on activeIndex
+          const alpha =
+            typeof activeIndex === 'number' ? (index === activeIndex ? 1 : inactiveAlpha) : 1;
+
+          // Add rectangle for this color band
+          svgContent += `<rect x="${x}" y="0" width="${bandWidth}" height="${height}" fill="rgb(${getRgbString(color)})" fill-opacity="${alpha}" />`;
+        });
+      } else {
+        // For diagonal bands, use a different approach with properly sized bands
+        // Calculate the number of bands needed to cover the entire SVG
+        // For diagonal bands, we need more bands than colors to ensure full coverage
+
+        // First, determine how many actual bands we'll need to cover the area
+        const diagonal = Math.sqrt(width * width + height * height);
+        const angleRadians = (normalizedAngle * Math.PI) / 180;
+
+        // Calculate the band width perpendicular to the angle
+        const perpendicularBandWidth = diagonal / processedColors.length;
+
+        // Calculate center of SVG
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // For each color, create a parallelogram/band at the appropriate angle
+        processedColors.forEach((color, index) => {
+          // Calculate the position along the perpendicular axis
+          const distanceFromCenter =
+            (index - (processedColors.length - 1) / 2) * perpendicularBandWidth;
+
+          // Calculate the start and end points of the band
+          // We'll draw a parallelogram for each band
+
+          // Direction vector perpendicular to the angle
+          const perpX = Math.cos(angleRadians + Math.PI / 2);
+          const perpY = Math.sin(angleRadians + Math.PI / 2);
+
+          // Direction vector along the angle
+          const dirX = Math.cos(angleRadians);
+          const dirY = Math.sin(angleRadians);
+
+          // Calculate the corners of the parallelogram
+          // We'll create a parallelogram that's wide enough to cover the diagonal
+          const halfDiagonal = diagonal / 2;
+
+          // Center point of the band
+          const bandCenterX = centerX + distanceFromCenter * perpX;
+          const bandCenterY = centerY + distanceFromCenter * perpY;
+
+          // Four corners of the parallelogram
+          const x1 = bandCenterX - halfDiagonal * dirX - (perpendicularBandWidth / 2) * perpX;
+          const y1 = bandCenterY - halfDiagonal * dirY - (perpendicularBandWidth / 2) * perpY;
+
+          const x2 = bandCenterX + halfDiagonal * dirX - (perpendicularBandWidth / 2) * perpX;
+          const y2 = bandCenterY + halfDiagonal * dirY - (perpendicularBandWidth / 2) * perpY;
+
+          const x3 = bandCenterX + halfDiagonal * dirX + (perpendicularBandWidth / 2) * perpX;
+          const y3 = bandCenterY + halfDiagonal * dirY + (perpendicularBandWidth / 2) * perpY;
+
+          const x4 = bandCenterX - halfDiagonal * dirX + (perpendicularBandWidth / 2) * perpX;
+          const y4 = bandCenterY - halfDiagonal * dirY + (perpendicularBandWidth / 2) * perpY;
+
+          // Determine alpha value based on activeIndex
+          const alpha =
+            typeof activeIndex === 'number' ? (index === activeIndex ? 1 : inactiveAlpha) : 1;
+
+          // Create a polygon for the band
+          svgContent += `<polygon points="${x1},${y1} ${x2},${y2} ${x3},${y3} ${x4},${y4}" fill="rgb(${getRgbString(color)})" fill-opacity="${alpha}" />`;
+        });
+      }
+
+      // Close the SVG
+      svgContent += `</svg>`;
 
       return svgContent;
     }
