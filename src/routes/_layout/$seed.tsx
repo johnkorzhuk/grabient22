@@ -1,4 +1,4 @@
-import { createFileRoute, useParams, useSearch } from '@tanstack/react-router';
+import { createFileRoute, useLocation, useParams, useSearch } from '@tanstack/react-router';
 import type { AppCollection, CosineCoeffs, GlobalModifierType } from '~/types';
 import { useRef, useState, useEffect } from 'react';
 import { cn } from '~/lib/utils';
@@ -14,7 +14,6 @@ import {
   generateFrequencyVariations,
   generatePhaseVariations,
   updateCoeffWithInverseGlobal,
-  getCollectionStyleCSS,
   cosineGradient,
 } from '~/lib/cosineGradient';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
@@ -41,6 +40,9 @@ import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/tanstack-react-start';
 import { api } from '../../../convex/_generated/api';
+import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
+import { CopyButton } from '~/components/CopyButton';
+import { getCollectionStyleSVG } from '~/lib/getCollectionStyleSVG';
 
 export const Route = createFileRoute('/_layout/$seed')({
   component: Home,
@@ -251,6 +253,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   processedCoeffs: CosineCoeffs;
 }) {
   const search = useSearch({ from: '/_layout' });
+  const { href } = useLocation();
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewSeed = use$(uiTempStore$.previewSeed);
   const previewAngle = use$(uiTempStore$.previewAngle);
@@ -281,9 +284,9 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   const activeModifier = use$(uiTempStore$.activeModifier);
   const navigate = useNavigate({ from: '/$seed' });
   const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
-  const previewCoeffs = previewData
-    ? applyGlobals(previewData.coeffs, previewData.globals)
-    : processedCoeffs;
+  // const previewCoeffs = previewData
+  //   ? applyGlobals(previewData.coeffs, previewData.globals)
+  //   : processedCoeffs;
   const { userId } = useAuth();
   const isDefaultGlobals = seedCollection.globals.every(
     (val, index) => val === DEFAULT_GLOBALS[index],
@@ -402,7 +405,27 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   });
 
   const isLiked = Boolean(isLikedData && !isLikedPending);
-  const cssProps = getCollectionStyleCSS(styleToUse, gradientColors, angleToUse, previewColorIndex);
+  const { styles, cssString } = getCollectionStyleCSS(
+    styleToUse,
+    gradientColors,
+    angleToUse,
+    {
+      seed: currentSeed,
+      href,
+    },
+    previewColorIndex,
+  );
+
+  const svgString = getCollectionStyleSVG(
+    styleToUse,
+    gradientColors,
+    angleToUse,
+    {
+      seed: currentSeed,
+      href,
+    },
+    previewColorIndex,
+  );
 
   return (
     <div className="flex flex-col w-full h-full relative" ref={containerRef}>
@@ -421,8 +444,11 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
         <LikeButton pending={isLikedPending} isLiked={isLiked} seed={currentSeed} />
       </div>
       {/* GradientPreview - remaining height */}
-      <div className="w-full flex-grow lg:mb-0 mb-2">
-        <GradientPreview cssProps={cssProps} />
+      <div className="w-full flex-grow lg:mb-0 mb-2 relative group">
+        <GradientPreview cssProps={styles} />
+        <div className="absolute top-2 right-2 z-10 flex gap-2">
+          <CopyButton cssString={cssString} svgString={svgString} copyClassName="py-1.5" />
+        </div>
       </div>
 
       {/* Graph section - fixed at 35% */}
@@ -430,6 +456,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
         <GradientChannelsChart
           processedCoeffs={processedCoeffs}
           steps={stepsToUse === 'auto' ? DEFAULT_STEPS : stepsToUse}
+          seed={currentSeed}
         />
       </div>
 

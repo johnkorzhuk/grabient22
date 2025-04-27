@@ -11,38 +11,23 @@ import { DEFAULT_CATEGORIES, paletteStore$, REGENERATE_PALETTES_EVENT } from '~/
 import { PaletteCategorySidebar } from './PaletteCategorySidebar';
 import { CategoryBadge } from './CategoryBadge';
 import { Navigation } from './Navigation';
-import { LayoutToggle } from '~/components/LayoutToggle';
 
 // Category selector component
 const CategorySelector = observer(function CategorySelector() {
-  const randomSearch = useSearch({
-    from: '/_layout/random',
-  });
+  let randomSearch;
+
+  try {
+    randomSearch = useSearch({
+      from: '/_layout/random',
+    });
+  } catch (error) {}
 
   let selectedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
-  const searchCategories = randomSearch.categories ?? DEFAULT_CATEGORIES;
+  const searchCategories = randomSearch?.categories ?? DEFAULT_CATEGORIES;
   const isCategoriesEqual =
     selectedCategories.length === searchCategories.length &&
     selectedCategories.every((c, i) => c === searchCategories[i]);
   if (!isCategoriesEqual) selectedCategories = searchCategories;
-  // const searchIsDefault = search.categories.length === 1 && search.categories[0] === 'Random';
-  // if (search.categories.every((c) => c === 'Random')) {
-  //   selectedCategories = DEFAULT_CATEGORY_ORDER;
-  // }
-
-  // if (isRandomRoute) {
-  //   try {
-  //     const { categories } = useSearch({
-  //       from: '/_layout/random',
-  //     });
-  //     if (categories) {
-  //       selectedCategories = categories;
-  //     }
-  //   } catch (error) {
-  //     // Fallback to default if there's an error
-  //     console.debug('Random route not active yet, using default categories');
-  //   }
-  // }
 
   const navigate = useNavigate({
     from: '/random',

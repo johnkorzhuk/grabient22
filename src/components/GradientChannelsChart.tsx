@@ -12,16 +12,19 @@ import { coeffsSchema } from '~/validators';
 import * as v from 'valibot';
 import { lazy, Suspense } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
-import { applyGlobals, cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
+import { applyGlobals, cosineGradient } from '~/lib/cosineGradient';
 import { uiTempStore$ } from '~/stores/ui';
 import { useHotkeys, useClipboard, useElementSize, useMediaQuery } from '@mantine/hooks';
 import { Copy, Check } from 'lucide-react';
 import { deserializeCoeffs } from '~/lib/serialization';
 import { rgbChannelConfig } from '~/constants/colors';
+import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
+import { useLocation } from '@tanstack/react-router';
 
 interface GradientChannelsChartProps {
   steps: number;
   processedCoeffs: v.InferOutput<typeof coeffsSchema>;
+  seed: string;
 }
 
 // Define proper types for the tooltip props
@@ -126,10 +129,12 @@ interface CustomXAxisTickProps {
   };
   gradientColors: number[][];
   isVertical?: boolean;
+  seed: string;
 }
 
 function CustomXAxisTick(props: CustomXAxisTickProps) {
   const { y, gradientColors, isVertical = false } = props;
+  const { href } = useLocation();
   const barHeight = 25;
   // Position the bar based on vertical/horizontal orientation
   // For horizontal mode with large negative margin, position the bar at the bottom of the visible area
@@ -142,7 +147,10 @@ function CustomXAxisTick(props: CustomXAxisTickProps) {
           style={{
             width: '100%',
             height: '100%',
-            ...getCollectionStyleCSS('linearSwatches', gradientColors, 90),
+            ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
+              seed: props.seed,
+              href,
+            }),
           }}
         />
       </foreignObject>
@@ -162,9 +170,11 @@ interface CustomYAxisTickProps {
   };
   gradientColors: number[][];
   isVertical?: boolean;
+  seed: string;
 }
 
 function CustomYAxisTick(props: CustomYAxisTickProps) {
+  const { href } = useLocation();
   const { x, gradientColors, isVertical = true } = props;
   const barWidth = 25; // Reduced width from 40px to 25px
   // Adjust position based on vertical/horizontal orientation
@@ -182,7 +192,10 @@ function CustomYAxisTick(props: CustomYAxisTickProps) {
           style={{
             width: '100%',
             height: '100%',
-            ...getCollectionStyleCSS('linearSwatches', gradientColors, 180), // Changed from 0 to 180 to reverse the order
+            ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
+              seed: props.seed,
+              href,
+            }),
           }}
         />
       </foreignObject>
@@ -207,6 +220,7 @@ interface ChartProps {
   isVertical?: boolean;
   width?: number;
   height?: number;
+  seed: string;
 }
 
 // Client-side only chart component
@@ -221,6 +235,7 @@ const Chart = lazy(() =>
       isVertical = false,
       width,
       height,
+      seed,
     }: ChartProps) => {
       // For vertical layout, we need to transform the data
       // In vertical layout, the data point's "t" value becomes the y-coordinate
@@ -273,6 +288,7 @@ const Chart = lazy(() =>
                             {...props}
                             gradientColors={gradientColors}
                             isVertical={isVertical}
+                            seed={seed}
                           />
                         )
                       : false
@@ -366,6 +382,7 @@ const Chart = lazy(() =>
                             {...props}
                             gradientColors={gradientColors}
                             isVertical={isVertical}
+                            seed={seed}
                           />
                         )
                       : false
@@ -433,6 +450,7 @@ const Chart = lazy(() =>
 export const GradientChannelsChart = observer(function GradientChannelsChart({
   processedCoeffs,
   steps,
+  seed,
 }: GradientChannelsChartProps) {
   const previewSeed = use$(uiTempStore$.previewSeed);
   const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
@@ -498,6 +516,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
               isVertical={isVertical}
               width={width || undefined}
               height={height || undefined}
+              seed={seed}
             />
           </Suspense>
         </ChartContainer>
@@ -511,6 +530,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
               isVertical={isVertical}
               width={width || undefined}
               height={height || undefined}
+              seed={seed}
             />
           </Suspense>
         </ChartContainer>

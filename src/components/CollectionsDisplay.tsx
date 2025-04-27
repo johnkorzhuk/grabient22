@@ -1,18 +1,19 @@
-import { useNavigate, useParams, useSearch, Link } from '@tanstack/react-router';
+import { useNavigate, useParams, useSearch, Link, useLocation } from '@tanstack/react-router';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useClipboard, useThrottledCallback } from '@mantine/hooks';
-import { useState, useRef } from 'react';
+import { useThrottledCallback } from '@mantine/hooks';
+import { useState } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
-import { Copy, Check } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';
-import { applyGlobals, cosineGradient, getCollectionStyleCSS } from '~/lib/cosineGradient';
+import { applyGlobals, cosineGradient } from '~/lib/cosineGradient';
 import { GradientPreview } from './GradientPreview';
 import { LikeButton } from './LikeButton';
+import { getCollectionStyleSVG } from '~/lib/getCollectionStyleSVG';
+import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
+import { CopyButton } from './CopyButton';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -32,6 +33,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   // We need to handle each case separately to satisfy TypeScript's type checking
   let seed: string | undefined = undefined;
   let navigate;
+  const { href } = useLocation();
 
   if (isSeedRoute) {
     const params = useParams({ from: '/_layout/$seed' });
@@ -119,7 +121,19 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               : collection.angle;
 
           // Generate the CSS once and store it
-          const cssProps = getCollectionStyleCSS(styleToUse, gradientColors, angleToUse);
+          const { styles, cssString } = getCollectionStyleCSS(
+            styleToUse,
+            gradientColors,
+            angleToUse,
+            {
+              seed: collection.seed,
+              href: href,
+            },
+          );
+          const svgString = getCollectionStyleSVG(styleToUse, gradientColors, angleToUse, {
+            seed: collection.seed,
+            href: href,
+          });
 
           if (isCurrentSeed) {
             return (
@@ -130,7 +144,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
                 )}
               >
-                <GradientPreview cssProps={cssProps} />
+                <GradientPreview cssProps={styles} />
               </li>
             );
           }
@@ -147,7 +161,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 uiTempStore$.previewSeed.set(null);
               }}
             >
-              <GradientPreview cssProps={cssProps} />
+              <GradientPreview cssProps={styles} />
               <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Link
                   to="/$seed"
@@ -171,15 +185,17 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                       {collection.likes}
                     </span>
                   )}
-                  <LikeButton
-                    className="relative -bottom-[1px]"
-                    seed={collection.seed}
-                    isLiked={Boolean(likedSeeds?.[collection.seed])}
-                    pending={false}
-                  />
+                  {!isSeedRoute && (
+                    <LikeButton
+                      className="relative -bottom-[1px]"
+                      seed={collection.seed}
+                      isLiked={Boolean(likedSeeds?.[collection.seed])}
+                      pending={false}
+                    />
+                  )}
                 </div>
 
-                <CopyButton cssProps={cssProps} />
+                <CopyButton cssString={cssString} svgString={svgString} />
               </div>
             </li>
           );
@@ -215,49 +231,3 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     </section>
   );
 });
-
-interface CopyButtonProps {
-  cssProps: React.CSSProperties;
-}
-
-function CopyButton({ cssProps }: CopyButtonProps) {
-  const clipboard = useClipboard({ timeout: 1000 });
-
-  const handleCopy = () => {
-    if (cssProps.background) {
-      const cssString = `background: ${cssProps.background};`;
-      clipboard.copy(cssString);
-    }
-  };
-
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <div className="bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center px-0.5">
-          <TooltipTrigger asChild>
-            <button
-              onClick={handleCopy}
-              className="p-1 cursor-pointer"
-              aria-label="Copy gradient CSS"
-            >
-              {clipboard.copied ? (
-                <Check
-                  className="w-5 h-5 transition-colors hover:text-foreground focus:text-foreground active:text-foreground"
-                  style={{ transition: 'color 0.2s' }}
-                />
-              ) : (
-                <Copy
-                  className="w-5 h-5 transition-colors hover:text-foreground focus:text-foreground active:text-foreground"
-                  style={{ transition: 'color 0.2s' }}
-                />
-              )}
-            </button>
-          </TooltipTrigger>
-        </div>
-        <TooltipContent>
-          <p>{clipboard.copied ? 'Copied!' : 'Copy CSS'}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-}

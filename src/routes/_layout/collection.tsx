@@ -7,7 +7,7 @@ import { usePaginatedQuery } from 'convex/react';
 import { useAuth } from '@clerk/tanstack-react-start';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
-const PAGE_SIZE = 96 as const;
+const PAGE_SIZE = 200 as const;
 // Define the route
 export const Route = createFileRoute('/_layout/collection')({
   component: CollectionRoute,
