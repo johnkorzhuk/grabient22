@@ -1,11 +1,12 @@
 import { defineConfig } from '@tanstack/react-start/config';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
-// import { cloudflare } from 'unenv';
+import { cloudflare } from 'unenv';
 import comlink from 'vite-plugin-comlink';
 
 export default defineConfig({
   server: {
-    preset: 'netlify',
+    preset: 'cloudflare-pages',
+    unenv: cloudflare,
   },
   tsr: {
     appDirectory: 'src',
