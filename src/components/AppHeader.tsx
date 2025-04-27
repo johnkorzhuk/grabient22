@@ -29,6 +29,7 @@ import { PaletteCategoryDisplay } from './PaletteCategoryDisplay';
 import { useMounted } from '@mantine/hooks';
 import { LayoutToggle } from './LayoutToggle';
 import { uiTempStore$ } from '~/stores/ui';
+import { GrabientLogo } from './GrabientLogo';
 
 // Category badge component for selection
 function CategoryBadge({
@@ -203,7 +204,9 @@ export const AppHeader = observer(function AppHeader() {
               };
             }}
           >
-            <h1 className="text-xl font-bold md:w-[166px]">Grabient</h1>
+            <div className="md:w-[168px] relative">
+              <GrabientLogo />
+            </div>
           </Link>
 
           <LayoutToggle />
