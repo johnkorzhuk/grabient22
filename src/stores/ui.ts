@@ -12,6 +12,11 @@ export interface UITempStore {
   previewColorIndex: number | null;
   activeModifier: GlobalModifierType;
   isGeneratingPalettes: boolean;
+  preferredOptions: {
+    style: v.InferOutput<typeof collectionStyleValidator> | 'auto';
+    steps: v.InferOutput<typeof stepsValidator> | 'auto';
+    angle: v.InferOutput<typeof angleValidator> | 'auto';
+  };
 }
 
 export const INITIAL_UI_TEMP_STATE: UITempStore = {
@@ -22,6 +27,11 @@ export const INITIAL_UI_TEMP_STATE: UITempStore = {
   previewColorIndex: null,
   activeModifier: null,
   isGeneratingPalettes: false,
+  preferredOptions: {
+    style: 'auto',
+    steps: 'auto',
+    angle: 'auto',
+  },
 };
 
 export const uiTempStore$ = observable<UITempStore>(INITIAL_UI_TEMP_STATE);

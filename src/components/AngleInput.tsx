@@ -29,10 +29,10 @@ export const AngleInput = observer(function AngleInput({
   const from = isSeedRoute
     ? '/$seed'
     : location.pathname === '/random'
-    ? '/random'
-    : location.pathname === '/collection'
-    ? '/collection'
-    : '/';
+      ? '/random'
+      : location.pathname === '/collection'
+        ? '/collection'
+        : '/';
 
   const navigate = useNavigate({ from });
   const previousValue = usePrevious(value);
@@ -69,6 +69,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set('auto');
     } else {
       const numValue = Number.parseFloat(newValue);
       if (!isNaN(numValue)) {
@@ -77,6 +78,7 @@ export const AngleInput = observer(function AngleInput({
           // Format to exactly one decimal place
           const formattedAngle = parseFloat(numValue.toFixed(1));
           uiTempStore$.previewAngle.set(formattedAngle);
+          uiTempStore$.preferredOptions.angle.set(formattedAngle);
         }
       }
     }
@@ -109,6 +111,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set('auto');
       return;
     }
 
@@ -124,6 +127,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
     } else if (!validateAngle(numValue)) {
       // Number out of range, revert to previous value
       navigate({
@@ -133,6 +137,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
     }
     // If valid, no need to change anything
 
@@ -163,6 +168,7 @@ export const AngleInput = observer(function AngleInput({
           }),
           replace: true,
         });
+        uiTempStore$.preferredOptions.angle.set(formattedAngle);
       }
     }
 
@@ -179,6 +185,7 @@ export const AngleInput = observer(function AngleInput({
           }),
           replace: true,
         });
+        uiTempStore$.preferredOptions.angle.set(DEFAULT_ANGLE);
       } else {
         // For non-auto, validate current input
         const currentInputValue = inputRef.current?.value || '';
@@ -193,6 +200,7 @@ export const AngleInput = observer(function AngleInput({
             }),
             replace: true,
           });
+          uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
         } else {
           // Format to one decimal place
           const formattedAngle = parseFloat(numValue.toFixed(1));
@@ -204,6 +212,7 @@ export const AngleInput = observer(function AngleInput({
             }),
             replace: true,
           });
+          uiTempStore$.preferredOptions.angle.set(formattedAngle);
         }
       }
 
@@ -221,6 +230,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
       inputRef.current?.blur();
     }
   };
@@ -245,6 +255,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set('auto');
       uiTempStore$.previewAngle.set(null);
     } else {
       // Otherwise set to the new value
@@ -255,6 +266,7 @@ export const AngleInput = observer(function AngleInput({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.angle.set(clickedAngle);
     }
   };
 
@@ -264,7 +276,7 @@ export const AngleInput = observer(function AngleInput({
     if (value === undefined || value === null) {
       return DEFAULT_ANGLE.toString();
     }
-    
+
     if (isFocused) {
       return value === 'auto' ? DEFAULT_ANGLE.toString() : value.toString();
     } else {

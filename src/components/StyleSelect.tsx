@@ -55,6 +55,7 @@ export const StyleSelect = observer(function StyleSelect({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.style.set('auto');
       uiTempStore$.previewStyle.set(null);
     } else {
       // Otherwise set to the new style
@@ -65,6 +66,7 @@ export const StyleSelect = observer(function StyleSelect({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.style.set(clickedStyle);
     }
   };
 

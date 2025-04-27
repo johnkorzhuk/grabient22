@@ -70,6 +70,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set('auto');
     } else {
       const numValue = Number.parseFloat(newValue);
       if (!isNaN(numValue)) {
@@ -82,6 +83,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
             }),
             replace: true,
           });
+          uiTempStore$.preferredOptions.steps.set(numValue);
         }
       }
     }
@@ -114,6 +116,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set('auto');
       return;
     }
 
@@ -129,6 +132,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set(previousValue || 'auto');
     } else if (!validateNumber(numValue)) {
       // Number out of range, revert to previous value
       navigate({
@@ -138,6 +142,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set(previousValue || 'auto');
     }
     // If valid, no need to change anything
   };
@@ -209,6 +214,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set(previousValue || 'auto');
       inputRef.current?.blur();
     }
   };
@@ -233,6 +239,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set('auto');
       uiTempStore$.previewSteps.set(null);
     } else {
       // Otherwise set to the new value
@@ -243,6 +250,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
         }),
         replace: true,
       });
+      uiTempStore$.preferredOptions.steps.set(clickedValue);
     }
   };
 

@@ -64,20 +64,27 @@ export const updatePopularCollections = internalMutation({
       topSeeds.map(async ({ seed, count }) => {
         // Get the original collection data
         const collection = await ctx.db
-          .query('collections')
+          .query('likes')
           .withIndex('seed', (q) => q.eq('seed', seed))
-          .unique();
+          .first();
 
         if (collection) {
-          // Insert into the popular collections table
-          await ctx.db.insert('popular', {
-            seed: collection.seed,
-            likes: count,
-            coeffs: collection.coeffs,
-            steps: collection.steps,
-            style: collection.style,
-            angle: collection.angle,
-          });
+          try {
+            const { coeffs, globals } = deserializeCoeffs(collection.seed);
+            const appliedCoeffs = applyGlobals(coeffs, globals);
+
+            await ctx.db.insert('popular', {
+              seed,
+              likes: count,
+              coeffs: appliedCoeffs,
+              steps: collection.steps,
+              style: collection.style,
+              angle: collection.angle,
+            });
+          } catch (error) {
+            console.error(`Failed to deserialize seed ${seed}:`, error);
+            // Skip this seed if deserialization fails
+          }
         } else {
           // If collection not found, try to deserialize the coefficients from the seed
           try {
@@ -97,6 +104,36 @@ export const updatePopularCollections = internalMutation({
             // Skip this seed if deserialization fails
           }
         }
+
+        // if (collection) {
+        //   // Insert into the popular collections table
+        //   await ctx.db.insert('popular', {
+        //     seed: collection.seed,
+        //     likes: count,
+        //     coeffs: collection.coeffs,
+        //     steps: collection.steps,
+        //     style: collection.style,
+        //     angle: collection.angle,
+        //   });
+        // } else {
+        //   // If collection not found, try to deserialize the coefficients from the seed
+        //   try {
+        //     const { coeffs, globals } = deserializeCoeffs(seed);
+        //     const appliedCoeffs = applyGlobals(coeffs, globals);
+
+        //     await ctx.db.insert('popular', {
+        //       seed,
+        //       likes: count,
+        //       coeffs: appliedCoeffs,
+        //       steps: DEFAULT_STEPS,
+        //       style: DEFAULT_STYLE,
+        //       angle: DEFAULT_ANGLE,
+        //     });
+        //   } catch (error) {
+        //     console.error(`Failed to deserialize seed ${seed}:`, error);
+        //     // Skip this seed if deserialization fails
+        //   }
+        // }
       }),
     );
 
@@ -185,7 +222,7 @@ export const checkUserLikedSeeds = query({
         const like = await ctx.db
           .query('likes')
           .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', seed))
-          .unique();
+          .first();
         return [seed, like !== null];
       }),
     );
@@ -208,7 +245,7 @@ export const checkUserLikedSeed = query({
     const like = await ctx.db
       .query('likes')
       .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', args.seed))
-      .unique();
+      .first();
 
     return like !== null;
   },

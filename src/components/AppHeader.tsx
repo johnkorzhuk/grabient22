@@ -28,6 +28,7 @@ import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carouse
 import { PaletteCategoryDisplay } from './PaletteCategoryDisplay';
 import { useMounted } from '@mantine/hooks';
 import { LayoutToggle } from './LayoutToggle';
+import { uiTempStore$ } from '~/stores/ui';
 
 // Category badge component for selection
 function CategoryBadge({
@@ -171,6 +172,7 @@ export const AppHeader = observer(function AppHeader() {
   const { style, steps, angle } = useSearch({
     from: '/_layout',
   });
+  const preferredOptions = use$(uiTempStore$.preferredOptions);
   const mounted = useMounted();
   // Get palette colors from the store
   const seedPaletteColors = use$(paletteStore$.seedPaletteColors);
@@ -195,7 +197,10 @@ export const AppHeader = observer(function AppHeader() {
           <Link
             to="/"
             search={(search) => {
-              return search;
+              return {
+                ...search,
+                ...preferredOptions,
+              };
             }}
           >
             <h1 className="text-xl font-bold md:w-[166px]">Grabient</h1>

@@ -156,7 +156,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
                 )}
               >
-                <div ref={itemRef} className="relative h-full w-full overflow-hidden rounded-md">
+                <div ref={itemRef} className="relative h-full w-full overflow-hidden">
                   <GradientPreview cssProps={styles} />
                 </div>
               </li>
@@ -185,7 +185,12 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                     seed: collection.seed,
                   }}
                   search={({ categories, ...search }) => {
-                    return search;
+                    return {
+                      ...search,
+                      angle: angle === 'auto' ? collection.angle : search.angle,
+                      style: style === 'auto' ? collection.style : search.style,
+                      steps: steps === 'auto' ? collection.steps : search.steps,
+                    };
                   }}
                   className="block px-2 py-1 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
                   aria-label={`View details for gradient ${index + 1}`}
