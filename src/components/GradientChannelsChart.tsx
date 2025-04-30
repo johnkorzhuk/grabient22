@@ -229,13 +229,11 @@ const Chart = lazy(() =>
     default: ({
       data,
       isPreview = false,
-      gradientColors,
       onIndexChange,
       copied = false,
       isVertical = false,
       width,
       height,
-      seed,
     }: ChartProps) => {
       // For vertical layout, we need to transform the data
       // In vertical layout, the data point's "t" value becomes the y-coordinate
