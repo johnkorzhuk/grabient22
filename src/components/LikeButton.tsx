@@ -8,17 +8,24 @@ import { useEffect, useState } from 'react';
 import { useLocation, useSearch } from '@tanstack/react-router';
 import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
 import { Route as CollectionRoute } from '~/routes/_layout/collection';
+import type { CollectionStyle } from '~/types';
 
 export function LikeButton({
   seed,
   isLiked: _isLiked,
   pending,
   className,
+  collectionSteps,
+  collectionStyle,
+  collectionAngle,
 }: {
   seed: string;
   isLiked: boolean;
   pending: boolean;
   className?: string;
+  collectionSteps?: number;
+  collectionStyle?: CollectionStyle;
+  collectionAngle?: number;
 }) {
   const location = useLocation();
   const likedRoute = location.pathname === CollectionRoute.fullPath;
@@ -26,15 +33,16 @@ export function LikeButton({
   const { userId } = useAuth();
   const mounted = useMounted();
   const search = useSearch({ from: '/_layout' });
-  const steps = search.steps === 'auto' ? DEFAULT_STEPS : search.steps;
-  const angle = search.angle === 'auto' ? DEFAULT_ANGLE : search.angle;
-  const style = search.style === 'auto' ? DEFAULT_STYLE : search.style;
+  const steps = search.steps === 'auto' ? collectionSteps : search.steps;
+  const angle = search.angle === 'auto' ? collectionAngle : search.angle;
+  const style = search.style === 'auto' ? collectionStyle : search.style;
   const likedSeedMutation = useLikeSeedMutation();
   // Local state for immediate UI feedback
   const [locallyLiked, setLocallyLiked] = useState(isLiked);
 
   // Debounced mutation to avoid spamming
   const debouncedMutate = useDebouncedCallback((liked: boolean) => {
+    console.log(steps, angle, style);
     if (!userId || liked === isLiked) return;
     likedSeedMutation.mutate({
       userId,

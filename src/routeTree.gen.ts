@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutRandomImport } from './routes/_layout/random'
+import { Route as LayoutGenerateImport } from './routes/_layout/generate'
 import { Route as LayoutCollectionImport } from './routes/_layout/collection'
 import { Route as LayoutSeedImport } from './routes/_layout/$seed'
 
@@ -33,6 +34,12 @@ const LayoutIndexRoute = LayoutIndexImport.update({
 const LayoutRandomRoute = LayoutRandomImport.update({
   id: '/random',
   path: '/random',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutGenerateRoute = LayoutGenerateImport.update({
+  id: '/generate',
+  path: '/generate',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -73,6 +80,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCollectionImport
       parentRoute: typeof LayoutImport
     }
+    '/_layout/generate': {
+      id: '/_layout/generate'
+      path: '/generate'
+      fullPath: '/generate'
+      preLoaderRoute: typeof LayoutGenerateImport
+      parentRoute: typeof LayoutImport
+    }
     '/_layout/random': {
       id: '/_layout/random'
       path: '/random'
@@ -95,6 +109,7 @@ declare module '@tanstack/react-router' {
 interface LayoutRouteChildren {
   LayoutSeedRoute: typeof LayoutSeedRoute
   LayoutCollectionRoute: typeof LayoutCollectionRoute
+  LayoutGenerateRoute: typeof LayoutGenerateRoute
   LayoutRandomRoute: typeof LayoutRandomRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
@@ -102,6 +117,7 @@ interface LayoutRouteChildren {
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSeedRoute: LayoutSeedRoute,
   LayoutCollectionRoute: LayoutCollectionRoute,
+  LayoutGenerateRoute: LayoutGenerateRoute,
   LayoutRandomRoute: LayoutRandomRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
@@ -113,6 +129,7 @@ export interface FileRoutesByFullPath {
   '': typeof LayoutRouteWithChildren
   '/$seed': typeof LayoutSeedRoute
   '/collection': typeof LayoutCollectionRoute
+  '/generate': typeof LayoutGenerateRoute
   '/random': typeof LayoutRandomRoute
   '/': typeof LayoutIndexRoute
 }
@@ -120,6 +137,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/$seed': typeof LayoutSeedRoute
   '/collection': typeof LayoutCollectionRoute
+  '/generate': typeof LayoutGenerateRoute
   '/random': typeof LayoutRandomRoute
   '/': typeof LayoutIndexRoute
 }
@@ -129,20 +147,22 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/_layout/$seed': typeof LayoutSeedRoute
   '/_layout/collection': typeof LayoutCollectionRoute
+  '/_layout/generate': typeof LayoutGenerateRoute
   '/_layout/random': typeof LayoutRandomRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/$seed' | '/collection' | '/random' | '/'
+  fullPaths: '' | '/$seed' | '/collection' | '/generate' | '/random' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$seed' | '/collection' | '/random' | '/'
+  to: '/$seed' | '/collection' | '/generate' | '/random' | '/'
   id:
     | '__root__'
     | '/_layout'
     | '/_layout/$seed'
     | '/_layout/collection'
+    | '/_layout/generate'
     | '/_layout/random'
     | '/_layout/'
   fileRoutesById: FileRoutesById
@@ -174,6 +194,7 @@ export const routeTree = rootRoute
       "children": [
         "/_layout/$seed",
         "/_layout/collection",
+        "/_layout/generate",
         "/_layout/random",
         "/_layout/"
       ]
@@ -184,6 +205,10 @@ export const routeTree = rootRoute
     },
     "/_layout/collection": {
       "filePath": "_layout/collection.tsx",
+      "parent": "/_layout"
+    },
+    "/_layout/generate": {
+      "filePath": "_layout/generate.tsx",
       "parent": "/_layout"
     },
     "/_layout/random": {

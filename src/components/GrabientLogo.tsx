@@ -26,7 +26,11 @@ export function GrabientLogo({ className }: AnimatedGrabientLogoProps) {
     const easedProgress = progress * progress * progress * (progress * (progress * 6 - 15) + 10);
 
     // Get interpolated coefficients
-    const initialCoeffs = interpolateCoeffs(COEFFS[baseIndex] as CosineCoeffs, COEFFS[nextIndex] as CosineCoeffs, easedProgress);
+    const initialCoeffs = interpolateCoeffs(
+      COEFFS[baseIndex] as CosineCoeffs,
+      COEFFS[nextIndex] as CosineCoeffs,
+      easedProgress,
+    );
 
     // Helper function to smoothly interpolate coefficients
     function interpolateCoeffs(
@@ -223,8 +227,8 @@ export function GrabientLogo({ className }: AnimatedGrabientLogoProps) {
       <svg width="132" height="30" viewBox="0 0 220 50" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="animatedGradient" x1="0%" y1="0%" x2="100%" y2="0%" ref={gradientRef}>
-            <stop stopColor={initialColors.startColor} offset="0%" />
-            <stop stopColor={initialColors.endColor} offset="100%" />
+            <stop stopColor={initialColors.startColor} offset="0%" suppressHydrationWarning />
+            <stop stopColor={initialColors.endColor} offset="100%" suppressHydrationWarning />
           </linearGradient>
         </defs>
         <g fill="none" fillRule="evenodd">

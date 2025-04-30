@@ -33,7 +33,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   // We need to handle each case separately to satisfy TypeScript's type checking
   let seed: string | undefined = undefined;
   let navigate;
-  const { href } = useLocation();
+  const { href, pathname } = useLocation();
+  const isGenerateRoute = pathname === '/generate';
 
   if (isSeedRoute) {
     const params = useParams({ from: '/_layout/$seed' });
@@ -43,6 +44,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     navigate = useNavigate({ from: '/random' });
   } else if (isCollectionRoute) {
     navigate = useNavigate({ from: '/collection' });
+  } else if (isGenerateRoute) {
+    navigate = useNavigate({ from: '/generate' });
   } else {
     // Default to the root route
     navigate = useNavigate({ from: '/' });
@@ -208,6 +211,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                       seed={collection.seed}
                       isLiked={Boolean(likedSeeds?.[collection.seed])}
                       pending={false}
+                      collectionSteps={collection.steps}
+                      collectionStyle={collection.style}
+                      collectionAngle={collection.angle}
                     />
                   )}
                 </div>
