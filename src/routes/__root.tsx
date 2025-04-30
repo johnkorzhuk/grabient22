@@ -56,6 +56,7 @@ export const Route = wrapCreateRootRouteWithSentry(
         ...seo({
           title: 'Grabient | Cosine Gradient Generator & Palette Finder',
           description: `Use Grabient, a cosine gradient generator, to create custom CSS gradients and discover inspiring color palettes. Perfect for designers and developers.`,
+          image: '/grabber.png',
         }),
       ],
       links: [
