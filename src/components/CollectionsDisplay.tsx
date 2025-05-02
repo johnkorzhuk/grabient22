@@ -9,11 +9,13 @@ import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';
 import { applyGlobals, cosineGradient } from '~/lib/cosineGradient';
+import { serializeCoeffs } from '~/lib/serialization';
 import { GradientPreview } from './GradientPreview';
 import { LikeButton } from './LikeButton';
 import { getCollectionStyleSVG } from '~/lib/getCollectionStyleSVG';
 import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
 import { CopyButton } from './CopyButton';
+import { RGBTabs } from './RGBTabs';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -177,6 +179,18 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               <div className="group relative h-full w-full overflow-hidden">
                 <GradientPreview cssProps={styles} />
               </div>
+              {/* <div className="absolute bottom-2 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md p-1">
+                <RGBTabs
+                  collection={collection}
+                  onOrderChange={(newCoeffs) => {
+                    const newSeed = serializeCoeffs(newCoeffs, collection.globals);
+                    navigate({
+                      params: { seed: newSeed },
+                      search: (prev) => prev,
+                    });
+                  }}
+                />
+              </div> */}
               <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Link
                   to="/$seed"

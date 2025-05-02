@@ -182,6 +182,21 @@ export const Sidebar = observer(function Sidebar({ isSeedRoute }: SidebarProps) 
 
       {/* Palette Categories for seed route */}
       {isSeedRoute && <PaletteCategorySidebar colors={seedPaletteColors} />}
+
+      {/* Spacer to push legacy link to bottom */}
+      <div className="flex-grow" />
+
+      {/* Legacy site link */}
+      <div className="pt-2 border-t border-border mt-2 pb-1">
+        <a
+          href="https://old.grabient.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        >
+          <span>Legacy site</span>
+        </a>
+      </div>
     </aside>
   );
 });
