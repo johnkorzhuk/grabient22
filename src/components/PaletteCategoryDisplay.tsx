@@ -22,7 +22,7 @@ export function PaletteCategoryDisplay({ colors, className }: PaletteCategoryDis
         // Create worker and wrap with comlink
         const worker = new Worker(
           new URL('../workers/palette-analyzer.worker.ts', import.meta.url),
-          { type: 'module' }
+          { type: 'module' },
         );
         const workerApi = wrap<WorkerApi>(worker);
 
@@ -45,15 +45,12 @@ export function PaletteCategoryDisplay({ colors, className }: PaletteCategoryDis
   }
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn('w-full ', className)}>
       <Carousel className="w-full">
         <CarouselContent className="-ml-1 py-1">
           {analysisResult.categories.map((category) => (
             <CarouselItem key={category} className="pl-1 basis-auto">
-              <CategoryBadge 
-                category={category} 
-                variant="secondary" 
-              />
+              <CategoryBadge category={category} variant="secondary" />
             </CarouselItem>
           ))}
         </CarouselContent>

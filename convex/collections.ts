@@ -1,4 +1,4 @@
-import { query, internalMutation } from './_generated/server';
+import { query, internalMutation, mutation } from './_generated/server';
 import { v } from 'convex/values';
 import seedData from '../seed.json';
 import * as vb from 'valibot';
@@ -14,6 +14,7 @@ import { deserializeCoeffs, serializeCoeffs } from '../src/lib/serialization';
 import type { CosineCoeffs } from '../src/types';
 import { applyGlobals } from '../src/lib/cosineGradient';
 import { publicLikesBySeed } from './likes';
+import { Collections } from './schema';
 
 export const updatePopularCollections = internalMutation({
   args: {
@@ -66,6 +67,7 @@ export const updatePopularCollections = internalMutation({
         const collection = await ctx.db
           .query('likes')
           .withIndex('seed', (q) => q.eq('seed', seed))
+          .order('asc')
           .first();
 
         if (collection) {
@@ -104,36 +106,6 @@ export const updatePopularCollections = internalMutation({
             // Skip this seed if deserialization fails
           }
         }
-
-        // if (collection) {
-        //   // Insert into the popular collections table
-        //   await ctx.db.insert('popular', {
-        //     seed: collection.seed,
-        //     likes: count,
-        //     coeffs: collection.coeffs,
-        //     steps: collection.steps,
-        //     style: collection.style,
-        //     angle: collection.angle,
-        //   });
-        // } else {
-        //   // If collection not found, try to deserialize the coefficients from the seed
-        //   try {
-        //     const { coeffs, globals } = deserializeCoeffs(seed);
-        //     const appliedCoeffs = applyGlobals(coeffs, globals);
-
-        //     await ctx.db.insert('popular', {
-        //       seed,
-        //       likes: count,
-        //       coeffs: appliedCoeffs,
-        //       steps: DEFAULT_STEPS,
-        //       style: DEFAULT_STYLE,
-        //       angle: DEFAULT_ANGLE,
-        //     });
-        //   } catch (error) {
-        //     console.error(`Failed to deserialize seed ${seed}:`, error);
-        //     // Skip this seed if deserialization fails
-        //   }
-        // }
       }),
     );
 
@@ -248,5 +220,34 @@ export const checkUserLikedSeed = query({
       .first();
 
     return like !== null;
+  },
+});
+
+export const createCollection = mutation({
+  args: Collections.withoutSystemFields,
+  handler: async (ctx, args) => {
+    // Create the collection
+    const collectionId = await ctx.db.insert('collections', {
+      tags: args.tags,
+      coeffs: args.coeffs,
+      steps: args.steps,
+      style: args.style,
+      angle: args.angle,
+      seed: args.seed,
+    });
+
+    if (args.tags && args.tags.length > 0) {
+      // Create entries in tagged_collections for each tag
+      await Promise.all(
+        args.tags.map((tag) =>
+          ctx.db.insert('tagged_collections', {
+            tag,
+            collectionId,
+          }),
+        ),
+      );
+    }
+
+    return collectionId;
   },
 });

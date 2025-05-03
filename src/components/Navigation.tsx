@@ -3,11 +3,14 @@ import { cn } from '~/lib/utils';
 import { Flame, Shuffle, Heart } from 'lucide-react';
 import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
 import { useMounted } from '@mantine/hooks';
+import { uiTempStore$ } from '~/stores/ui';
+import { observer, use$ } from '@legendapp/state/react';
 
-export function Navigation() {
+export const Navigation = observer(function Navigation() {
   const location = useLocation();
   const { isSignedIn } = useAuth();
   const mounted = useMounted();
+  const preferredOptions = use$(uiTempStore$.preferredOptions);
 
   // Navigation links
   const navLinks = [
@@ -17,7 +20,7 @@ export function Navigation() {
   ];
 
   return (
-    <nav className="flex flex-col space-y-1 w-full">
+    <nav className="flex flex-col space-y-1 w-full disable-animation-on-theme-change">
       {navLinks.map((link) => {
         const isActive = location.pathname === link.path;
 
@@ -49,7 +52,10 @@ export function Navigation() {
               isActive ? 'bg-accent text-accent-foreground' : 'text-foreground',
             )}
             search={(search) => {
-              return search;
+              return {
+                ...search,
+                ...preferredOptions,
+              };
             }}
           >
             {link.icon}
@@ -59,4 +65,4 @@ export function Navigation() {
       })}
     </nav>
   );
-}
+});

@@ -4,7 +4,6 @@ import { useThrottledCallback, useElementSize } from '@mantine/hooks';
 import { useState } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
-
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
 import { MAX_ITEM_HEIGHT, MIN_ITEM_HEIGHT, validatePanelValue } from '~/validators';

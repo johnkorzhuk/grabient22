@@ -65,6 +65,7 @@ const CategorySelector = observer(function CategorySelector() {
 
   let selectedCategories = use$(paletteStore$.categories) ?? DEFAULT_CATEGORIES;
   const searchCategories = search.categories ?? DEFAULT_CATEGORIES;
+
   const isCategoriesEqual =
     selectedCategories.length === searchCategories.length &&
     selectedCategories.every((c, i) => c === searchCategories[i]);

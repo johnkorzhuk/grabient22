@@ -32,7 +32,7 @@ export function CategoryBadge({
     <Badge
       variant={variant}
       className={cn(
-        'whitespace-nowrap transition-colors select-none',
+        'whitespace-nowrap transition-colors select-none disable-animation-on-theme-change',
         isInteractive && 'cursor-pointer hover:bg-accent hover:text-accent-foreground',
         className,
       )}

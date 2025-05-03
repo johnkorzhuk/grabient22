@@ -38,6 +38,7 @@ export const Collections = Table('collections', {
   style: styleValidator,
   angle: angleValidator,
   seed: v.string(),
+  tags: v.optional(v.array(v.string())),
 });
 
 export const PopularCollections = Table('popular', {
@@ -60,6 +61,14 @@ export const Likes = Table('likes', {
 
 export default defineSchema({
   collections: Collections.table.index('seed', ['seed']),
+  tagged_collections: defineTable({
+    tag: v.string(),
+    collectionId: v.id('collections'),
+  })
+    .index('by_tag', ['tag'])
+    .searchIndex('search_tag', {
+      searchField: 'tag',
+    }),
   likes: Likes.table
     .index('seed', ['seed'])
     .index('userId', ['userId'])

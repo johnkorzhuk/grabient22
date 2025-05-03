@@ -5,7 +5,6 @@ import { COLLECTION_LAYOUTS } from '~/validators';
 import { LayoutGrid, Rows } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 
-
 export function LayoutToggle() {
   const { layout } = useSearch({ from: '/_layout' });
   const location = useLocation();
@@ -15,24 +14,23 @@ export function LayoutToggle() {
   const from = isSeedRoute
     ? '/$seed'
     : location.pathname === '/random'
-    ? '/random'
-    : location.pathname === '/collection'
-    ? '/collection'
-    : '/';
+      ? '/random'
+      : location.pathname === '/collection'
+        ? '/collection'
+        : '/';
 
   const navigate = useNavigate({ from });
 
   // Handle layout toggle
   const handleLayoutChange = (newLayout: (typeof COLLECTION_LAYOUTS)[number]) => {
     navigate({
-      //  @ts-ignore-next-line
       search: (prev) => ({ ...prev, layout: newLayout }),
       replace: true,
     });
   };
 
   return (
-    <div className="flex space-x-2 w-fit">
+    <div className="flex space-x-2 w-fit disable-animation-on-theme-change">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
