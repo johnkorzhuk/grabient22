@@ -17,6 +17,7 @@ export const publicLikesBySeed = new TableAggregate<{
 }>(components.likesAggregate, {
   namespace: (doc) => doc.seed,
   sortKey: (doc) => doc._creationTime,
+  sumValue: () => 1,
 });
 
 export const getPublicLikesCount = query({

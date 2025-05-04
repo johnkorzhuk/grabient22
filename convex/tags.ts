@@ -36,7 +36,7 @@ export const getCollectionsByTags = query({
     const taggedCollectionsPromises = args.tags.map((tag) =>
       ctx.db
         .query('tagged_collections')
-        .withIndex('by_tag', (q) => q.eq('tag', tag))
+        .withIndex('tag', (q) => q.eq('tag', tag))
         .collect(),
     );
 

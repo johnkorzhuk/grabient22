@@ -65,7 +65,7 @@ export default defineSchema({
     tag: v.string(),
     collectionId: v.id('collections'),
   })
-    .index('by_tag', ['tag'])
+    .index('tag', ['tag'])
     .searchIndex('search_tag', {
       searchField: 'tag',
     }),

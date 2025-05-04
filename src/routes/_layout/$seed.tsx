@@ -259,6 +259,7 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   const previewAngle = use$(uiTempStore$.previewAngle);
   const previewStyle = use$(uiTempStore$.previewStyle);
   const previewColorIndex = use$(uiTempStore$.previewColorIndex);
+
   const { steps, angle, style } = search;
   // Determine steps to use (collection's native steps or from URL/preview)
   // Determine steps to use (preview -> URL -> initial)
@@ -267,7 +268,6 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
 
   // Use our custom gradient generator with the determined number of steps
   const numStops = stepsToUse === 'auto' ? seedCollection.steps : stepsToUse;
-  const gradientColors = cosineGradient(numStops, processedCoeffs);
 
   // Determine style to use (from URL/preview or default)
   const styleToUse =
@@ -284,9 +284,10 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
   const activeModifier = use$(uiTempStore$.activeModifier);
   const navigate = useNavigate({ from: '/$seed' });
   const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
-  // const previewCoeffs = previewData
-  //   ? applyGlobals(previewData.coeffs, previewData.globals)
-  //   : processedCoeffs;
+  const previewCoeffs = previewData
+    ? applyGlobals(previewData.coeffs, previewData.globals)
+    : processedCoeffs;
+  const gradientColors = cosineGradient(numStops, previewCoeffs);
   const { userId } = useAuth();
   const isDefaultGlobals = seedCollection.globals.every(
     (val, index) => val === DEFAULT_GLOBALS[index],
@@ -410,11 +411,22 @@ const SeedChartAndPreviewPanel = observer(function SeedChartAndPreviewPanel({
     gradientColors,
     angleToUse,
     {
-      seed: currentSeed,
+      seed: previewSeed || currentSeed,
       href,
     },
     previewColorIndex,
   );
+
+  // const { styles: previewStyles } = getCollectionStyleCSS(
+  //   styleToUse,
+  //   gradientColors,
+  //   angleToUse,
+  //   {
+  //     seed: previewSeed,
+  //     href,
+  //   },
+  //   previewColorIndex,
+  // );
 
   const svgString = getCollectionStyleSVG(
     styleToUse,
