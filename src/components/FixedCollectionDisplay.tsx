@@ -34,7 +34,7 @@ export const FixedCollectionDisplay = observer(function CollectionsDisplay({
 
   const previewStyle = 'linearSwatches';
   const previewSteps = use$(uiTempStore$.previewSteps);
-  const previewAngle = use$(uiTempStore$.previewAngle) || 90;
+  const previewAngle = 90;
 
   return (
     <section className="h-full w-full overflow-auto relative">
