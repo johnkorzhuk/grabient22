@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { CollectionsDisplay } from '~/components/CollectionsDisplay';
+import { CollectionsDisplay } from '~/components/ResizableCollectionsDisplay';
 import { deserializeCoeffs } from '~/lib/serialization';
 import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
 import type { AppCollection } from '~/types';

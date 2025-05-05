@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PaletteCategoryKey } from '~/validators';
 import * as v from 'valibot';
 import { categoriesValidator, DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
-import { CollectionsDisplay } from '~/components/CollectionsDisplay';
+import { CollectionsDisplay } from '~/components/ResizableCollectionsDisplay';
 import type { AppCollection } from '~/types';
 import { wrap } from 'comlink';
 import { observer, use$ } from '@legendapp/state/react';

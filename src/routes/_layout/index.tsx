@@ -2,7 +2,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '../../../convex/_generated/api';
-import { CollectionsDisplay } from '~/components/CollectionsDisplay';
+import { CollectionsDisplay } from '~/components/ResizableCollectionsDisplay';
 import seedData from '../../../seed.json';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { useAuth } from '@clerk/tanstack-react-start';

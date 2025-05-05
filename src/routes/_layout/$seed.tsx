@@ -5,7 +5,7 @@ import { cn } from '~/lib/utils';
 import { useThrottledCallback } from '@mantine/hooks';
 import { deserializeCoeffs, serializeCoeffs } from '~/lib/serialization';
 import { redirect, useNavigate } from '@tanstack/react-router';
-import { CollectionsDisplay } from '~/components/CollectionsDisplay';
+import { FixedCollectionDisplay } from '~/components/FixedCollectionDisplay';
 import {
   applyGlobals,
   compareGlobals,
@@ -105,7 +105,7 @@ function Home() {
   return (
     <div className="flex h-full w-full">
       <div className="w-2/3 h-full">
-        <CollectionsDisplay collections={collections} isSeedRoute />
+        <FixedCollectionDisplay collections={collections} />
       </div>
       <div className="w-1/3 h-full min-w-[250px]">
         <SeedChartAndPreviewPanel

@@ -210,7 +210,7 @@ export const AppHeader = observer(function AppHeader() {
             </div>
           </Link>
 
-          <LayoutToggle />
+          {!isSeedRoute && <LayoutToggle />}
         </div>
         <div className="flex items-center gap-4">
           <a
