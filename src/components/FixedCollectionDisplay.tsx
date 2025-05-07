@@ -15,37 +15,21 @@ type CollectionsDisplayProps = {
   likedSeeds?: Record<string, boolean>;
 };
 
-// PERCENT
-const ROW_HEIGHT = 5;
-
 export const FixedCollectionDisplay = observer(function CollectionsDisplay({
   collections,
   likedSeeds,
 }: CollectionsDisplayProps) {
-  // We need to handle each case separately to satisfy TypeScript's type checking
-  let seed: string | undefined = undefined;
+  const { seed } = useParams({ from: '/_layout/$seed' });
   const { href } = useLocation();
-
-  const params = useParams({ from: '/_layout/$seed' });
-  seed = params.seed;
-
   const { style, steps, angle } = useSearch({ from: '/_layout' });
   const previewSeed = use$(uiTempStore$.previewSeed);
-
   const previewStyle = 'linearSwatches';
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewAngle = 90;
 
   return (
     <section className="h-full w-full overflow-auto relative">
-      <ul
-        className={cn('h-full w-full relative')}
-        style={
-          {
-            '--row-height': `${ROW_HEIGHT}%`,
-          } as React.CSSProperties
-        }
-      >
+      <ul className={cn('h-full w-full relative')}>
         {collections.map((collection, index) => {
           const isCurrentSeed = seed !== undefined && collection.seed === seed;
           // Make sure coeffs and globals exist before applying
