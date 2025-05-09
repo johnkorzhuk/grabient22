@@ -1,7 +1,7 @@
 import { useNavigate, useParams, useSearch, Link, useLocation } from '@tanstack/react-router';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { useThrottledCallback, useElementSize } from '@mantine/hooks';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
 import { uiTempStore$ } from '~/stores/ui';
@@ -15,6 +15,7 @@ import { getCollectionStyleSVG } from '~/lib/getCollectionStyleSVG';
 import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
 import { CopyButton } from './CopyButton';
 import { RGBTabs } from './RGBTabs';
+import { useItemInteraction } from '~/hooks/useTouchInteraction';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -58,6 +59,14 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   const previewStyle = use$(uiTempStore$.previewStyle);
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewAngle = use$(uiTempStore$.previewAngle);
+
+  // Add item interaction hook for both mobile and desktop
+  const { toggleItem, clearActiveItem, isItemActive } = useItemInteraction();
+
+  // Clear active item when navigating away
+  useEffect(() => {
+    return () => clearActiveItem();
+  }, [clearActiveItem]);
 
   const handleResize = (newHeight: number) => {
     const truncatedValue = Number(newHeight.toFixed(1));
@@ -170,6 +179,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 'relative group',
                 isGridLayout ? 'w-full h-full' : 'h-[var(--row-height)] w-full',
               )}
+              onClick={() => toggleItem(collection._id)}
               onMouseLeave={() => {
                 if (!previewSeed) return;
                 uiTempStore$.previewSeed.set(null);
@@ -190,7 +200,15 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   }}
                 />
               </div> */}
-              <div className="absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+              <div
+                className={cn(
+                  'absolute top-2.5 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md transition-opacity',
+                  {
+                    'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
+                    'opacity-100': isItemActive(collection._id),
+                  },
+                )}
+              >
                 <Link
                   to="/$seed"
                   params={{
@@ -212,7 +230,12 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               </div>
               <div className="absolute top-2 right-2 z-10 flex gap-2">
                 {/* Like button container - preserving original styling */}
-                <div className="bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                <div
+                  className={cn('bg-background/20 backdrop-blur-sm rounded-md transition-opacity', {
+                    'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
+                    'opacity-100': isItemActive(collection._id),
+                  })}
+                >
                   {Boolean(collection.likes) && (
                     <span className="font-medium relative bottom-[5px] pl-2 pr-2 select-none">
                       {collection.likes}
@@ -231,7 +254,11 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   )}
                 </div>
 
-                <CopyButton cssString={cssString} svgString={svgString} />
+                <CopyButton
+                  cssString={cssString}
+                  svgString={svgString}
+                  isActive={isItemActive(collection._id)}
+                />
               </div>
             </li>
           );

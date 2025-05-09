@@ -9,6 +9,8 @@ import { LikeButton } from './LikeButton';
 import { getCollectionStyleSVG } from '~/lib/getCollectionStyleSVG';
 import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
 import { CopyButton } from './CopyButton';
+import { useItemInteraction } from '~/hooks/useTouchInteraction';
+import { useEffect } from 'react';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -26,6 +28,14 @@ export const FixedCollectionDisplay = observer(function CollectionsDisplay({
   const previewStyle = 'linearSwatches';
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewAngle = 90;
+
+  // Add item interaction hook for both mobile and desktop
+  const { toggleItem, clearActiveItem, isItemActive } = useItemInteraction();
+
+  // Clear active item when navigating away
+  useEffect(() => {
+    return () => clearActiveItem();
+  }, [clearActiveItem]);
 
   return (
     <section className="h-full w-full overflow-auto relative">
@@ -90,6 +100,7 @@ export const FixedCollectionDisplay = observer(function CollectionsDisplay({
             <li
               key={collection._id}
               className={cn('relative group', 'h-[44px] w-full')}
+              onClick={() => toggleItem(collection._id)}
               onMouseLeave={() => {
                 if (!previewSeed) return;
                 uiTempStore$.previewSeed.set(null);
@@ -110,7 +121,15 @@ export const FixedCollectionDisplay = observer(function CollectionsDisplay({
                   }}
                 />
               </div> */}
-              <div className="absolute top-2 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+              <div
+                className={cn(
+                  'absolute top-2 left-2 z-10 bg-background/20 backdrop-blur-sm rounded-md transition-opacity',
+                  {
+                    'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
+                    'opacity-100': isItemActive(collection._id),
+                  },
+                )}
+              >
                 <Link
                   to="/$seed"
                   params={{
@@ -132,7 +151,12 @@ export const FixedCollectionDisplay = observer(function CollectionsDisplay({
               </div>
               <div className="absolute top-1.5 right-2 z-10 flex gap-2">
                 {/* Like button container - preserving original styling */}
-                <div className="bg-background/20 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                <div
+                  className={cn('bg-background/20 backdrop-blur-sm rounded-md transition-opacity', {
+                    'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
+                    'opacity-100': isItemActive(collection._id),
+                  })}
+                >
                   {Boolean(collection.likes) && (
                     <span className="font-medium relative bottom-[5px] pl-2 pr-2 select-none">
                       {collection.likes}
@@ -149,7 +173,11 @@ export const FixedCollectionDisplay = observer(function CollectionsDisplay({
                   />
                 </div>
 
-                <CopyButton cssString={cssString} svgString={svgString} />
+                <CopyButton
+                  cssString={cssString}
+                  svgString={svgString}
+                  isActive={isItemActive(collection._id)}
+                />
               </div>
             </li>
           );

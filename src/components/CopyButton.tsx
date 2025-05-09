@@ -14,9 +14,10 @@ interface CopyButtonProps {
   cssString: string;
   svgString: string;
   copyClassName?: string;
+  isActive?: boolean;
 }
 
-export function CopyButton({ cssString, svgString, copyClassName }: CopyButtonProps) {
+export function CopyButton({ cssString, svgString, copyClassName, isActive = false }: CopyButtonProps) {
   const clipboard = useClipboard({ timeout: 1000 });
   const [copiedType, setCopiedType] = useState<'none' | 'css' | 'svg'>('none');
   const [open, setOpen] = useState(false);
@@ -77,8 +78,8 @@ export function CopyButton({ cssString, svgString, copyClassName }: CopyButtonPr
         className={cn(
           'bg-background/20 backdrop-blur-sm rounded-md transition-opacity flex items-center justify-center px-0.5 z-10',
           {
-            'opacity-0 group-hover:opacity-100': !open,
-            'opacity-100': open,
+            'opacity-0 group-hover:opacity-100': !open && !isActive,
+            'opacity-100': open || isActive,
           },
         )}
       >
