@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, stripSearchParams, useMatches } from '@tanstac
 import * as v from 'valibot';
 import { AppHeader } from '~/components/AppHeader';
 import { Sidebar } from '~/components/Sidebar';
+import { MobileNavigation } from '~/components/MobileNavigation';
 import {
   rowHeightValidator,
   styleWithAutoValidator,
@@ -60,10 +61,12 @@ function RouteComponent() {
         <div className="hidden md:block">
           <Sidebar isSeedRoute={isSeedRoute} />
         </div>
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-14 md:pb-0">
           <Outlet />
         </main>
       </div>
+      {/* Mobile navigation footer - only visible on small screens */}
+      <MobileNavigation />      
     </div>
   );
 }

@@ -26,7 +26,7 @@ import { observer, use$ } from '@legendapp/state/react';
 import { PaletteCategories } from '~/lib/generation';
 import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
 import { PaletteCategoryDisplay } from './PaletteCategoryDisplay';
-import { useMounted } from '@mantine/hooks';
+import { useMounted, useMediaQuery } from '@mantine/hooks';
 import { LayoutToggle } from './LayoutToggle';
 import { uiTempStore$ } from '~/stores/ui';
 import { GrabientLogo } from './GrabientLogo';
@@ -185,6 +185,8 @@ export const AppHeader = observer(function AppHeader() {
   const isRandomRoute = location.pathname === '/random';
   const shouldShowControls = isRandomRoute || isSeedRoute;
   const { isSignedIn } = useAuth();
+  // Use Mantine's useMediaQuery hook to detect small viewports
+  const isSmallScreen = useMediaQuery('(max-width: 640px)');
 
   // Function to handle regeneration via event
   const handleRegenerate = () => {
@@ -210,7 +212,8 @@ export const AppHeader = observer(function AppHeader() {
             </div>
           </Link>
 
-          {!isSeedRoute && <LayoutToggle />}
+          {/* Only show LayoutToggle in header on larger screens */}
+          {!isSeedRoute && !isSmallScreen && <LayoutToggle />}
         </div>
         <div className="flex items-center gap-4">
           <a
@@ -270,16 +273,23 @@ export const AppHeader = observer(function AppHeader() {
       {/* Mobile controls - only visible below md breakpoint */}
       <div className="md:hidden px-4 pb-2 pt-1">
         <div className="flex items-center justify-between w-full">
+          {/* LayoutToggle on the left side for small screens */}
+          {!isSeedRoute && isSmallScreen && (
+            <div className="flex-shrink-0 mr-2">
+              <LayoutToggle />
+            </div>
+          )}
+          
           {/* Category carousel for mobile - only show on random route */}
           {shouldShowControls && isRandomRoute && (
-            <div className="flex-grow overflow-hidden mr-2">
+            <div className="flex-grow overflow-hidden mx-2">
               <CategorySelector />
             </div>
           )}
 
           {/* Palette categories for seed route */}
           {shouldShowControls && isSeedRoute && !isRandomRoute && seedPaletteColors.length > 0 && (
-            <div className="flex-grow overflow-hidden mr-2">
+            <div className="flex-grow overflow-hidden mx-2">
               <PaletteCategoryDisplay colors={seedPaletteColors} />
             </div>
           )}

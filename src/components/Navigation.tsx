@@ -5,19 +5,18 @@ import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
 import { useMounted } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
 import { observer, use$ } from '@legendapp/state/react';
+// Navigation links
+export const navLinks = [
+  { name: 'Popular', path: '/', icon: <Flame className="h-4 w-4 mr-3" /> },
+  { name: 'Random', path: '/random', icon: <Shuffle className="h-4 w-4 mr-3" /> },
+  { name: 'Collection', path: '/collection', icon: <Heart className="h-4 w-4 mr-3" /> },
+];
 
 export const Navigation = observer(function Navigation() {
   const location = useLocation();
   const { isSignedIn } = useAuth();
   const mounted = useMounted();
   const preferredOptions = use$(uiTempStore$.preferredOptions);
-
-  // Navigation links
-  const navLinks = [
-    { name: 'Popular', path: '/', icon: <Flame className="h-4 w-4 mr-3" /> },
-    { name: 'Random', path: '/random', icon: <Shuffle className="h-4 w-4 mr-3" /> },
-    { name: 'Collection', path: '/collection', icon: <Heart className="h-4 w-4 mr-3" /> },
-  ];
 
   return (
     <nav className="flex flex-col space-y-1 w-full disable-animation-on-theme-change">

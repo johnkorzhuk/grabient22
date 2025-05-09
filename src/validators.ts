@@ -51,7 +51,7 @@ export const layoutValidator = v.union(COLLECTION_LAYOUTS.map((l) => v.literal(l
 
 export const DEFAULT_ITEM_HEIGHT_ROW = 20;
 export const DEFAULT_ITEM_HEIGHT_GRID = 35;
-export const MIN_ITEM_HEIGHT = 4;
+export const MIN_ITEM_HEIGHT = 6;
 export const MAX_ITEM_HEIGHT = 100 - MIN_ITEM_HEIGHT;
 // Create row height validator with the provided min/max constraints
 export const rowHeightValidator = v.pipe(
