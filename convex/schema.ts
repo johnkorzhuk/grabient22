@@ -59,16 +59,16 @@ export const Likes = Table('likes', {
   isPublic: v.boolean(),
 });
 
+export const TaggedCollections = Table('tagged_collections', {
+  tag: v.string(),
+  collectionId: v.id('collections'),
+});
+
 export default defineSchema({
   collections: Collections.table.index('seed', ['seed']),
-  tagged_collections: defineTable({
-    tag: v.string(),
-    collectionId: v.id('collections'),
-  })
-    .index('tag', ['tag'])
-    .searchIndex('search_tag', {
-      searchField: 'tag',
-    }),
+  tagged_collections: TaggedCollections.table.index('tag', ['tag']).searchIndex('search_tag', {
+    searchField: 'tag',
+  }),
   likes: Likes.table
     .index('seed', ['seed'])
     .index('userId', ['userId'])
