@@ -20,7 +20,7 @@ export const searchCollectionsByTagText = query({
     const collections = await Promise.all(Array.from(collectionIds).map((id) => ctx.db.get(id)));
 
     // Filter out any null values (in case a collection was deleted)
-    return collections.filter(Boolean);
+    return collections.filter(Boolean) as NonNullable<typeof collections[number]>[];
   },
 });
 
@@ -54,6 +54,6 @@ export const getCollectionsByTags = query({
     const collections = await Promise.all(Array.from(collectionIds).map((id) => ctx.db.get(id)));
 
     // Filter out any null values (in case a collection was deleted)
-    return collections.filter(Boolean);
+    return collections.filter(Boolean) as NonNullable<typeof collections[number]>[];
   },
 });
