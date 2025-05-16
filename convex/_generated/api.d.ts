@@ -10,6 +10,7 @@
 
 import type * as collections from "../collections.js";
 import type * as crons from "../crons.js";
+import type * as http from "../http.js";
 import type * as likes from "../likes.js";
 import type * as migrations from "../migrations.js";
 import type * as tags from "../tags.js";
@@ -31,6 +32,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   collections: typeof collections;
   crons: typeof crons;
+  http: typeof http;
   likes: typeof likes;
   migrations: typeof migrations;
   tags: typeof tags;
