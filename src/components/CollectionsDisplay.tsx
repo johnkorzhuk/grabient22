@@ -1,5 +1,5 @@
 import { useSearch, Link, useLocation } from '@tanstack/react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { AppCollection } from '~/types';
 import { cn } from '~/lib/utils';
 import { uiTempStore$ } from '~/stores/ui';
@@ -38,6 +38,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 
   // Add item interaction hook for both mobile and desktop
   const { toggleItem, clearActiveItem, isItemActive } = useItemInteraction();
+  
+  // Track which items have visible RGB tabs
+  const [visibleRGBTabs, setVisibleRGBTabs] = useState<Record<string, boolean>>({});
 
   // Clear active item when navigating away
   useEffect(() => {
@@ -106,23 +109,39 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               key={collection._id}
               className={cn('relative group', 'w-full')}
               onClick={() => toggleItem(collection._id)}
+              onMouseEnter={() => {
+                setVisibleRGBTabs(prev => ({
+                  ...prev,
+                  [collection._id]: true
+                }));
+              }}
               onMouseLeave={() => {
-                // if (isItemActive(collection._id)) {
-                //   toggleItem(collection._id);
-                // }
+                // Hide RGB tabs when mouse leaves unless item is active
+                if (!isItemActive(collection._id)) {
+                  setVisibleRGBTabs(prev => ({
+                    ...prev,
+                    [collection._id]: false
+                  }));
+                }
+                
+                // Clear preview seed if set
                 if (!previewSeed) return;
                 uiTempStore$.previewSeed.set(null);
               }}
             >
               {/* Gradient container with fixed height */}
-              <div className="relative h-[300px] w-full">
+              <div 
+                className="relative h-[300px] w-full"
+              >
                 {/* Hover/active effect - subtle glow that extends beyond boundaries */}
                 <div
                   className={cn(
-                    'absolute -inset-4 transition-opacity duration-300 z-0 pointer-events-none blur-lg rounded-xl',
+                    'absolute inset-0 rounded-lg transition-opacity duration-200',
+                    'bg-gradient-to-br from-transparent via-transparent to-transparent',
+                    'border border-transparent',
                     {
-                      'opacity-0 group-hover:opacity-40': !isItemActive(collection._id),
-                      'opacity-40': isItemActive(collection._id),
+                      'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
+                      'opacity-100 border-border/30': isItemActive(collection._id),
                     },
                   )}
                 >
@@ -203,16 +222,12 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                       )}
                     </div>
 
-                    {/* RGB Tabs - only shown when hovered */}
-                    <div
-                      className={cn('transition-opacity duration-200 absolute top-0 left-0', {
-                        'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
-                        'opacity-100': isItemActive(collection._id),
-                      })}
-                    >
-                      <RGBTabs
-                        collection={collection}
-                        onOrderChange={(newCoeffs) => {
+                    {/* RGB Tabs - only shown when hovered or active */}
+                    {(isItemActive(collection._id) || visibleRGBTabs[collection._id]) && (
+                      <div className="absolute top-0 left-0">
+                        <RGBTabs
+                          collection={collection}
+                          onOrderChange={(newCoeffs) => {
                           // Generate new seed from the updated coefficients
                           const newSeed = serializeCoeffs(newCoeffs, collection.globals);
 
@@ -245,7 +260,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                           }
                         }}
                       />
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center group">
