@@ -17,6 +17,7 @@ export interface UITempStore {
     steps: v.InferOutput<typeof stepsValidator> | 'auto';
     angle: v.InferOutput<typeof angleValidator> | 'auto';
   };
+  isDragging: boolean;
 }
 
 export const INITIAL_UI_TEMP_STATE: UITempStore = {
@@ -32,6 +33,7 @@ export const INITIAL_UI_TEMP_STATE: UITempStore = {
     steps: 'auto',
     angle: 'auto',
   },
+  isDragging: false,
 };
 
 export const uiTempStore$ = observable<UITempStore>(INITIAL_UI_TEMP_STATE);

@@ -3,12 +3,14 @@ import * as v from 'valibot';
 import { AppHeader } from '~/components/AppHeader';
 import { Sidebar } from '~/components/Sidebar';
 import { MobileNavigation } from '~/components/MobileNavigation';
+import { uiTempStore$ } from '~/stores/ui';
 import {
   styleWithAutoValidator,
   stepsWithAutoValidator,
   angleWithAutoValidator,
 } from '~/validators';
 import { Route as SeedRoute } from './_layout/$seed';
+import { observer } from '@legendapp/state/react';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -43,13 +45,19 @@ function RouteComponent() {
   // const matches = useMatches();
   // const isSeedRoute = matches.some((match) => match.routeId === SeedRoute.id);
 
+  return <Layout />;
+}
+
+const Layout = observer(function Layout() {
+  const isDragging = uiTempStore$.isDragging.get();
+  
   return (
-    <div className="h-screen overflow-auto">
+    <div className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}>
       <AppHeader className="sticky top-0 z-50 bg-background" />
       <div className="pt-12">
         {/* <div className="hidden md:block">
-          <Sidebar isSeedRoute={isSeedRoute} />
-        </div> */}
+    <Sidebar isSeedRoute={isSeedRoute} />
+  </div> */}
         <main className="relative">
           <Outlet />
         </main>
@@ -58,4 +66,4 @@ function RouteComponent() {
       {/* <MobileNavigation /> */}
     </div>
   );
-}
+});

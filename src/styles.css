@@ -155,4 +155,9 @@ html {
     transition: none !important;
     animation: none !important;
   }
+  
+  /* Prevent layout shifts from scrollbar appearing/disappearing */
+  .scrollbar-stable {
+    scrollbar-gutter: stable;
+  }
 }

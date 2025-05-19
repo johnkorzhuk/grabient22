@@ -15,6 +15,7 @@ import { GripVertical } from 'lucide-react';
 import { rgbChannelConfig } from '../constants/colors';
 import type { CollectionPreset, CosineCoeffs } from '../types';
 import { applyGlobals, cosineGradient } from '../lib/cosineGradient';
+import { uiTempStore$ } from '../stores/ui';
 
 type RGBTab = {
   id: string;
@@ -53,7 +54,7 @@ function SortableTab({ id, color, label }: SortableTabProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="w-10 h-5 rounded-md shadow-sm flex items-center justify-start pl-1.5 cursor-grab"
+      className="w-9 h-5 rounded-md shadow-sm flex items-center justify-start pl-1.5 cursor-grab"
       title={label} // Add tooltip with the color label
       suppressHydrationWarning
       {...attributes}
@@ -134,8 +135,17 @@ export function RGBTabs({ collection, onOrderChange }: RGBTabsProps) {
     useSensor(KeyboardSensor),
   );
 
-  // Handle drag end to update order
+  // Handle drag start to set isDragging state
+  const handleDragStart = () => {
+    // Set isDragging to true when drag starts
+    uiTempStore$.isDragging.set(true);
+  };
+
+  // Handle drag end to update order and reset isDragging state
   const handleDragEnd = (event: DragEndEvent) => {
+    // Set isDragging back to false when drag ends
+    uiTempStore$.isDragging.set(false);
+    
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -173,6 +183,7 @@ export function RGBTabs({ collection, onOrderChange }: RGBTabsProps) {
       key={tabOrderKey}
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       modifiers={[restrictToHorizontalAxis]}
     >
