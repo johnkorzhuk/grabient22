@@ -214,7 +214,7 @@ function generateModifierVariationsRecursive(
     const collection = {
       ...baseCollection,
       globals: newGlobals,
-      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}` as Id<'popular'>,
+      _id: `${name}_${value.toFixed(4)}_${nanoid(6)}` as Id<'collections'>,
     };
     const colors = cosineGradient(steps, applyGlobals(coeffs, newGlobals));
     return { collection, colors };

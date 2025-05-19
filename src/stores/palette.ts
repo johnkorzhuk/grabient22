@@ -225,7 +225,7 @@ export async function generatePalettesForCategories(
 
         // Cast the coeffs and globals to the expected types for AppCollection
         return {
-          _id: id as Id<'popular'>,
+          _id: id as Id<'collections'>,
           seed: seed,
           coeffs: palette.coeffs,
           globals: palette.globals,
@@ -233,6 +233,7 @@ export async function generatePalettesForCategories(
           steps,
           angle,
           likes: 0,
+          _creationTime: Date.now(),
         };
       });
 

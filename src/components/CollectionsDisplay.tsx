@@ -38,7 +38,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 
   // Add item interaction hook for both mobile and desktop
   const { toggleItem, clearActiveItem, isItemActive } = useItemInteraction();
-  
+
   // Track which items have visible RGB tabs
   const [visibleRGBTabs, setVisibleRGBTabs] = useState<Record<string, boolean>>({});
 
@@ -110,38 +110,34 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               className={cn('relative group', 'w-full')}
               onClick={() => toggleItem(collection._id)}
               onMouseEnter={() => {
-                setVisibleRGBTabs(prev => ({
+                setVisibleRGBTabs((prev) => ({
                   ...prev,
-                  [collection._id]: true
+                  [collection._id]: true,
                 }));
               }}
               onMouseLeave={() => {
                 // Hide RGB tabs when mouse leaves unless item is active
                 if (!isItemActive(collection._id)) {
-                  setVisibleRGBTabs(prev => ({
+                  setVisibleRGBTabs((prev) => ({
                     ...prev,
-                    [collection._id]: false
+                    [collection._id]: false,
                   }));
                 }
-                
+
                 // Clear preview seed if set
                 if (!previewSeed) return;
                 uiTempStore$.previewSeed.set(null);
               }}
             >
               {/* Gradient container with fixed height */}
-              <div 
-                className="relative h-[300px] w-full"
-              >
+              <div className="relative h-[300px] w-full">
                 {/* Hover/active effect - subtle glow that extends beyond boundaries */}
                 <div
                   className={cn(
-                    'absolute inset-0 rounded-lg transition-opacity duration-200',
-                    'bg-gradient-to-br from-transparent via-transparent to-transparent',
-                    'border border-transparent',
+                    'absolute -inset-3 transition-opacity duration-300 z-0 pointer-events-none blur-lg rounded-xl',
                     {
-                      'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
-                      'opacity-100 border-border/30': isItemActive(collection._id),
+                      'opacity-0 group-hover:opacity-40': !isItemActive(collection._id),
+                      'opacity-40': isItemActive(collection._id),
                     },
                   )}
                 >
@@ -199,7 +195,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               </div>
 
               {/* Like button and count moved below the gradient container - always visible */}
-              <div className="flex justify-between mt-4">
+              <div className="flex justify-between pt-4">
                 <div className="flex items-center">
                   {/* Only render RGBTabs when item is hovered or active */}
                   <div className="relative">
@@ -217,7 +213,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                         <span>
                           {formatDistanceToNow(new Date(collection._creationTime), {
                             addSuffix: false,
-                          })}
+                          }).replace('about', '')}
                         </span>
                       )}
                     </div>
@@ -228,43 +224,43 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                         <RGBTabs
                           collection={collection}
                           onOrderChange={(newCoeffs) => {
-                          // Generate new seed from the updated coefficients
-                          const newSeed = serializeCoeffs(newCoeffs, collection.globals);
+                            // Generate new seed from the updated coefficients
+                            const newSeed = serializeCoeffs(newCoeffs, collection.globals);
 
-                          // Find the collection in the store and update it
-                          // Get the current collections array
-                          const collections = collectionStore$.collections.get();
-                          const collectionIndex = collections.findIndex(
-                            (c) => String(c._id) === String(collection._id),
-                          );
-                          const initalCollection = initialCollections.find(
-                            (c) => String(c._id) === String(collection._id),
-                          );
+                            // Find the collection in the store and update it
+                            // Get the current collections array
+                            const collections = collectionStore$.collections.get();
+                            const collectionIndex = collections.findIndex(
+                              (c) => String(c._id) === String(collection._id),
+                            );
+                            const initalCollection = initialCollections.find(
+                              (c) => String(c._id) === String(collection._id),
+                            );
 
-                          if (collectionIndex !== -1) {
-                            // Create a new array with the updated collection
-                            const updatedCollections = [...collections];
-                            updatedCollections[collectionIndex] = {
-                              ...collections[collectionIndex],
-                              coeffs: newCoeffs,
-                              seed: newSeed,
-                              // Reset likes to 0 since this is now a different gradient
-                              likes:
-                                newSeed !== initalCollection?.seed
-                                  ? 0
-                                  : initalCollection?.likes || 0,
-                            };
+                            if (collectionIndex !== -1) {
+                              // Create a new array with the updated collection
+                              const updatedCollections = [...collections];
+                              updatedCollections[collectionIndex] = {
+                                ...collections[collectionIndex],
+                                coeffs: newCoeffs,
+                                seed: newSeed,
+                                // Reset likes to 0 since this is now a different gradient
+                                likes:
+                                  newSeed !== initalCollection?.seed
+                                    ? 0
+                                    : initalCollection?.likes || 0,
+                              };
 
-                            // Update the entire collections array
-                            collectionStore$.collections.set(updatedCollections);
-                          }
-                        }}
-                      />
+                              // Update the entire collections array
+                              collectionStore$.collections.set(updatedCollections);
+                            }
+                          }}
+                        />
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center group">
+                <div className="flex items-center group min-h-[28px]">
                   {Boolean(collection.likes) && (
                     <span className="font-medium pr-4 select-none text-muted-foreground group-hover:text-foreground transition-colors duration-200">
                       {collection.likes}

@@ -78,7 +78,7 @@ function Home() {
     style: style === 'auto' ? initialSearchDataRef.current.style : style,
     steps: steps === 'auto' ? initialSearchDataRef.current.steps : steps,
     angle: angle === 'auto' ? initialSearchDataRef.current.angle : angle,
-    _id: encodedSeedData as Id<'popular'>,
+    _id: encodedSeedData as Id<'collections'>,
     seed: encodedSeedData,
     likes: 0,
     _creationTime: Date.now(),

@@ -15,6 +15,8 @@ import type { CosineCoeffs } from '../src/types';
 import { applyGlobals } from '../src/lib/cosineGradient';
 import { publicLikesBySeed } from './likes';
 import { Collections } from './schema';
+import { Doc } from './_generated/dataModel';
+import { paginationOptsValidator } from 'convex/server';
 
 export const updatePopularCollections = internalMutation({
   args: {
@@ -113,6 +115,83 @@ export const updatePopularCollections = internalMutation({
   },
 });
 
+export const updateCollectionLikes = internalMutation({
+  returns: v.null(),
+  handler: async (ctx) => {
+    // Get all likes from the database
+    const allLikes = await ctx.db.query('likes').collect();
+
+    // Group likes by seed
+    const likesBySeed = new Map();
+    for (const like of allLikes) {
+      if (!likesBySeed.has(like.seed)) {
+        likesBySeed.set(like.seed, []);
+      }
+      likesBySeed.get(like.seed).push(like);
+    }
+
+    // Process each unique seed
+    for (const [seed, likes] of likesBySeed.entries()) {
+      // Count total likes for this seed (regardless of isPublic status)
+      const totalLikes = likes.length;
+
+      // Get public likes only
+      const publicLikes = likes.filter((like: Doc<'likes'>) => like.isPublic);
+
+      // Check if we already have this collection in the database
+      const existingCollection = await ctx.db
+        .query('collections')
+        .withIndex('seed', (q) => q.eq('seed', seed))
+        .first();
+
+      if (existingCollection) {
+        // Update the existing collection with the total likes count
+        await ctx.db.patch(existingCollection._id, { likes: totalLikes });
+      } else if (publicLikes.length > 0) {
+        // Only create a new collection if there's at least one public like
+        // Use the first public like as a reference for collection properties
+        const referenceLike = publicLikes[0];
+
+        try {
+          const { coeffs, globals } = deserializeCoeffs(referenceLike.seed);
+          const appliedCoeffs = applyGlobals(coeffs, globals);
+
+          // Create a new collection entry
+          await ctx.db.insert('collections', {
+            seed,
+            likes: totalLikes,
+            coeffs: appliedCoeffs,
+            steps: referenceLike.steps,
+            style: referenceLike.style,
+            angle: referenceLike.angle,
+          });
+        } catch (error) {
+          console.error(`Failed to deserialize seed ${seed}:`, error);
+          // Try with just the seed if the like's seed fails to deserialize
+          try {
+            const { coeffs, globals } = deserializeCoeffs(seed);
+            const appliedCoeffs = applyGlobals(coeffs, globals);
+
+            await ctx.db.insert('collections', {
+              seed,
+              likes: totalLikes,
+              coeffs: appliedCoeffs,
+              steps: referenceLike.steps || DEFAULT_STEPS,
+              style: referenceLike.style || DEFAULT_STYLE,
+              angle: referenceLike.angle || DEFAULT_ANGLE,
+            });
+          } catch (innerError) {
+            console.error(`Failed to deserialize seed directly ${seed}:`, innerError);
+            // Skip this seed if both deserialization attempts fail
+          }
+        }
+      }
+    }
+
+    return null;
+  },
+});
+
 export const list = query({
   handler: async (ctx) => {
     return await ctx.db
@@ -140,6 +219,38 @@ export const listPopular = query({
   },
 });
 
+export const listPopularNew = query({
+  handler: async (ctx) => {
+    const collections = await ctx.db.query('collections').withIndex('likes').order('desc').take(96);
+
+    return collections.map((collection) => ({
+      ...collection,
+      coeffs: collection.coeffs as CosineCoeffs,
+      globals: DEFAULT_GLOBALS,
+    }));
+  },
+});
+
+// export const listPopularNew = query({
+//   args: { paginationOpts: paginationOptsValidator },
+//   handler: async (ctx, args) => {
+//     const paginationResult = await ctx.db
+//       .query('collections')
+//       .withIndex('likes')
+//       .order('desc')
+//       .paginate(args.paginationOpts);
+
+//     return {
+//       ...paginationResult,
+//       page: paginationResult.page.map((collection) => ({
+//         ...collection,
+//         coeffs: collection.coeffs as CosineCoeffs,
+//         globals: DEFAULT_GLOBALS,
+//       })),
+//     };
+//   },
+// });
+
 export const seed = internalMutation({
   args: {},
   returns: v.null(),
@@ -165,6 +276,7 @@ export const seed = internalMutation({
         await ctx.db.insert('collections', {
           ...collectionWithoutGlobals,
           seed: serializeCoeffs(validatedCollection.coeffs, DEFAULT_GLOBALS),
+          likes: 0,
         });
       } catch (error) {
         console.error(`Failed to validate collection:`, error);

@@ -45,7 +45,7 @@ function CollectionRoute() {
               style: like.style || DEFAULT_STYLE,
               steps: like.steps || DEFAULT_STEPS,
               angle: like.angle || DEFAULT_ANGLE,
-              _id: like._id as unknown as Id<'popular'>,
+              _id: like._id as unknown as Id<'collections'>,
               seed: like.seed,
               likes: 0,
               _creationTime: Date.now(),

@@ -41,7 +41,7 @@ export const Route = createFileRoute('/_layout/')({
 
 function Home() {
   const { data: collections } = useSuspenseQuery({
-    ...convexQuery(api.collections.listPopular, {}),
+    ...convexQuery(api.collections.listPopularNew, {}),
     gcTime: Number.POSITIVE_INFINITY,
   });
 
