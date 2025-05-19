@@ -2,10 +2,11 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { convexQuery } from '@convex-dev/react-query';
 import { api } from '../../../convex/_generated/api';
-import { CollectionsDisplay } from '~/components/ResizableCollectionsDisplay';
+import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import seedData from '../../../seed.json';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { useAuth } from '@clerk/tanstack-react-start';
+import { collectionStore$ } from '~/stores/collection';
 
 // // Process seed data by applying globals to coeffs and removing globals field
 // const processedSeedData = (seedData as unknown as Array<{
@@ -55,7 +56,5 @@ function Home() {
     enabled: Boolean(userId),
   });
 
-  return (
-    <CollectionsDisplay collections={collections} isSeedRoute={false} likedSeeds={likedSeeds} />
-  );
+  return <CollectionsDisplay collections={collections} likedSeeds={likedSeeds} />;
 }

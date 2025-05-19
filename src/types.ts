@@ -14,8 +14,7 @@ export type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
 export type CosineGlobals = v.InferOutput<typeof globalsSchema>;
 
 // Serialized collection type
-export interface AppCollection
-  extends Omit<Doc<'popular'>, '_creationTime' | 'coeffs' | 'globals'> {
+export interface AppCollection extends Omit<Doc<'popular'>, 'coeffs' | 'globals'> {
   coeffs: CosineCoeffs;
   globals: CosineGlobals;
 }

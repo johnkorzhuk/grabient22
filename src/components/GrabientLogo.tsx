@@ -224,7 +224,12 @@ export function GrabientLogo({ className }: AnimatedGrabientLogoProps) {
 
   return (
     <div className={cn('relative top-1', className)}>
-      <svg width="132" height="30" viewBox="0 0 220 50" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        className="w-[140px] h-[32px] md:w-[190px] md:h-[43px]"
+        viewBox="0 0 220 50"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="xMidYMid meet"
+      >
         <defs>
           <linearGradient id="animatedGradient" x1="0%" y1="0%" x2="100%" y2="0%" ref={gradientRef}>
             <stop stopColor={initialColors.startColor} offset="0%" suppressHydrationWarning />

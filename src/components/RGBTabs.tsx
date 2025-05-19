@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -113,14 +113,24 @@ export function RGBTabs({ collection, onOrderChange }: RGBTabsProps) {
   // Create a new array to ensure stable sorting
   const sortedTabs = [...unsortedTabs].sort((a, b) => b.value - a.value);
 
-  // Set up sensors for drag detection
+  // Set up sensors for drag detection with improved touch support
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    // Mouse-specific sensor with minimal distance constraint
+    useSensor(MouseSensor, {
+      // Small distance prevents accidental drags
       activationConstraint: {
-        delay: 0,
-        tolerance: 5,
+        distance: 3, // Minimal movement required to start drag
       },
     }),
+    // Touch-specific sensor with delay to distinguish from scrolling/tapping
+    useSensor(TouchSensor, {
+      // Touch devices need different constraints
+      activationConstraint: {
+        delay: 100, // Short delay helps distinguish drag from tap/scroll
+        tolerance: 8, // Slightly higher tolerance for touch precision
+      },
+    }),
+    // Keyboard support for accessibility
     useSensor(KeyboardSensor),
   );
 

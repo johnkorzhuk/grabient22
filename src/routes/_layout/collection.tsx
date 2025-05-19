@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { CollectionsDisplay } from '~/components/ResizableCollectionsDisplay';
+import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import { deserializeCoeffs } from '~/lib/serialization';
 import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
 import type { AppCollection } from '~/types';
@@ -48,6 +48,7 @@ function CollectionRoute() {
               _id: like._id as unknown as Id<'popular'>,
               seed: like.seed,
               likes: 0,
+              _creationTime: Date.now(),
             };
 
             return collection;
@@ -89,12 +90,7 @@ function CollectionRoute() {
   return (
     <div className="h-full w-full flex flex-col">
       <div className="flex-grow">
-        <CollectionsDisplay
-          collections={collections}
-          isSeedRoute={false}
-          isRandomRoute={false}
-          isCollectionRoute={true}
-        />
+        <CollectionsDisplay collections={collections} />
       </div>
     </div>
   );

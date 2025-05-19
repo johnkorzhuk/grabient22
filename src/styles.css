@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --breakpoint-3xl: 120rem; /* 1920px equivalent (1920/16 = 120rem) */
+  --breakpoint-4xl: 192rem; /* 3072px equivalent (3072/16 = 192rem) */
+}
+
 body {
   @apply m-0;
   font-family:

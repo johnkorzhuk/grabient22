@@ -94,7 +94,7 @@ export function LikeButton({
         <TooltipTrigger asChild>
           <button
             type="button"
-            className={cn('p-1 rounded-full transition-colors cursor-pointer', className)}
+            className={cn('rounded-full transition-colors cursor-pointer', className)}
             aria-label="Favorite"
             disabled={pending}
             onClick={() => {

@@ -26,8 +26,7 @@ import { observer, use$ } from '@legendapp/state/react';
 import { PaletteCategories } from '~/lib/generation';
 import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
 import { PaletteCategoryDisplay } from './PaletteCategoryDisplay';
-import { useMounted, useMediaQuery } from '@mantine/hooks';
-import { LayoutToggle } from './LayoutToggle';
+import { useMounted } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
 import { GrabientLogo } from './GrabientLogo';
 
@@ -170,10 +169,10 @@ const CategorySelector = observer(function CategorySelector() {
   );
 });
 
-export const AppHeader = observer(function AppHeader() {
-  const { style, steps, angle } = useSearch({
-    from: '/_layout',
-  });
+export const AppHeader = observer(function AppHeader({ className }: { className?: string }) {
+  // const { style, steps, angle } = useSearch({
+  //   from: '/_layout',
+  // });
   const preferredOptions = use$(uiTempStore$.preferredOptions);
   const mounted = useMounted();
   // Get palette colors from the store
@@ -185,8 +184,6 @@ export const AppHeader = observer(function AppHeader() {
   const isRandomRoute = location.pathname === '/random';
   const shouldShowControls = isRandomRoute || isSeedRoute;
   const { isSignedIn } = useAuth();
-  // Use Mantine's useMediaQuery hook to detect small viewports
-  const isSmallScreen = useMediaQuery('(max-width: 640px)');
 
   // Function to handle regeneration via event
   const handleRegenerate = () => {
@@ -195,8 +192,8 @@ export const AppHeader = observer(function AppHeader() {
   };
 
   return (
-    <header className="w-full border-b border-border bg-background ">
-      <div className="mx-auto flex w-full items-center justify-between border-b border-border bg-background px-4 py-2">
+    <header className={cn('w-full bg-background', className)}>
+      <div className="mx-auto flex w-full items-center justify-between bg-background px-5 lg:px-14 pt-5 pb-6">
         <div className="flex items-center gap-4">
           <Link
             to="/"
@@ -207,56 +204,42 @@ export const AppHeader = observer(function AppHeader() {
               };
             }}
           >
-            <div className="md:w-[168px] relative">
+            <div className="md:w-[200px] relative">
               <GrabientLogo />
             </div>
           </Link>
-
-          {/* Only show LayoutToggle in header on larger screens */}
-          {!isSeedRoute && !isSmallScreen && <LayoutToggle />}
         </div>
         <div className="flex items-center gap-4">
-          <a
+          {/* <a
             href="https://iquilezles.org/articles/palettes/"
             target="_blank"
             rel="noopener noreferrer external"
-            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+            className="text-base text-muted-foreground hover:text-foreground flex items-center gap-2 font-medium transition-colors duration-200 sm:mr-6"
             aria-label="Article on cosine gradients by Inigo Quilez (opens in a new window)"
           >
             About
             <span className="sr-only">(opens in a new window)</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-external-link"
-            >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-          </a>
+          </a> */}
           <ThemeToggle />
           <div
-            className={cn('flex items-center justify-end', isSignedIn ? 'w-[30px]' : 'w-[60px]')}
+            className={cn(
+              'flex items-center justify-end',
+              isSignedIn ? 'w-[48px] sm:w-[72px]' : 'w-[72px]',
+            )}
           >
             {mounted ? (
               <>
                 <SignedIn>
-                  <UserButton afterSignOutUrl={location.pathname} />
+                  <div className="scale-130 relative right-[4px] top-[2px] transform-gpu origin-center">
+                    <UserButton afterSignOutUrl={location.pathname} />
+                  </div>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton mode="modal">
                     <Button
-                      size="sm"
+                      size="default"
                       variant="outline"
-                      className="cursor-pointer disable-animation-on-theme-change"
+                      className="cursor-pointer disable-animation-on-theme-change relative right-[2px]"
                     >
                       Sign in
                     </Button>
@@ -264,110 +247,102 @@ export const AppHeader = observer(function AppHeader() {
                 </SignedOut>
               </>
             ) : (
-              <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+              <div className="w-10 h-10 transform-gpu origin-center rounded-full bg-muted animate-pulse" />
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile controls - only visible below md breakpoint */}
-      <div className="md:hidden px-4 pb-2 pt-1">
-        <div className="flex items-center justify-between w-full">
-          {/* LayoutToggle on the left side for small screens */}
-          {!isSeedRoute && isSmallScreen && (
-            <div className="flex-shrink-0 mr-2">
-              <LayoutToggle />
-            </div>
-          )}
-          
-          {/* Category carousel for mobile - only show on random route */}
-          {shouldShowControls && isRandomRoute && (
-            <div className="flex-grow overflow-hidden mx-2">
-              <CategorySelector />
-            </div>
-          )}
-
-          {/* Palette categories for seed route */}
-          {shouldShowControls && isSeedRoute && !isRandomRoute && seedPaletteColors.length > 0 && (
-            <div className="flex-grow overflow-hidden mx-2">
-              <PaletteCategoryDisplay colors={seedPaletteColors} />
-            </div>
-          )}
-
-          {/* Control buttons in a flex container */}
-          <div
-            className={cn('flex items-center gap-2 flex-shrink-0', {
-              'ml-auto': !shouldShowControls || (isSeedRoute && !isRandomRoute), // Push to right when on seed route or non-control routes
-            })}
-          >
-            {/* Regenerate button with tooltip - only show on random route */}
-            {shouldShowControls && isRandomRoute && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleRegenerate}
-                      className="cursor-pointer h-8 w-8 p-1"
-                    >
-                      <RefreshCw className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Regenerate Palettes</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-
-            {/* Settings button with tooltip */}
-            <Popover open={open} onOpenChange={setOpen}>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        aria-label="Open gradient settings"
-                        className="cursor-pointer h-8 w-8 p-1"
-                      >
-                        <Settings2 className="h-5 w-5" />
-                      </Button>
-                    </PopoverTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Gradient Settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <PopoverContent className="w-[220px] p-3 bg-background border-border">
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <h3 className="text-xs font-medium text-muted-foreground mb-2">Style</h3>
-                    <div>
-                      <StyleSelect value={style} />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <div className="w-1/2 space-y-1">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Steps</h3>
-                      <StepsInput value={steps} />
-                    </div>
-
-                    <div className="w-1/2 space-y-1">
-                      <h3 className="text-xs font-medium text-muted-foreground mb-2">Angle</h3>
-                      <AngleInput value={angle} />
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
           </div>
         </div>
       </div>
     </header>
   );
 });
+
+// <div className="md:hidden px-4 pb-2 pt-1">
+//   <div className="flex items-center justify-between w-full">
+//     {/* Category carousel for mobile - only show on random route */}
+//     {shouldShowControls && isRandomRoute && (
+//       <div className="flex-grow overflow-hidden mx-2">
+//         <CategorySelector />
+//       </div>
+//     )}
+
+//     {/* Palette categories for seed route */}
+//     {shouldShowControls && isSeedRoute && !isRandomRoute && seedPaletteColors.length > 0 && (
+//       <div className="flex-grow overflow-hidden mx-2">
+//         <PaletteCategoryDisplay colors={seedPaletteColors} />
+//       </div>
+//     )}
+
+//     {/* Control buttons in a flex container */}
+//     <div
+//       className={cn('flex items-center gap-2 flex-shrink-0', {
+//         'ml-auto': !shouldShowControls || (isSeedRoute && !isRandomRoute), // Push to right when on seed route or non-control routes
+//       })}
+//     >
+//       {/* Regenerate button with tooltip - only show on random route */}
+//       {shouldShowControls && isRandomRoute && (
+//         <TooltipProvider>
+//           <Tooltip>
+//             <TooltipTrigger asChild>
+//               <Button
+//                 variant="ghost"
+//                 size="sm"
+//                 onClick={handleRegenerate}
+//                 className="cursor-pointer h-8 w-8 p-1"
+//               >
+//                 <RefreshCw className="h-5 w-5" />
+//               </Button>
+//             </TooltipTrigger>
+//             <TooltipContent>
+//               <p>Regenerate Palettes</p>
+//             </TooltipContent>
+//           </Tooltip>
+//         </TooltipProvider>
+//       )}
+
+//       {/* Settings button with tooltip */}
+//       <Popover open={open} onOpenChange={setOpen}>
+//         <TooltipProvider>
+//           <Tooltip>
+//             <TooltipTrigger asChild>
+//               <PopoverTrigger asChild>
+//                 <Button
+//                   variant="ghost"
+//                   size="sm"
+//                   aria-label="Open gradient settings"
+//                   className="cursor-pointer h-8 w-8 p-1"
+//                 >
+//                   <Settings2 className="h-5 w-5" />
+//                 </Button>
+//               </PopoverTrigger>
+//             </TooltipTrigger>
+//             <TooltipContent>
+//               <p>Gradient Settings</p>
+//             </TooltipContent>
+//           </Tooltip>
+//         </TooltipProvider>
+//         <PopoverContent className="w-[220px] p-3 bg-background border-border">
+//           <div className="space-y-3">
+//             <div className="space-y-1">
+//               <h3 className="text-xs font-medium text-muted-foreground mb-2">Style</h3>
+//               <div>
+//                 <StyleSelect value={style} />
+//               </div>
+//             </div>
+
+//             <div className="flex gap-2">
+//               <div className="w-1/2 space-y-1">
+//                 <h3 className="text-xs font-medium text-muted-foreground mb-2">Steps</h3>
+//                 <StepsInput value={steps} />
+//               </div>
+
+//               <div className="w-1/2 space-y-1">
+//                 <h3 className="text-xs font-medium text-muted-foreground mb-2">Angle</h3>
+//                 <AngleInput value={angle} />
+//               </div>
+//             </div>
+//           </div>
+//         </PopoverContent>
+//       </Popover>
+//     </div>
+//   </div>
+// </div>

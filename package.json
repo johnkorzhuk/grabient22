@@ -56,6 +56,7 @@
     "concurrently": "^8.2.2",
     "convex": "^1.19.0",
     "convex-helpers": "^0.1.79",
+    "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "ky": "^1.7.4",
     "lucide-react": "^0.475.0",

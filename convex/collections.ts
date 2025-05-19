@@ -119,7 +119,7 @@ export const list = query({
       .query('collections')
       .take(100)
       .then((collections) => {
-        return collections.map(({ _creationTime, ...collection }) => ({
+        return collections.map((collection) => ({
           ...collection,
           coeffs: collection.coeffs as CosineCoeffs,
           globals: DEFAULT_GLOBALS,
@@ -132,7 +132,7 @@ export const listPopular = query({
   handler: async (ctx) => {
     const collections = await ctx.db.query('popular').withIndex('likes').order('desc').take(96);
 
-    return collections.map(({ _creationTime, ...collection }) => ({
+    return collections.map((collection) => ({
       ...collection,
       coeffs: collection.coeffs as CosineCoeffs,
       globals: DEFAULT_GLOBALS,

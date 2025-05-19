@@ -81,6 +81,7 @@ function Home() {
     _id: encodedSeedData as Id<'popular'>,
     seed: encodedSeedData,
     likes: 0,
+    _creationTime: Date.now(),
   };
 
   // Generate variations

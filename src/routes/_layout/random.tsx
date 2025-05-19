@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PaletteCategoryKey } from '~/validators';
 import * as v from 'valibot';
 import { categoriesValidator, DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
-import { CollectionsDisplay } from '~/components/ResizableCollectionsDisplay';
+import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import type { AppCollection } from '~/types';
 import { wrap } from 'comlink';
 import { observer, use$ } from '@legendapp/state/react';
@@ -224,7 +224,7 @@ const GeneratePage = observer(function GeneratePage() {
   return (
     <div className="h-full w-full flex flex-col relative">
       {collections.length > 0 ? (
-        <CollectionsDisplay collections={collections} isSeedRoute={false} isRandomRoute={true} />
+        <CollectionsDisplay collections={collections} />
       ) : (
         <div className="h-full flex items-center justify-center">
           <div className="text-center py-8">
