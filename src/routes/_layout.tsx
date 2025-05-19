@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import { AppHeader } from '~/components/AppHeader';
 import { Sidebar } from '~/components/Sidebar';
 import { MobileNavigation } from '~/components/MobileNavigation';
+import { ScrollToTop } from '~/components/ScrollToTop';
 import { uiTempStore$ } from '~/stores/ui';
 import {
   styleWithAutoValidator,
@@ -50,9 +51,11 @@ function RouteComponent() {
 
 const Layout = observer(function Layout() {
   const isDragging = uiTempStore$.isDragging.get();
-  
+
   return (
-    <div className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}>
+    <div
+      className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}
+    >
       <AppHeader className="sticky top-0 z-50 bg-background" />
       <div className="pt-12">
         {/* <div className="hidden md:block">
@@ -61,6 +64,7 @@ const Layout = observer(function Layout() {
         <main className="relative">
           <Outlet />
         </main>
+        <ScrollToTop />
       </div>
       {/* Mobile navigation footer - only visible on small screens */}
       {/* <MobileNavigation /> */}
