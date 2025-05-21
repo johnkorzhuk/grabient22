@@ -12,6 +12,7 @@ import {
 } from '~/validators';
 import { Route as SeedRoute } from './_layout/$seed';
 import { observer, use$ } from '@legendapp/state/react';
+import { SubHeader } from '~/components/SubHeader';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -57,10 +58,12 @@ const Layout = observer(function Layout() {
       className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}
     >
       <AppHeader className="sticky top-0 z-50 bg-background" />
+      <SubHeader fixed />
       <div className="pt-12">
         {/* <div className="hidden md:block">
     <Sidebar isSeedRoute={isSeedRoute} />
   </div> */}
+
         <main className="relative">
           <Outlet />
         </main>
