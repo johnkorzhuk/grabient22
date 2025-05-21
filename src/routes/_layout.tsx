@@ -11,7 +11,7 @@ import {
   angleWithAutoValidator,
 } from '~/validators';
 import { Route as SeedRoute } from './_layout/$seed';
-import { observer } from '@legendapp/state/react';
+import { observer, use$ } from '@legendapp/state/react';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -50,7 +50,7 @@ function RouteComponent() {
 }
 
 const Layout = observer(function Layout() {
-  const isDragging = uiTempStore$.isDragging.get();
+  const isDragging = use$(uiTempStore$.isDragging);
 
   return (
     <div

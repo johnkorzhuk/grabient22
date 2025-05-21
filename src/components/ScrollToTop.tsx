@@ -65,11 +65,11 @@ export function ScrollToTop() {
               <button
                 onClick={scrollToTop}
                 className={cn(
-                  'fixed bottom-6 right-6 z-[100]',
+                  'fixed bottom-3 md:bottom-6 right-2 md:right-6 z-[100]',
                   'p-3',
-                  'rounded-full bg-background/30 border border-foreground/10 backdrop-blur-lg',
+                  'rounded-full bg-background/20 border border-foreground/10 backdrop-blur-lg',
                   'cursor-pointer hover:bg-background/10 hover:scale-110',
-                  'transition-all duration-200 transform-gpu',
+                  'transition-all duration-200 transform-gpu disable-animation-on-theme-change',
                   'text-foreground',
                   'shadow-lg',
                   'flex items-center justify-center',
