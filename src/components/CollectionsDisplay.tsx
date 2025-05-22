@@ -15,6 +15,7 @@ import { RGBTabs } from './RGBTabs';
 import { useItemInteraction } from '~/hooks/useTouchInteraction';
 import { collectionStore$ } from '~/stores/collection';
 import { serializeCoeffs } from '~/lib/serialization';
+import { useHover } from '@mantine/hooks';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -37,7 +38,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   }
 
   // Add item interaction hook for both mobile and desktop
-  const { toggleItem, clearActiveItem, isItemActive } = useItemInteraction();
+  const { toggleItem, clearActiveItem, isItemActive, activeItemId } = useItemInteraction();
 
   // Track which items have visible RGB tabs
   const [visibleRGBTabs, setVisibleRGBTabs] = useState<Record<string, boolean>>({});
@@ -51,6 +52,34 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
     collectionStore$.collections.set(initialCollections);
   }, [initialCollections]);
 
+  // Set preview values when an active item is selected, but only for 'auto' parameters
+  useEffect(() => {
+    if (activeItemId) {
+      // Find the active collection
+      const activeCollection = collections.find((collection) => collection._id === activeItemId);
+
+      if (activeCollection) {
+        // Only set preview values for parameters that are set to 'auto'
+        if (style === 'auto') {
+          uiTempStore$.previewStyle.set(activeCollection.style);
+        }
+
+        if (steps === 'auto') {
+          uiTempStore$.previewSteps.set(activeCollection.steps);
+        }
+
+        if (angle === 'auto') {
+          uiTempStore$.previewAngle.set(activeCollection.angle);
+        }
+      }
+    } else {
+      // Clear preview values when no item is active
+      uiTempStore$.previewStyle.set(null);
+      uiTempStore$.previewSteps.set(null);
+      uiTempStore$.previewAngle.set(null);
+    }
+  }, [activeItemId, collections, style, steps, angle]);
+
   return (
     <section className="h-full w-full relative mb-20">
       <ol
@@ -60,28 +89,27 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
         )}
       >
         {collections.map((collection, index) => {
-          // Make sure coeffs and globals exist before applying
+          const itemActive = isItemActive(collection._id);
+          const { hovered, ref } = useHover();
           const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
-          // Determine steps to use (collection's native steps or from URL/preview)
-          const stepsToUse =
+          let stepsToUse =
             previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : collection.steps;
-
-          // Use our custom gradient generator with the determined number of steps
-          const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
-          const gradientColors = cosineGradient(numStops, processedCoeffs);
-
-          // Determine style to use (from URL/preview or default)
-          const styleToUse =
+          let styleToUse =
             previewStyle !== null ? previewStyle : style === 'auto' ? collection.style : style;
-
-          // Determine angle to use (from URL/preview or default)
-          const angleToUse =
+          let angleToUse =
             previewAngle !== null || angle !== 'auto'
               ? (previewAngle ??
                 (typeof angle === 'number' ? parseFloat(angle.toFixed(1)) : collection.angle))
               : collection.angle;
 
-          // Generate the CSS once and store it
+          stepsToUse = hovered && !itemActive && steps === 'auto' ? collection.steps : stepsToUse;
+          styleToUse = hovered && !itemActive && style === 'auto' ? collection.style : styleToUse;
+          angleToUse = hovered && !itemActive && angle === 'auto' ? collection.angle : angleToUse;
+
+          // Use our custom gradient generator with the determined number of steps
+          const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
+          const gradientColors = cosineGradient(numStops, processedCoeffs);
+
           const { styles, cssString } = getCollectionStyleCSS(
             styleToUse,
             gradientColors,
@@ -106,6 +134,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 
           return (
             <li
+              ref={ref}
               key={collection._id}
               className={cn('relative group', 'w-full')}
               onClick={() => toggleItem(collection._id)}
@@ -117,7 +146,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
               }}
               onMouseLeave={() => {
                 // Hide RGB tabs when mouse leaves unless item is active
-                if (!isItemActive(collection._id)) {
+                if (!itemActive) {
                   setVisibleRGBTabs((prev) => ({
                     ...prev,
                     [collection._id]: false,
@@ -136,8 +165,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   className={cn(
                     'absolute -inset-3 transition-opacity duration-300 z-0 pointer-events-none blur-lg rounded-xl',
                     {
-                      'opacity-0 group-hover:opacity-40': !isItemActive(collection._id),
-                      'opacity-40': isItemActive(collection._id),
+                      'opacity-0 group-hover:opacity-40': !itemActive,
+                      'opacity-40': itemActive,
                     },
                   )}
                 >
@@ -153,8 +182,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   className={cn(
                     'absolute top-3.5 left-3.5 z-10 bg-background/20 backdrop-blur-sm rounded-md transition-opacity',
                     {
-                      'opacity-0 group-hover:opacity-100': !isItemActive(collection._id),
-                      'opacity-100': isItemActive(collection._id),
+                      'opacity-0 group-hover:opacity-100': !itemActive,
+                      'opacity-100': itemActive,
                     },
                   )}
                 >
@@ -183,10 +212,10 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                   <CopyButton
                     cssString={cssString}
                     svgString={svgString}
-                    isActive={isItemActive(collection._id)}
+                    isActive={itemActive}
                     onOpen={() => {
                       // Always set this item as active, don't toggle
-                      if (!isItemActive(collection._id)) {
+                      if (!itemActive) {
                         toggleItem(collection._id);
                       }
                     }}
@@ -204,8 +233,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                       className={cn(
                         'transition-opacity duration-200 text-sm text-muted-foreground',
                         {
-                          'opacity-100 group-hover:opacity-0': !isItemActive(collection._id),
-                          'opacity-0': isItemActive(collection._id),
+                          'opacity-100 group-hover:opacity-0': !itemActive,
+                          'opacity-0': itemActive,
                         },
                       )}
                     >
@@ -219,7 +248,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                     </div>
 
                     {/* RGB Tabs - only shown when hovered or active */}
-                    {(isItemActive(collection._id) || visibleRGBTabs[collection._id]) && (
+                    {(itemActive || visibleRGBTabs[collection._id]) && (
                       <div className="absolute top-0 left-0">
                         <RGBTabs
                           collection={collection}
