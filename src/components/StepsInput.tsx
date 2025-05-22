@@ -285,7 +285,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
           className={cn(
             'flex items-center relative border border-input rounded-md',
             'bg-transparent hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 w-full',
-            'font-medium text-base h-10',
+            'font-medium text-base h-10 shadow-sm',
             className,
           )}
           onClick={(e) => {
