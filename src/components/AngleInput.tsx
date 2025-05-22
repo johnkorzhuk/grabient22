@@ -304,7 +304,7 @@ export const AngleInput = observer(function AngleInput({
           aria-label="Angle input"
           className={cn(
             'flex items-center relative border border-input rounded-md',
-            'bg-transparent hover:bg-background hover:text-foreground transition-colors w-full',
+            'bg-transparent hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 w-full',
             'font-medium text-base h-10',
             className,
           )}

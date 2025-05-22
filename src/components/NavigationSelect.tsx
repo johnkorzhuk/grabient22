@@ -46,7 +46,7 @@ export function NavigationSelect({ className, popoverClassName }: NavigationSele
           className={cn(
             'w-[150px] md:w-[170px] justify-between',
             'font-medium text-base h-10 px-3',
-            'bg-transparent border-input hover:bg-background hover:text-foreground cursor-pointer',
+            'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             className,
           )}
         >

@@ -82,7 +82,7 @@ export const StyleSelect = observer(function StyleSelect({
           className={cn(
             'w-full justify-between',
             'font-medium text-base h-10 px-3',
-            'bg-transparent border-input hover:bg-background hover:text-foreground cursor-pointer',
+            'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             className,
           )}
         >
