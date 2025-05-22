@@ -193,7 +193,7 @@ export const AppHeader = observer(function AppHeader({ className }: { className?
 
   return (
     <header className={cn('w-full bg-background', className)}>
-      <div className="mx-auto flex w-full items-center justify-between bg-background px-5 lg:px-14 pt-5 pb-6">
+      <div className="mx-auto flex w-full items-center justify-between bg-background px-5 lg:px-14 pt-3 pb-4 lg:pt-5 lg:pb-6">
         <div className="flex items-center gap-4">
           <Link
             to="/"

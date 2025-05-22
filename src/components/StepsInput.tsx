@@ -30,10 +30,10 @@ export const StepsInput = observer(function NumberInputWithPresets({
   const from = isSeedRoute
     ? '/$seed'
     : location.pathname === '/random'
-    ? '/random'
-    : location.pathname === '/collection'
-    ? '/collection'
-    : '/';
+      ? '/random'
+      : location.pathname === '/collection'
+        ? '/collection'
+        : '/';
 
   const navigate = useNavigate({ from });
   const previousValue = usePrevious(value);
@@ -62,7 +62,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
-    if (newValue === '' || newValue === 'auto') {
+    if (newValue === '' || newValue === 'auto' || newValue === 'steps') {
       navigate({
         search: (prev) => ({
           ...prev,
@@ -265,7 +265,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
       return value === 'auto' ? DEFAULT_STEPS.toString() : value.toString();
     } else {
       if (value === 'auto') {
-        return previewValue !== null ? previewValue.toString() : 'auto';
+        return previewValue !== null ? previewValue.toString() : 'steps';
       }
       return value.toString();
     }
@@ -283,7 +283,9 @@ export const StepsInput = observer(function NumberInputWithPresets({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            'flex items-center relative border border-input rounded-md bg-background hover:bg-accent hover:text-accent-foreground transition-colors disable-animation-on-theme-change shadow-sm h-8 w-full',
+            'flex items-center relative border border-input rounded-md',
+            'bg-transparent hover:bg-background hover:text-foreground transition-colors w-full',
+            'font-medium text-base h-10',
             className,
           )}
           onClick={(e) => {
@@ -315,15 +317,15 @@ export const StepsInput = observer(function NumberInputWithPresets({
               value === 'auto' && !isFocused && !previewValue ? 'text-muted-foreground' : '',
               'disable-animation-on-theme-change',
               'border-0',
-              'font-medium',
-              'py-1 text-xs',
+              'font-medium text-base',
+              'py-2',
             )}
           />
           <div
             ref={buttonRef}
             className={cn(
               'absolute inset-y-0 right-0 flex items-center justify-center',
-              'text-muted-foreground hover:text-foreground',
+              'text-muted-foreground hover:text-foreground cursor-pointer',
               'focus:outline-none',
               'ml-2 pr-3',
             )}
@@ -335,7 +337,10 @@ export const StepsInput = observer(function NumberInputWithPresets({
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className={cn('p-0 w-[var(--radix-popover-trigger-width)]', popoverClassName)}
+        className={cn(
+          'p-0 w-[var(--radix-popover-trigger-width)] bg-background/80 backdrop-blur-sm border-border rounded-md',
+          popoverClassName,
+        )}
         align="start"
         side="bottom"
         sideOffset={0}
@@ -347,8 +352,8 @@ export const StepsInput = observer(function NumberInputWithPresets({
           }
         }}
       >
-        <Command className="border-0 rounded-none w-full text-xs">
-          <CommandList className="max-h-[220px] w-full">
+        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-medium [&_[cmdk-item]]:text-base [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
+          <CommandList className="max-h-[240px] w-full">
             <CommandGroup className="w-full">
               {presets.map((preset) => (
                 <CommandItem
@@ -358,7 +363,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
                   onMouseEnter={() => {
                     uiTempStore$.previewSteps.set(preset);
                   }}
-                  className="cursor-pointer pl-3 relative w-full h-7 min-h-[1.75rem] py-1"
+                  className="cursor-pointer relative w-full h-9 min-h-[2.25rem]"
                 >
                   {preset.toString()}
                   <CheckIcon

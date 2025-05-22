@@ -225,7 +225,8 @@ export function GrabientLogo({ className }: AnimatedGrabientLogoProps) {
   return (
     <div className={cn('relative top-1', className)}>
       <svg
-        className="w-[140px] h-[32px] md:w-[190px] md:h-[43px]"
+        // className="w-[140px] h-[32px] md:w-[190px] md:h-[43px]"
+        className="w-[190px] h-[43px]"
         viewBox="0 0 220 50"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid meet"

@@ -61,7 +61,7 @@ export const AngleInput = observer(function AngleInput({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
-    if (newValue === '' || newValue === 'auto') {
+    if (newValue === '' || newValue === 'auto' || newValue === 'angle') {
       navigate({
         search: (prev) => ({
           ...prev,
@@ -281,7 +281,7 @@ export const AngleInput = observer(function AngleInput({
       return value === 'auto' ? DEFAULT_ANGLE.toString() : value.toString();
     } else {
       if (value === 'auto') {
-        return previewAngle !== null ? previewAngle.toString() : 'auto';
+        return previewAngle !== null ? previewAngle.toString() + '°' : 'angle';
       }
       return value.toString();
     }
@@ -303,7 +303,9 @@ export const AngleInput = observer(function AngleInput({
           aria-expanded={open}
           aria-label="Angle input"
           className={cn(
-            'flex items-center relative border border-input rounded-md bg-background hover:bg-accent hover:text-accent-foreground transition-colors disable-animation-on-theme-change shadow-sm h-8 w-full',
+            'flex items-center relative border border-input rounded-md',
+            'bg-transparent hover:bg-background hover:text-foreground transition-colors w-full',
+            'font-medium text-base h-10',
             className,
           )}
           onClick={(e) => {
@@ -329,10 +331,9 @@ export const AngleInput = observer(function AngleInput({
               'disabled:cursor-not-allowed disabled:opacity-50',
               'pr-10', // Space for the dropdown icon
               value === 'auto' && !isFocused && !previewAngle ? 'text-muted-foreground' : '',
-              'disable-animation-on-theme-change',
               'border-0', // Remove input border since we're using a parent border
-              'font-medium', // Match StyleSelect's text weight
-              'py-1 text-xs',
+              'font-medium text-base',
+              'py-2',
             )}
           />
           <div
@@ -340,7 +341,7 @@ export const AngleInput = observer(function AngleInput({
             className={cn(
               'absolute inset-y-0 right-0 flex items-center justify-center',
               'text-muted-foreground hover:text-foreground',
-              'focus:outline-none',
+              'focus:outline-none cursor-pointer',
               'ml-2 pr-3', // Match StyleSelect's icon spacing
             )}
             onClick={handleButtonClick}
@@ -351,7 +352,10 @@ export const AngleInput = observer(function AngleInput({
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className={cn('p-0 w-[var(--radix-popover-trigger-width)]', popoverClassName)}
+        className={cn(
+          'p-0 w-[var(--radix-popover-trigger-width)] bg-background/80 backdrop-blur-sm border-border rounded-md',
+          popoverClassName,
+        )}
         align="start"
         side="bottom"
         sideOffset={0}
@@ -363,7 +367,7 @@ export const AngleInput = observer(function AngleInput({
           }
         }}
       >
-        <Command className="border-0 rounded-none w-full text-xs">
+        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-medium [&_[cmdk-item]]:text-base [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
           <CommandList className="w-full" style={{ height: 'auto' }}>
             <CommandGroup className="w-full">
               {presets.map((preset) => (
@@ -374,7 +378,7 @@ export const AngleInput = observer(function AngleInput({
                   onMouseEnter={() => {
                     uiTempStore$.previewAngle.set(preset);
                   }}
-                  className="cursor-pointer pl-3 relative w-full h-8 min-h-[2rem] py-1.5"
+                  className="cursor-pointer relative w-full h-9 min-h-[2.25rem]"
                 >
                   {`${preset}°`}
                   <CheckIcon

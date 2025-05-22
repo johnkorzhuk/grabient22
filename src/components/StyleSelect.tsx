@@ -37,10 +37,10 @@ export const StyleSelect = observer(function StyleSelect({
   const from = isSeedRoute
     ? '/$seed'
     : location.pathname === '/random'
-    ? '/random'
-    : location.pathname === '/collection'
-    ? '/collection'
-    : '/';
+      ? '/random'
+      : location.pathname === '/collection'
+        ? '/collection'
+        : '/';
 
   const navigate = useNavigate({ from });
   const previewValue = use$(uiTempStore$.previewStyle);
@@ -75,32 +75,39 @@ export const StyleSelect = observer(function StyleSelect({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={false}
           aria-label="Select gradient style"
-          className={cn("w-full justify-between disable-animation-on-theme-change group", className)}
+          className={cn(
+            'w-full justify-between',
+            'font-medium text-base h-10 px-3',
+            'bg-transparent border-input hover:bg-background hover:text-foreground cursor-pointer',
+            className,
+          )}
         >
           {value === 'auto' ? (
-            <span className="text-muted-foreground text-opacity-75">
-              {previewValue ? STYLE_LABELS[previewValue] || 'auto' : 'auto'}
+            <span className="text-muted-foreground">
+              {previewValue ? STYLE_LABELS[previewValue] || 'style' : 'style'}
             </span>
           ) : (
             STYLE_LABELS[value]
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground group-hover:text-foreground cursor-pointer" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-muted-foreground group-hover:text-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className={cn("p-0 w-[var(--radix-popover-trigger-width)]", popoverClassName)}
+        className={cn(
+          'p-0 w-[var(--radix-popover-trigger-width)] bg-background/80 backdrop-blur-sm border-border rounded-md',
+          popoverClassName,
+        )}
         onMouseLeave={() => {
           if (previewValue) {
             uiTempStore$.previewStyle.set(null);
           }
         }}
       >
-        <Command className="text-xs">
+        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-medium [&_[cmdk-item]]:text-base [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
           <CommandList>
             <CommandGroup>
               {COLLECTION_STYLES.map((style) => (
@@ -111,7 +118,7 @@ export const StyleSelect = observer(function StyleSelect({
                   onMouseEnter={() => {
                     uiTempStore$.previewStyle.set(style);
                   }}
-                  className="cursor-pointer pl-3 relative h-7 min-h-[1.75rem] py-1"
+                  className="cursor-pointer relative h-9 min-h-[2.25rem]"
                 >
                   {STYLE_LABELS[style]}
                   <CheckIcon
