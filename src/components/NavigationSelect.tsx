@@ -23,6 +23,11 @@ const TIME_NAVIGATION_ITEMS = {
   oldest: { id: 'oldest', label: 'Oldest', path: '/oldest' },
 };
 
+export const ROUTES = {
+  ...BASE_NAVIGATION_ITEMS,
+  ...TIME_NAVIGATION_ITEMS,
+};
+
 export function NavigationSelect({ className, popoverClassName }: NavigationSelectProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,18 +43,19 @@ export function NavigationSelect({ className, popoverClassName }: NavigationSele
 
   // Determine if we're on a time-based route (newest/oldest)
   const isTimeRoute = currentPath === 'newest' || currentPath === 'oldest';
-  
+
   // Get the opposite time route to show in the dropdown
-  const oppositeTimeRoute = currentPath === 'newest' ? TIME_NAVIGATION_ITEMS.oldest : TIME_NAVIGATION_ITEMS.newest;
-  
+  const oppositeTimeRoute =
+    currentPath === 'newest' ? TIME_NAVIGATION_ITEMS.oldest : TIME_NAVIGATION_ITEMS.newest;
+
   // Build the navigation items dynamically
   const navigationItems = [
     // If we're on a time route, show the opposite in the dropdown
     // Otherwise show the newest option by default
     isTimeRoute ? oppositeTimeRoute : TIME_NAVIGATION_ITEMS.newest,
-    ...BASE_NAVIGATION_ITEMS
+    ...BASE_NAVIGATION_ITEMS,
   ];
-  
+
   // Find the current navigation item
   const currentItem = isTimeRoute
     ? TIME_NAVIGATION_ITEMS[currentPath as 'newest' | 'oldest']

@@ -1,8 +1,6 @@
 import { cn } from '~/lib/utils';
 import { NavigationSelect } from '~/components/NavigationSelect';
-import { StyleSelect } from './StyleSelect';
-import { StepsInput } from './StepsInput';
-import { AngleInput } from './AngleInput';
+import { ViewOptions } from './ViewOptions';
 import { useSearch, useNavigate, useLocation, useMatches } from '@tanstack/react-router';
 import { Menu, X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
@@ -123,31 +121,38 @@ export const SubHeader = observer(function SubHeader({
         )}
       >
         <div className="flex items-center justify-between">
-          <NavigationSelect />
+          {/* Left side - only render NavigationSelect if current path is in ROUTES */}
+          <div className="flex-1">
+            {(location.pathname === '/' ||
+              location.pathname === '/collection' ||
+              location.pathname === '/newest' ||
+              location.pathname === '/oldest') && <NavigationSelect />}
+          </div>
 
           {/* Desktop view (> 450px) */}
-          <div className="hidden sm:flex items-center gap-3 relative">
-            {/* Render apply button when activeItemId exists and not all searches are set */}
-            {activeItemId && !allSearchSet && (
-              <ActionButton onClick={setActiveSearch}>apply</ActionButton>
-            )}
-            {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
-            {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) && (
-              <ActionButton onClick={clearSearchParams}>reset</ActionButton>
-            )}
-            <StyleSelect value={style} className="w-[190px] h-10" />
-            <StepsInput value={steps} className="w-[110px] h-10" />
-            <AngleInput value={angle} className="w-[110px] h-10" />
+          <div className="hidden sm:flex items-center relative">
+            <div className="mr-2 relative -top-0.5">
+              {/* Render apply button when activeItemId exists and not all searches are set */}
+              {activeItemId && !allSearchSet && (
+                <ActionButton onClick={setActiveSearch}>apply</ActionButton>
+              )}
+              {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
+              {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) && (
+                <ActionButton onClick={clearSearchParams}>reset</ActionButton>
+              )}
+            </div>
+            <ViewOptions style={style} steps={steps} angle={angle} variant="fixed" />
           </div>
 
           {/* Mobile view (≤ 450px) */}
           <div className="sm:hidden relative flex items-center" ref={menuRef}>
-            {activeItemId && !allSearchSet && isMenuOpen && (
-              <ActionButton onClick={setActiveSearch}>apply</ActionButton>
-            )}
-            {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) && isMenuOpen && (
-              <ActionButton onClick={clearSearchParams}>reset</ActionButton>
-            )}
+            <div className="mr-4 relative -top-0.5">
+              {activeItemId && !allSearchSet && isMenuOpen && (
+                <ActionButton onClick={setActiveSearch}>apply</ActionButton>
+              )}
+              {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) &&
+                isMenuOpen && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -175,10 +180,8 @@ export const SubHeader = observer(function SubHeader({
             },
           )}
         >
-          <div className="px-5 py-3 flex items-center gap-2 w-full overflow-x-auto relative">
-            <StyleSelect value={style} className="w-[50%] min-w-[160px] h-10" />
-            <StepsInput value={steps} className="w-[25%] min-w-[80px] h-10" />
-            <AngleInput value={angle} className="w-[25%] min-w-[80px] h-10" />
+          <div className="px-5 py-3 relative">
+            <ViewOptions style={style} steps={steps} angle={angle} variant="full" />
           </div>
         </div>
       )}

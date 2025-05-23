@@ -80,7 +80,7 @@ const Layout = observer(function Layout() {
     <Sidebar isSeedRoute={isSeedRoute} />
   </div> */}
 
-        <main className="relative">
+        <main className="relative pb-13">
           <Outlet />
         </main>
         <FooterSection className="mt-13" />
