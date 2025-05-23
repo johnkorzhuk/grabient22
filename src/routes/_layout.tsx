@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import * as v from 'valibot';
 import { AppHeader } from '~/components/AppHeader';
 import { ScrollToTop } from '~/components/ScrollToTop';
+import { FooterSection } from '~/components/FooterSection';
 import { uiTempStore$ } from '~/stores/ui';
 import {
   styleWithAutoValidator,
@@ -54,10 +55,11 @@ const Layout = observer(function Layout() {
   const isDragging = use$(uiTempStore$.isDragging);
   const { scrollContainerRef, isVisible: isHeroVisible } = useScrollThreshold(50);
 
-  // Debug: log the state changes
   useEffect(() => {
-    console.log('Hero visibility changed:', isHeroVisible);
-  }, [isHeroVisible]);
+    return () => {
+      uiTempStore$.activeCollectionId.set(null);
+    };
+  }, []);
 
   return (
     <div
@@ -81,6 +83,7 @@ const Layout = observer(function Layout() {
         <main className="relative">
           <Outlet />
         </main>
+        <FooterSection className="mt-13" />
         <ScrollToTop />
       </div>
       {/* Mobile navigation footer - only visible on small screens */}

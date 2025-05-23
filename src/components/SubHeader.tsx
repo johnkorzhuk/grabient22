@@ -47,7 +47,7 @@ export const SubHeader = observer(function SubHeader({
   const activeItemId = use$(uiTempStore$.activeCollectionId);
   const activeCollection = collections.find((collection) => collection._id === activeItemId);
   const anySearchSet = searchList.some((value) => value !== 'auto');
-  const allSearchesSet = searchList.every((value) => value !== 'auto');
+  const allSearchSet = searchList.every((value) => value !== 'auto');
   const style = search.style === 'auto' ? (activeCollection?.style ?? search.style) : search.style;
   const steps = search.steps === 'auto' ? (activeCollection?.steps ?? search.steps) : search.steps;
   const angle = search.angle === 'auto' ? (activeCollection?.angle ?? search.angle) : search.angle;
@@ -128,11 +128,11 @@ export const SubHeader = observer(function SubHeader({
           {/* Desktop view (> 450px) */}
           <div className="hidden sm:flex items-center gap-3 relative">
             {/* Render apply button when activeItemId exists and not all searches are set */}
-            {activeItemId && !allSearchesSet && (
+            {activeItemId && !allSearchSet && (
               <ActionButton onClick={setActiveSearch}>apply</ActionButton>
             )}
             {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
-            {((activeItemId && allSearchesSet) || (!activeItemId && anySearchSet)) && (
+            {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) && (
               <ActionButton onClick={clearSearchParams}>reset</ActionButton>
             )}
             <StyleSelect value={style} className="w-[190px] h-10" />
@@ -142,11 +142,12 @@ export const SubHeader = observer(function SubHeader({
 
           {/* Mobile view (≤ 450px) */}
           <div className="sm:hidden relative flex items-center" ref={menuRef}>
-            {activeItemId && !allSearchesSet && isMenuOpen && (
+            {activeItemId && !allSearchSet && isMenuOpen && (
               <ActionButton onClick={setActiveSearch}>apply</ActionButton>
             )}
-            {((activeItemId && allSearchesSet) || (!activeItemId && anySearchSet)) &&
-              isMenuOpen && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
+            {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) && isMenuOpen && (
+              <ActionButton onClick={clearSearchParams}>reset</ActionButton>
+            )}
             <Button
               variant="ghost"
               size="sm"

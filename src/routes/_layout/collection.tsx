@@ -7,6 +7,8 @@ import { usePaginatedQuery } from 'convex/react';
 import { useAuth } from '@clerk/tanstack-react-start';
 import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
+import { convexQuery } from '@convex-dev/react-query';
+import { useQuery } from '@tanstack/react-query';
 const PAGE_SIZE = 200 as const;
 // Define the route
 export const Route = createFileRoute('/_layout/collection')({
@@ -48,7 +50,7 @@ function CollectionRoute() {
               _id: like._id as unknown as Id<'collections'>,
               seed: like.seed,
               likes: 0,
-              _creationTime: Date.now(),
+              _creationTime: like._creationTime,
             };
 
             return collection;
@@ -59,6 +61,15 @@ function CollectionRoute() {
         })
         .filter(Boolean) as AppCollection[])
     : [];
+
+  const { data } = useQuery({
+    ...convexQuery(api.likes.checkUserLikedSeeds, {
+      userId,
+      seeds: collections.map((c) => c.seed),
+    }),
+    gcTime: Number.POSITIVE_INFINITY,
+    enabled: Boolean(userId),
+  });
 
   // Manual function to load more
   // const handleLoadMore = () => {
@@ -87,11 +98,5 @@ function CollectionRoute() {
   //   );
   // }
 
-  return (
-    <div className="h-full w-full flex flex-col">
-      <div className="flex-grow">
-        <CollectionsDisplay collections={collections} />
-      </div>
-    </div>
-  );
+  return <CollectionsDisplay collections={collections} likedSeeds={data} />;
 }

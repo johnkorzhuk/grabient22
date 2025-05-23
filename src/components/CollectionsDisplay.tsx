@@ -74,7 +74,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   // }, [activeItemId, collections, style, steps, angle]);
 
   return (
-    <section className="h-full w-full relative mb-20">
+    <section className="h-full w-full relative">
       <ol
         className={cn(
           'h-full w-full relative px-5 lg:px-14',
