@@ -231,6 +231,32 @@ export const listPopularNew = query({
   },
 });
 
+export const listNew = query({
+  handler: async (ctx) => {
+    // Fetch collections ordered by creation time (newest first)
+    const collections = await ctx.db.query('collections').order('desc').take(96);
+
+    return collections.map((collection) => ({
+      ...collection,
+      coeffs: collection.coeffs as CosineCoeffs,
+      globals: DEFAULT_GLOBALS,
+    }));
+  },
+});
+
+export const listOld = query({
+  handler: async (ctx) => {
+    // Fetch collections ordered by creation time (oldest first)
+    const collections = await ctx.db.query('collections').order('asc').take(96);
+
+    return collections.map((collection) => ({
+      ...collection,
+      coeffs: collection.coeffs as CosineCoeffs,
+      globals: DEFAULT_GLOBALS,
+    }));
+  },
+});
+
 // export const listPopularNew = query({
 //   args: { paginationOpts: paginationOptsValidator },
 //   handler: async (ctx, args) => {

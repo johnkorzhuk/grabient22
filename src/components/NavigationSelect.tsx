@@ -11,11 +11,17 @@ interface NavigationSelectProps {
   popoverClassName?: string;
 }
 
-const NAVIGATION_ITEMS = [
+// Base navigation items - newest/oldest will be dynamically added based on current selection
+const BASE_NAVIGATION_ITEMS = [
   { id: 'popular', label: 'Popular', path: '/' },
-  { id: 'random', label: 'Random', path: '/random' },
   { id: 'collection', label: 'Collection', path: '/collection' },
 ];
+
+// Time-based navigation items that will alternate
+const TIME_NAVIGATION_ITEMS = {
+  newest: { id: 'newest', label: 'Newest', path: '/newest' },
+  oldest: { id: 'oldest', label: 'Oldest', path: '/oldest' },
+};
 
 export function NavigationSelect({ className, popoverClassName }: NavigationSelectProps) {
   const location = useLocation();
@@ -30,9 +36,24 @@ export function NavigationSelect({ className, popoverClassName }: NavigationSele
     navigate({ to: path, search: (search) => search });
   };
 
+  // Determine if we're on a time-based route (newest/oldest)
+  const isTimeRoute = currentPath === 'newest' || currentPath === 'oldest';
+  
+  // Get the opposite time route to show in the dropdown
+  const oppositeTimeRoute = currentPath === 'newest' ? TIME_NAVIGATION_ITEMS.oldest : TIME_NAVIGATION_ITEMS.newest;
+  
+  // Build the navigation items dynamically
+  const navigationItems = [
+    // If we're on a time route, show the opposite in the dropdown
+    // Otherwise show the newest option by default
+    isTimeRoute ? oppositeTimeRoute : TIME_NAVIGATION_ITEMS.newest,
+    ...BASE_NAVIGATION_ITEMS
+  ];
+  
   // Find the current navigation item
-  const currentItem =
-    NAVIGATION_ITEMS.find((item) => item.id === currentPath) || NAVIGATION_ITEMS[0];
+  const currentItem = isTimeRoute
+    ? TIME_NAVIGATION_ITEMS[currentPath as 'newest' | 'oldest']
+    : navigationItems.find((item) => item.id === currentPath) || navigationItems[0];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -63,7 +84,7 @@ export function NavigationSelect({ className, popoverClassName }: NavigationSele
         <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-bold [&_[cmdk-item]]:text-sm [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
           <CommandList>
             <CommandGroup>
-              {NAVIGATION_ITEMS.map((item) => (
+              {navigationItems.map((item) => (
                 <CommandItem
                   key={item.id}
                   value={item.id}

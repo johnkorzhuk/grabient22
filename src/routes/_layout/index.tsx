@@ -33,7 +33,7 @@ export const Route = createFileRoute('/_layout/')({
   // pendingComponent: () => <Loader />,
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
-      ...convexQuery(api.collections.listPopular, {}),
+      ...convexQuery(api.collections.listPopularNew, {}),
       gcTime: 2000,
     });
   },
