@@ -379,7 +379,7 @@ export const AngleInput = observer(function AngleInput({
                   onMouseEnter={() => {
                     uiTempStore$.previewAngle.set(preset);
                   }}
-                  className="cursor-pointer relative w-full h-9 min-h-[2.25rem]"
+                  className="cursor-pointer relative w-full h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   {`${preset}°`}
                   <CheckIcon

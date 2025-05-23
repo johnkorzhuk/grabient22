@@ -363,7 +363,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
                   onMouseEnter={() => {
                     uiTempStore$.previewSteps.set(preset);
                   }}
-                  className="cursor-pointer relative w-full h-9 min-h-[2.25rem]"
+                  className="cursor-pointer relative w-full h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   {preset.toString()}
                   <CheckIcon

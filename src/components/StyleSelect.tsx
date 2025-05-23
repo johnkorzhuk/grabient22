@@ -118,7 +118,7 @@ export const StyleSelect = observer(function StyleSelect({
                   onMouseEnter={() => {
                     uiTempStore$.previewStyle.set(style);
                   }}
-                  className="cursor-pointer relative h-9 min-h-[2.25rem]"
+                  className="cursor-pointer relative h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   {STYLE_LABELS[style]}
                   <CheckIcon

@@ -1,9 +1,7 @@
-import { createFileRoute, Outlet, stripSearchParams, useMatches } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
+import { createFileRoute, Outlet, stripSearchParams } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import * as v from 'valibot';
 import { AppHeader } from '~/components/AppHeader';
-import { Sidebar } from '~/components/Sidebar';
-import { MobileNavigation } from '~/components/MobileNavigation';
 import { ScrollToTop } from '~/components/ScrollToTop';
 import { uiTempStore$ } from '~/stores/ui';
 import {
@@ -14,7 +12,7 @@ import {
 import { Route as SeedRoute } from './_layout/$seed';
 import { observer, use$ } from '@legendapp/state/react';
 import { SubHeader } from '~/components/SubHeader';
-import { useInViewport, useThrottledCallback } from '@mantine/hooks';
+import useScrollThreshold from '~/hooks/useScrollThreshold';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -54,28 +52,26 @@ function RouteComponent() {
 
 const Layout = observer(function Layout() {
   const isDragging = use$(uiTempStore$.isDragging);
-  const [isStableInViewport, setIsStableInViewport] = useState(true);
-  const { ref, inViewport } = useInViewport();
-  const throttledSetInViewport = useThrottledCallback((value: boolean) => {
-    setIsStableInViewport(value);
-  }, 200);
+  const { scrollContainerRef, isVisible: isHeroVisible } = useScrollThreshold(50);
 
+  // Debug: log the state changes
   useEffect(() => {
-    throttledSetInViewport(inViewport);
-  }, [inViewport, throttledSetInViewport]);
+    console.log('Hero visibility changed:', isHeroVisible);
+  }, [isHeroVisible]);
 
   return (
     <div
+      ref={scrollContainerRef}
       className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}
     >
       <AppHeader className="sticky top-0 z-40 bg-background" />
-      <div ref={ref} className="w-full bg-background/90 backdrop-blur-sm">
+      <div className="w-full bg-background/90 backdrop-blur-sm">
         {/* <div className="mx-auto font-poppins">
           Hero content that gets scrolled out of view and is never sticky
         </div> */}
       </div>
 
-      <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" isHeroVisible={isStableInViewport} />
+      <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" isHeroVisible={isHeroVisible} />
 
       <div className="pt-10">
         {/* <div className="hidden md:block">
