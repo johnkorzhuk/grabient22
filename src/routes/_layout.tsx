@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, stripSearchParams, useMatches } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
 import * as v from 'valibot';
 import { AppHeader } from '~/components/AppHeader';
 import { Sidebar } from '~/components/Sidebar';
@@ -13,7 +14,7 @@ import {
 import { Route as SeedRoute } from './_layout/$seed';
 import { observer, use$ } from '@legendapp/state/react';
 import { SubHeader } from '~/components/SubHeader';
-import { useInViewport } from '@mantine/hooks';
+import { useInViewport, useThrottledCallback } from '@mantine/hooks';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -53,24 +54,28 @@ function RouteComponent() {
 
 const Layout = observer(function Layout() {
   const isDragging = use$(uiTempStore$.isDragging);
-  // Use the ref from useInViewport directly
+  const [isStableInViewport, setIsStableInViewport] = useState(true);
   const { ref, inViewport } = useInViewport();
+  const throttledSetInViewport = useThrottledCallback((value: boolean) => {
+    setIsStableInViewport(value);
+  }, 200);
+
+  useEffect(() => {
+    throttledSetInViewport(inViewport);
+  }, [inViewport, throttledSetInViewport]);
 
   return (
     <div
       className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}
     >
       <AppHeader className="sticky top-0 z-40 bg-background" />
-      <div
-        ref={ref}
-        className="w-full bg-background/90 backdrop-blur-sm py-3 border-b border-dashed border-border/70"
-      >
-        <div className="mx-auto font-poppins">
+      <div ref={ref} className="w-full bg-background/90 backdrop-blur-sm">
+        {/* <div className="mx-auto font-poppins">
           Hero content that gets scrolled out of view and is never sticky
-        </div>
+        </div> */}
       </div>
 
-      <SubHeader className="sticky top-17 lg:top-21 z-50" isHeroVisible={inViewport} />
+      <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" isHeroVisible={isStableInViewport} />
 
       <div className="pt-10">
         {/* <div className="hidden md:block">
