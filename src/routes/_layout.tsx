@@ -57,14 +57,14 @@ const Layout = observer(function Layout() {
     <div
       className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}
     >
-      <AppHeader className="sticky top-0 z-50 bg-background" />
+      <AppHeader className="sticky top-0 z-40 bg-background" />
       <div className="w-full bg-background/90 backdrop-blur-sm py-3 border-b border-dashed border-border/70">
         <div className="mx-auto">
           Hero content that gets scrolled out of view and is never sticky
         </div>
       </div>
 
-      <SubHeader className="sticky top-17.5 lg:top-21.5 z-40" />
+      <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" />
 
       <div className="pt-12">
         {/* <div className="hidden md:block">

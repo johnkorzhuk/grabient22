@@ -12,7 +12,6 @@ import { getCollectionStyleSVG } from '~/lib/getCollectionStyleSVG';
 import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
 import { CopyButton } from './CopyButton';
 import { RGBTabs } from './RGBTabs';
-import { useItemInteraction } from '~/hooks/useTouchInteraction';
 import { collectionStore$ } from '~/stores/collection';
 import { serializeCoeffs } from '~/lib/serialization';
 
@@ -31,21 +30,16 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   const previewStyle = use$(uiTempStore$.previewStyle);
   const previewSteps = use$(uiTempStore$.previewSteps);
   const previewAngle = use$(uiTempStore$.previewAngle);
+
   let collections = use$(collectionStore$.collections);
   if (!collections.length) {
     collections = initialCollections;
   }
 
-  // Add item interaction hook for both mobile and desktop
-  const { toggleItem, clearActiveItem, isItemActive, activeItemId } = useItemInteraction();
-
-  // Track which items have visible RGB tabs
-  const [visibleRGBTabs, setVisibleRGBTabs] = useState<Record<string, boolean>>({});
-
   // Clear active item when navigating away
-  useEffect(() => {
-    return () => clearActiveItem();
-  }, [clearActiveItem]);
+  // useEffect(() => {
+  //   return () => uiTempStore$.activeCollectionId.set(null);
+  // }, [activeCollectionId]);
 
   useEffect(() => {
     collectionStore$.collections.set(initialCollections);
@@ -88,7 +82,8 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
         )}
       >
         {collections.map((collection, index) => {
-          const itemActive = isItemActive(collection._id);
+          const activeCollectionId = use$(uiTempStore$.activeCollectionId);
+          const itemActive = activeCollectionId === collection._id;
           // const { hovered, ref } = useHover();
           const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
           let stepsToUse =
@@ -135,22 +130,11 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
             <li
               key={collection._id}
               className={cn('relative group', 'w-full')}
-              onClick={() => toggleItem(collection._id)}
-              onMouseEnter={() => {
-                setVisibleRGBTabs((prev) => ({
-                  ...prev,
-                  [collection._id]: true,
-                }));
+              onClick={() => {
+                if (itemActive) uiTempStore$.activeCollectionId.set(null);
+                else uiTempStore$.activeCollectionId.set(collection._id);
               }}
               onMouseLeave={() => {
-                // Hide RGB tabs when mouse leaves unless item is active
-                if (!itemActive) {
-                  setVisibleRGBTabs((prev) => ({
-                    ...prev,
-                    [collection._id]: false,
-                  }));
-                }
-
                 // Clear preview seed if set
                 if (!previewSeed) return;
                 uiTempStore$.previewSeed.set(null);
@@ -214,7 +198,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                     onOpen={() => {
                       // Always set this item as active, don't toggle
                       if (!itemActive) {
-                        toggleItem(collection._id);
+                        uiTempStore$.activeCollectionId.set(collection._id);
                       }
                     }}
                   />
@@ -246,45 +230,48 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                     </div>
 
                     {/* RGB Tabs - only shown when hovered or active */}
-                    {(itemActive || visibleRGBTabs[collection._id]) && (
-                      <div className="absolute top-0 left-0">
-                        <RGBTabs
-                          collection={collection}
-                          onOrderChange={(newCoeffs) => {
-                            // Generate new seed from the updated coefficients
-                            const newSeed = serializeCoeffs(newCoeffs, collection.globals);
+                    <div
+                      className={cn('absolute top-0 left-0 transition-opacity duration-200', {
+                        'opacity-0 group-hover:opacity-100': !itemActive,
+                        'opacity-100': itemActive,
+                      })}
+                    >
+                      <RGBTabs
+                        collection={collection}
+                        onOrderChange={(newCoeffs) => {
+                          // Generate new seed from the updated coefficients
+                          const newSeed = serializeCoeffs(newCoeffs, collection.globals);
 
-                            // Find the collection in the store and update it
-                            // Get the current collections array
-                            const collections = collectionStore$.collections.get();
-                            const collectionIndex = collections.findIndex(
-                              (c) => String(c._id) === String(collection._id),
-                            );
-                            const initalCollection = initialCollections.find(
-                              (c) => String(c._id) === String(collection._id),
-                            );
+                          // Find the collection in the store and update it
+                          // Get the current collections array
+                          const collections = collectionStore$.collections.get();
+                          const collectionIndex = collections.findIndex(
+                            (c) => String(c._id) === String(collection._id),
+                          );
+                          const initalCollection = initialCollections.find(
+                            (c) => String(c._id) === String(collection._id),
+                          );
 
-                            if (collectionIndex !== -1) {
-                              // Create a new array with the updated collection
-                              const updatedCollections = [...collections];
-                              updatedCollections[collectionIndex] = {
-                                ...collections[collectionIndex],
-                                coeffs: newCoeffs,
-                                seed: newSeed,
-                                // Reset likes to 0 since this is now a different gradient
-                                likes:
-                                  newSeed !== initalCollection?.seed
-                                    ? 0
-                                    : initalCollection?.likes || 0,
-                              };
+                          if (collectionIndex !== -1) {
+                            // Create a new array with the updated collection
+                            const updatedCollections = [...collections];
+                            updatedCollections[collectionIndex] = {
+                              ...collections[collectionIndex],
+                              coeffs: newCoeffs,
+                              seed: newSeed,
+                              // Reset likes to 0 since this is now a different gradient
+                              likes:
+                                newSeed !== initalCollection?.seed
+                                  ? 0
+                                  : initalCollection?.likes || 0,
+                            };
 
-                              // Update the entire collections array
-                              collectionStore$.collections.set(updatedCollections);
-                            }
-                          }}
-                        />
-                      </div>
-                    )}
+                            // Update the entire collections array
+                            collectionStore$.collections.set(updatedCollections);
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center group min-h-[28px]">
