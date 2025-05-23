@@ -17,6 +17,23 @@ interface SubHeaderProps {
   isHeroVisible?: boolean;
 }
 
+const ActionButton = ({
+  onClick,
+  children,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div
+      onClick={onClick}
+      className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200 select-none leading-none translate-y-0.5"
+    >
+      {children}
+    </div>
+  );
+};
+
 export const SubHeader = observer(function SubHeader({
   className,
   isHeroVisible = true,
@@ -112,21 +129,11 @@ export const SubHeader = observer(function SubHeader({
           <div className="hidden sm:flex items-center gap-3 relative">
             {/* Render apply button when activeItemId exists and not all searches are set */}
             {activeItemId && !allSearchesSet && (
-              <div
-                onClick={setActiveSearch}
-                className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
-              >
-                apply
-              </div>
+              <ActionButton onClick={setActiveSearch}>apply</ActionButton>
             )}
             {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
             {((activeItemId && allSearchesSet) || (!activeItemId && anySearchSet)) && (
-              <div
-                onClick={clearSearchParams}
-                className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
-              >
-                reset
-              </div>
+              <ActionButton onClick={clearSearchParams}>reset</ActionButton>
             )}
             <StyleSelect value={style} className="w-[190px] h-10" />
             <StepsInput value={steps} className="w-[110px] h-10" />
@@ -136,22 +143,10 @@ export const SubHeader = observer(function SubHeader({
           {/* Mobile view (≤ 450px) */}
           <div className="sm:hidden relative flex items-center" ref={menuRef}>
             {activeItemId && !allSearchesSet && isMenuOpen && (
-              <div
-                onClick={setActiveSearch}
-                className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
-              >
-                apply
-              </div>
+              <ActionButton onClick={setActiveSearch}>apply</ActionButton>
             )}
             {((activeItemId && allSearchesSet) || (!activeItemId && anySearchSet)) &&
-              isMenuOpen && (
-                <div
-                  onClick={clearSearchParams}
-                  className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
-                >
-                  reset
-                </div>
-              )}
+              isMenuOpen && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
             <Button
               variant="ghost"
               size="sm"
