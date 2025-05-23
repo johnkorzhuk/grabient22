@@ -65,7 +65,7 @@ const Layout = observer(function Layout() {
         ref={ref}
         className="w-full bg-background/90 backdrop-blur-sm py-3 border-b border-dashed border-border/70"
       >
-        <div className="mx-auto">
+        <div className="mx-auto font-poppins">
           Hero content that gets scrolled out of view and is never sticky
         </div>
       </div>

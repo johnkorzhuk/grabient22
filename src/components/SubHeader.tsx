@@ -114,7 +114,7 @@ export const SubHeader = observer(function SubHeader({
             {activeItemId && !allSearchesSet && (
               <div
                 onClick={setActiveSearch}
-                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
+                className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
               >
                 apply
               </div>
@@ -123,7 +123,7 @@ export const SubHeader = observer(function SubHeader({
             {((activeItemId && allSearchesSet) || (!activeItemId && anySearchSet)) && (
               <div
                 onClick={clearSearchParams}
-                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
+                className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
               >
                 reset
               </div>
@@ -138,7 +138,7 @@ export const SubHeader = observer(function SubHeader({
             {activeItemId && !allSearchesSet && isMenuOpen && (
               <div
                 onClick={setActiveSearch}
-                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
+                className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
               >
                 apply
               </div>
@@ -147,7 +147,7 @@ export const SubHeader = observer(function SubHeader({
               isMenuOpen && (
                 <div
                   onClick={clearSearchParams}
-                  className="text-sm text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
+                  className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
                 >
                   reset
                 </div>
@@ -170,7 +170,14 @@ export const SubHeader = observer(function SubHeader({
       {isMenuOpen && (
         <div
           ref={menuContentRef}
-          className="sm:hidden fixed left-0 right-0 top-16 z-50 w-full bg-background/90 backdrop-blur-sm border-b border-dashed border-border/70 shadow-md"
+          className={cn(
+            'sm:hidden fixed left-0 right-0 z-50 w-full bg-background/90 backdrop-blur-sm border-b border-dashed border-border/70 shadow-md transition-[top] duration-100 ease-in-out transform-gpu',
+            {
+              'top-16': !isHeroVisible,
+              'top-20': isHeroVisible,
+              'bg-background/100': isHeroVisible,
+            },
+          )}
         >
           <div className="px-5 py-3 flex items-center gap-2 w-full overflow-x-auto relative">
             <StyleSelect value={style} className="w-[50%] min-w-[160px] h-10" />

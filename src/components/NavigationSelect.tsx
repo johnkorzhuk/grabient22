@@ -45,7 +45,7 @@ export function NavigationSelect({ className, popoverClassName }: NavigationSele
           aria-label="Navigation"
           className={cn(
             'w-[150px] md:w-[170px] justify-between',
-            'font-medium text-base h-10 px-3',
+            'font-bold text-sm h-10 px-3',
             'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             className,
           )}
@@ -60,7 +60,7 @@ export function NavigationSelect({ className, popoverClassName }: NavigationSele
           popoverClassName,
         )}
       >
-        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-medium [&_[cmdk-item]]:text-base [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
+        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-bold [&_[cmdk-item]]:text-sm [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
           <CommandList>
             <CommandGroup>
               {NAVIGATION_ITEMS.map((item) => (

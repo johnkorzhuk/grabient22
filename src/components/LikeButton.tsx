@@ -6,7 +6,6 @@ import { useLikeSeedMutation } from '~/queries';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { useEffect, useState } from 'react';
 import { useLocation, useSearch } from '@tanstack/react-router';
-import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '~/validators';
 import { Route as CollectionRoute } from '~/routes/_layout/collection';
 import type { CollectionStyle } from '~/types';
 

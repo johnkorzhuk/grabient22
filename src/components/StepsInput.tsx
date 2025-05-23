@@ -285,7 +285,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
           className={cn(
             'flex items-center relative border border-input rounded-md',
             'bg-transparent hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 w-full',
-            'font-medium text-base h-10 shadow-sm',
+            'font-bold text-sm h-10 shadow-sm',
             className,
           )}
           onClick={(e) => {
@@ -317,7 +317,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
               value === 'auto' && !isFocused && !previewValue ? 'text-muted-foreground' : '',
               'disable-animation-on-theme-change',
               'border-0',
-              'font-medium text-base',
+              'font-bold text-sm',
               'py-2',
             )}
           />
@@ -352,7 +352,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
           }
         }}
       >
-        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-medium [&_[cmdk-item]]:text-base [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
+        <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-bold [&_[cmdk-item]]:text-sm [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
           <CommandList className="max-h-[240px] w-full">
             <CommandGroup className="w-full">
               {presets.map((preset) => (

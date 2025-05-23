@@ -129,7 +129,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
           return (
             <li
               key={collection._id}
-              className={cn('relative group', 'w-full')}
+              className={cn('relative group', 'w-full font-poppins')}
               onClick={() => {
                 if (itemActive) uiTempStore$.activeCollectionId.set(null);
                 else uiTempStore$.activeCollectionId.set(collection._id);
@@ -185,7 +185,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                     className="block px-2 py-1 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
                     aria-label={`View details for gradient ${index + 1}`}
                   >
-                    <span className="relative bottom-[1px] font-medium">Details</span>
+                    <span className="relative font-medium">Details</span>
                   </Link>
                 </div>
 
@@ -281,7 +281,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                     </span>
                   )}
                   <LikeButton
-                    className="relative -bottom-[1px] text-muted-foreground group-hover:text-foreground transition-colors duration-200"
+                    className="relative text-muted-foreground group-hover:text-foreground transition-colors duration-200"
                     seed={collection.seed}
                     isLiked={Boolean(likedSeeds?.[collection.seed])}
                     pending={false}
