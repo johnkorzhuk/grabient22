@@ -15,7 +15,6 @@ import { RGBTabs } from './RGBTabs';
 import { useItemInteraction } from '~/hooks/useTouchInteraction';
 import { collectionStore$ } from '~/stores/collection';
 import { serializeCoeffs } from '~/lib/serialization';
-import { useHover } from '@mantine/hooks';
 
 type CollectionsDisplayProps = {
   collections: AppCollection[];
@@ -53,32 +52,32 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   }, [initialCollections]);
 
   // Set preview values when an active item is selected, but only for 'auto' parameters
-  useEffect(() => {
-    if (activeItemId) {
-      // Find the active collection
-      const activeCollection = collections.find((collection) => collection._id === activeItemId);
+  // useEffect(() => {
+  //   if (activeItemId) {
+  //     // Find the active collection
+  //     const activeCollection = collections.find((collection) => collection._id === activeItemId);
 
-      if (activeCollection) {
-        // Only set preview values for parameters that are set to 'auto'
-        if (style === 'auto') {
-          uiTempStore$.previewStyle.set(activeCollection.style);
-        }
+  //     if (activeCollection) {
+  //       // Only set preview values for parameters that are set to 'auto'
+  //       if (style === 'auto') {
+  //         uiTempStore$.previewStyle.set(activeCollection.style);
+  //       }
 
-        if (steps === 'auto') {
-          uiTempStore$.previewSteps.set(activeCollection.steps);
-        }
+  //       if (steps === 'auto') {
+  //         uiTempStore$.previewSteps.set(activeCollection.steps);
+  //       }
 
-        if (angle === 'auto') {
-          uiTempStore$.previewAngle.set(activeCollection.angle);
-        }
-      }
-    } else {
-      // Clear preview values when no item is active
-      uiTempStore$.previewStyle.set(null);
-      uiTempStore$.previewSteps.set(null);
-      uiTempStore$.previewAngle.set(null);
-    }
-  }, [activeItemId, collections, style, steps, angle]);
+  //       if (angle === 'auto') {
+  //         uiTempStore$.previewAngle.set(activeCollection.angle);
+  //       }
+  //     }
+  //   } else {
+  //     // Clear preview values when no item is active
+  //     uiTempStore$.previewStyle.set(null);
+  //     uiTempStore$.previewSteps.set(null);
+  //     uiTempStore$.previewAngle.set(null);
+  //   }
+  // }, [activeItemId, collections, style, steps, angle]);
 
   return (
     <section className="h-full w-full relative mb-20">
@@ -90,7 +89,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
       >
         {collections.map((collection, index) => {
           const itemActive = isItemActive(collection._id);
-          const { hovered, ref } = useHover();
+          // const { hovered, ref } = useHover();
           const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
           let stepsToUse =
             previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : collection.steps;
@@ -102,9 +101,9 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 (typeof angle === 'number' ? parseFloat(angle.toFixed(1)) : collection.angle))
               : collection.angle;
 
-          stepsToUse = hovered && !itemActive && steps === 'auto' ? collection.steps : stepsToUse;
-          styleToUse = hovered && !itemActive && style === 'auto' ? collection.style : styleToUse;
-          angleToUse = hovered && !itemActive && angle === 'auto' ? collection.angle : angleToUse;
+          // stepsToUse = hovered && !itemActive && steps === 'auto' ? collection.steps : stepsToUse;
+          // styleToUse = hovered && !itemActive && style === 'auto' ? collection.style : styleToUse;
+          // angleToUse = hovered && !itemActive && angle === 'auto' ? collection.angle : angleToUse;
 
           // Use our custom gradient generator with the determined number of steps
           const numStops = stepsToUse === 'auto' ? collection.steps : stepsToUse;
@@ -134,7 +133,6 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
 
           return (
             <li
-              ref={ref}
               key={collection._id}
               className={cn('relative group', 'w-full')}
               onClick={() => toggleItem(collection._id)}

@@ -18,7 +18,13 @@ interface CopyButtonProps {
   onOpen?: () => void;
 }
 
-export function CopyButton({ cssString, svgString, copyClassName, isActive = false, onOpen }: CopyButtonProps) {
+export function CopyButton({
+  cssString,
+  svgString,
+  copyClassName,
+  isActive = false,
+  onOpen,
+}: CopyButtonProps) {
   const clipboard = useClipboard({ timeout: 1000 });
   const [copiedType, setCopiedType] = useState<'none' | 'css' | 'svg'>('none');
   const [open, setOpen] = useState(false);
@@ -104,12 +110,14 @@ export function CopyButton({ cssString, svgString, copyClassName, isActive = fal
 
       {/* Dropdown menu with transparent trigger */}
       <div className="absolute inset-0">
-        <DropdownMenu onOpenChange={(isOpen) => {
-          setOpen(isOpen);
-          if (isOpen && onOpen) {
-            onOpen();
-          }
-        }}>
+        <DropdownMenu
+          onOpenChange={(isOpen) => {
+            setOpen(isOpen);
+            if (isOpen && onOpen) {
+              onOpen();
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <button className="w-full h-full opacity-0 cursor-pointer" aria-label="Copy options">
               <span className="sr-only">Open copy options</span>
