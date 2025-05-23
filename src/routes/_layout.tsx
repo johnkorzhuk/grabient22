@@ -13,6 +13,7 @@ import {
 import { Route as SeedRoute } from './_layout/$seed';
 import { observer, use$ } from '@legendapp/state/react';
 import { SubHeader } from '~/components/SubHeader';
+import { useInViewport } from '@mantine/hooks';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -52,21 +53,26 @@ function RouteComponent() {
 
 const Layout = observer(function Layout() {
   const isDragging = use$(uiTempStore$.isDragging);
+  // Use the ref from useInViewport directly
+  const { ref, inViewport } = useInViewport();
 
   return (
     <div
       className={`h-screen scrollbar-stable ${isDragging ? 'overflow-hidden' : 'overflow-auto'}`}
     >
       <AppHeader className="sticky top-0 z-40 bg-background" />
-      <div className="w-full bg-background/90 backdrop-blur-sm py-3 border-b border-dashed border-border/70">
+      <div
+        ref={ref}
+        className="w-full bg-background/90 backdrop-blur-sm py-3 border-b border-dashed border-border/70"
+      >
         <div className="mx-auto">
           Hero content that gets scrolled out of view and is never sticky
         </div>
       </div>
 
-      <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" />
+      <SubHeader className="sticky top-17 lg:top-21 z-50" isHeroVisible={inViewport} />
 
-      <div className="pt-12">
+      <div className="pt-10">
         {/* <div className="hidden md:block">
     <Sidebar isSeedRoute={isSeedRoute} />
   </div> */}

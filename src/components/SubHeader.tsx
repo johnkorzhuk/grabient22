@@ -10,12 +10,17 @@ import { useState, useEffect, useRef } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
 import { collectionStore$ } from '~/stores/collection';
 import { uiTempStore$ } from '~/stores/ui';
+import { PrimaryDivider } from './Divider';
 
 interface SubHeaderProps {
   className?: string;
+  isHeroVisible?: boolean;
 }
 
-export const SubHeader = observer(function SubHeader({ className }: SubHeaderProps) {
+export const SubHeader = observer(function SubHeader({
+  className,
+  isHeroVisible = true,
+}: SubHeaderProps) {
   const search = useSearch({ from: '/_layout' });
   const searchList = [search.style, search.steps, search.angle];
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,7 +34,6 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
   const style = search.style === 'auto' ? (activeCollection?.style ?? search.style) : search.style;
   const steps = search.steps === 'auto' ? (activeCollection?.steps ?? search.steps) : search.steps;
   const angle = search.angle === 'auto' ? (activeCollection?.angle ?? search.angle) : search.angle;
-
   // Clear all search parameters
   const location = useLocation();
   const matches = useMatches();
@@ -90,13 +94,17 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
   }, []);
 
   return (
-    <header
-      className={cn(
-        'w-full bg-background/90 backdrop-blur-sm py-3 md:border-b md:border-dashed md:border-border/70',
-        className,
-      )}
-    >
-      <div className="mx-auto w-full px-5 lg:px-14">
+    <header className={cn('w-full bg-background/90 backdrop-blur-sm py-3 relative', className)}>
+      <PrimaryDivider />
+      <div
+        className={cn(
+          'mx-auto w-full px-5 lg:px-14 transition-[margin-top] duration-100 ease-in-out transform-gpu',
+          {
+            'mt-5': isHeroVisible,
+            'mt-0': !isHeroVisible,
+          },
+        )}
+      >
         <div className="flex items-center justify-between">
           <NavigationSelect />
 
@@ -106,7 +114,7 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
             {activeItemId && !allSearchesSet && (
               <div
                 onClick={setActiveSearch}
-                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2"
+                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
               >
                 apply
               </div>
@@ -115,7 +123,7 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
             {((activeItemId && allSearchesSet) || (!activeItemId && anySearchSet)) && (
               <div
                 onClick={clearSearchParams}
-                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2"
+                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200"
               >
                 reset
               </div>
@@ -130,7 +138,7 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
             {activeItemId && !allSearchesSet && isMenuOpen && (
               <div
                 onClick={setActiveSearch}
-                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5"
+                className="text-sm text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
               >
                 apply
               </div>
@@ -139,7 +147,7 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
               isMenuOpen && (
                 <div
                   onClick={clearSearchParams}
-                  className="text-sm text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5"
+                  className="text-sm text-muted-foreground hover:text-foreground cursor-pointer mr-4 -mt-0.5 transition-colors duration-200"
                 >
                   reset
                 </div>
@@ -162,7 +170,7 @@ export const SubHeader = observer(function SubHeader({ className }: SubHeaderPro
       {isMenuOpen && (
         <div
           ref={menuContentRef}
-          className="sm:hidden fixed left-0 right-0 top-[64px] z-50 w-full bg-background/90 backdrop-blur-sm border-b border-dashed border-border/70 shadow-md"
+          className="sm:hidden fixed left-0 right-0 top-16 z-50 w-full bg-background/90 backdrop-blur-sm border-b border-dashed border-border/70 shadow-md"
         >
           <div className="px-5 py-3 flex items-center gap-2 w-full overflow-x-auto relative">
             <StyleSelect value={style} className="w-[50%] min-w-[160px] h-10" />
