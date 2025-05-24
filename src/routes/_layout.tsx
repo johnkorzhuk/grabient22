@@ -14,6 +14,8 @@ import { Route as SeedRoute } from './_layout/$seed';
 import { observer, use$ } from '@legendapp/state/react';
 import { SubHeader } from '~/components/SubHeader';
 import useScrollThreshold from '~/hooks/useScrollThreshold';
+import { useLocation } from '@tanstack/react-router';
+import { ROUTES, type NavigationItemPath } from '~/components/NavigationSelect';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -45,6 +47,15 @@ export const Route = createFileRoute('/_layout')({
 });
 
 function RouteComponent() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const route = Object.values(ROUTES).find((route) => route.path === location.pathname);
+    if (route) {
+      uiTempStore$.navSelect.set(route.path);
+    }
+  }, [location.pathname]);
+
   // const matches = useMatches();
   // const isSeedRoute = matches.some((match) => match.routeId === SeedRoute.id);
 

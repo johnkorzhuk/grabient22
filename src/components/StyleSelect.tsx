@@ -1,5 +1,5 @@
 import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate, useMatches, useLocation } from '@tanstack/react-router';
+import { useNavigate, useMatches } from '@tanstack/react-router';
 import * as v from 'valibot';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
@@ -30,18 +30,13 @@ export const StyleSelect = observer(function StyleSelect({
   className,
   popoverClassName,
 }: StyleSelectProps) {
-  const location = useLocation();
   const matches = useMatches();
   const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+  const navSelect = use$(uiTempStore$.navSelect);
 
-  const from = isSeedRoute
-    ? '/$seed'
-    : location.pathname === '/random'
-      ? '/random'
-      : location.pathname === '/collection'
-        ? '/collection'
-        : '/';
-
+  // Determine the source route for navigation
+  // If we're on a seed route, use that, otherwise use the preferred navigation route
+  const from = isSeedRoute ? '/$seed' : navSelect === '/' ? '/' : navSelect;
   const navigate = useNavigate({ from });
   const previewValue = use$(uiTempStore$.previewStyle);
 

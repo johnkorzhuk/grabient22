@@ -1,5 +1,5 @@
 import { cn } from '~/lib/utils';
-import { NavigationSelect } from '~/components/NavigationSelect';
+import { NavigationSelect, ROUTES } from '~/components/NavigationSelect';
 import { ViewOptions } from './ViewOptions';
 import { useSearch, useNavigate, useLocation, useMatches } from '@tanstack/react-router';
 import { Menu, X } from 'lucide-react';
@@ -7,7 +7,7 @@ import { Button } from '~/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
 import { collectionStore$ } from '~/stores/collection';
-import { uiTempStore$ } from '~/stores/ui';
+import { INITIAL_UI_TEMP_STATE, uiTempStore$ } from '~/stores/ui';
 import { PrimaryDivider } from './Divider';
 
 interface SubHeaderProps {
@@ -53,14 +53,11 @@ export const SubHeader = observer(function SubHeader({
   const location = useLocation();
   const matches = useMatches();
   const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+  const navSelect = use$(uiTempStore$.navSelect);
 
-  const from = isSeedRoute
-    ? '/$seed'
-    : location.pathname === '/random'
-      ? '/random'
-      : location.pathname === '/collection'
-        ? '/collection'
-        : '/';
+  // Determine the source route for navigation
+  // If we're on a seed route, use that, otherwise use the preferred navigation route
+  const from = isSeedRoute ? '/$seed' : navSelect === '/' ? '/' : navSelect;
 
   const navigate = useNavigate({ from });
 
@@ -68,6 +65,11 @@ export const SubHeader = observer(function SubHeader({
     if (activeItemId) {
       uiTempStore$.activeCollectionId.set(null);
     }
+    uiTempStore$.preferredOptions.set({
+      style: 'auto',
+      steps: 'auto',
+      angle: 'auto',
+    });
     navigate({
       search: (prev) => ({
         ...prev,
@@ -80,6 +82,12 @@ export const SubHeader = observer(function SubHeader({
   };
 
   const setActiveSearch = () => {
+    uiTempStore$.preferredOptions.set({
+      style,
+      steps,
+      angle,
+    });
+
     navigate({
       search: (prev) => ({
         ...prev,
@@ -123,10 +131,9 @@ export const SubHeader = observer(function SubHeader({
         <div className="flex items-center justify-between">
           {/* Left side - only render NavigationSelect if current path is in ROUTES */}
           <div className="flex-1">
-            {(location.pathname === '/' ||
-              location.pathname === '/collection' ||
-              location.pathname === '/newest' ||
-              location.pathname === '/oldest') && <NavigationSelect />}
+            {Object.values(ROUTES).some((route) => route.path === location.pathname) && (
+              <NavigationSelect />
+            )}
           </div>
 
           {/* Desktop view (> 450px) */}

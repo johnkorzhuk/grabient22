@@ -9,6 +9,7 @@ import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
 import { convexQuery } from '@convex-dev/react-query';
 import { useQuery } from '@tanstack/react-query';
+import { uiTempStore$ } from '~/stores/ui';
 const PAGE_SIZE = 200 as const;
 // Define the route
 export const Route = createFileRoute('/_layout/collection')({

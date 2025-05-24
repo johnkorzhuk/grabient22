@@ -125,6 +125,7 @@ function GeneratePage() {
         angle,
         seed: '',
         likes: 0,
+        _creationTime: Date.now(),
       };
 
       // Generate and set the seed
@@ -159,6 +160,7 @@ function GeneratePage() {
           angle,
           seed: '',
           likes: 0,
+          _creationTime: Date.now(),
         };
 
         // Now serialize with the normalized coefficients
@@ -203,6 +205,7 @@ function GeneratePage() {
           angle,
           seed: '',
           likes: 0,
+          _creationTime: Date.now(),
         };
 
         // Now serialize with the normalized coefficients

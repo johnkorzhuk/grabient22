@@ -210,16 +210,6 @@ export const AppHeader = observer(function AppHeader({ className }: { className?
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          {/* <a
-            href="https://iquilezles.org/articles/palettes/"
-            target="_blank"
-            rel="noopener noreferrer external"
-            className="text-base text-muted-foreground hover:text-foreground flex items-center gap-2 font-medium transition-colors duration-200 sm:mr-6"
-            aria-label="Article on cosine gradients by Inigo Quilez (opens in a new window)"
-          >
-            About
-            <span className="sr-only">(opens in a new window)</span>
-          </a> */}
           <ThemeToggle />
           <div
             className={cn(

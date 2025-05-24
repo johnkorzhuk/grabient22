@@ -4,6 +4,7 @@ import { convexQuery } from '@convex-dev/react-query';
 import { api } from '../../../convex/_generated/api';
 import { CollectionsDisplay } from '~/components/CollectionsDisplay';
 import { useAuth } from '@clerk/tanstack-react-start';
+import { uiTempStore$ } from '~/stores/ui';
 
 export const Route = createFileRoute('/_layout/oldest')({
   component: OldestCollections,

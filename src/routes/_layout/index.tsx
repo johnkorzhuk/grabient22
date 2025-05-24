@@ -7,6 +7,7 @@ import seedData from '../../../seed.json';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { useAuth } from '@clerk/tanstack-react-start';
 import { collectionStore$ } from '~/stores/collection';
+import { uiTempStore$ } from '~/stores/ui';
 
 // // Process seed data by applying globals to coeffs and removing globals field
 // const processedSeedData = (seedData as unknown as Array<{

@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import { observable } from '@legendapp/state';
 import { collectionStyleValidator, stepsValidator, angleValidator } from '~/validators';
 import type { GlobalModifierType } from '~/types';
+import type { NavigationItemPath } from '~/components/NavigationSelect';
 
 export interface UITempStore {
   previewStyle: v.InferOutput<typeof collectionStyleValidator> | null;
@@ -19,6 +20,7 @@ export interface UITempStore {
   };
   isDragging: boolean;
   activeCollectionId: string | null;
+  navSelect: NavigationItemPath;
 }
 
 export const INITIAL_UI_TEMP_STATE: UITempStore = {
@@ -36,6 +38,7 @@ export const INITIAL_UI_TEMP_STATE: UITempStore = {
   },
   isDragging: false,
   activeCollectionId: null,
+  navSelect: '/',
 };
 
 export const uiTempStore$ = observable<UITempStore>(INITIAL_UI_TEMP_STATE);
