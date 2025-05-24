@@ -25,7 +25,7 @@ const ActionButton = ({
   return (
     <div
       onClick={onClick}
-      className="text-xs font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200 select-none leading-none translate-y-0.5"
+      className="text-sm font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200 select-none leading-none translate-y-0.5"
     >
       {children}
     </div>
@@ -138,7 +138,7 @@ export const SubHeader = observer(function SubHeader({
 
           {/* Desktop view (> 450px) */}
           <div className="hidden sm:flex items-center relative">
-            <div className="mr-2 relative -top-0.5">
+            <div className="mr-2 relative">
               {/* Render apply button when activeItemId exists and not all searches are set */}
               {activeItemId && !allSearchSet && (
                 <ActionButton onClick={setActiveSearch}>apply</ActionButton>
