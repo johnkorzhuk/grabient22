@@ -3,7 +3,7 @@ import * as v from 'valibot';
 import { observable } from '@legendapp/state';
 import { collectionStyleValidator, stepsValidator, angleValidator } from '~/validators';
 import type { GlobalModifierType } from '~/types';
-import type { NavigationItemPath } from '~/components/NavigationSelect';
+import type { NavigationItemPath } from '~/components/header/NavigationSelect';
 
 export interface UITempStore {
   previewStyle: v.InferOutput<typeof collectionStyleValidator> | null;

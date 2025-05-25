@@ -1,6 +1,6 @@
-import { StyleSelect } from './StyleSelect';
-import { StepsInput } from './StepsInput';
-import { AngleInput } from './AngleInput';
+import { StyleSelect } from './header/StyleSelect';
+import { StepsInput } from './header/StepsInput';
+import { AngleInput } from './header/AngleInput';
 import { useSearch, useLocation, useNavigate } from '@tanstack/react-router';
 import { RefreshCw } from 'lucide-react';
 import { PaletteCategories } from '~/lib/generation';

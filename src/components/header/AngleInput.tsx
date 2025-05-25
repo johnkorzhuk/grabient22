@@ -7,24 +7,23 @@ import { cn } from '~/lib/utils';
 import { useRef, useState, useEffect } from 'react';
 import { usePrevious } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
-import { DEFAULT_STEPS, MAX_STEPS, MIN_STEPS } from '~/validators';
+import { MIN_ANGLE, MAX_ANGLE, angleWithAutoValidator, DEFAULT_ANGLE } from '~/validators';
+import * as v from 'valibot';
 
-const presets = [3, 5, 8, 13, 21, 34];
-const step = 1;
+const presets = [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0];
+const step = 1.0; // Increment/decrement step for arrow keys
 
-type StepsInputProps = {
-  value: number | 'auto';
-  className?: string;
-  popoverClassName?: string;
-};
-
-export const StepsInput = observer(function NumberInputWithPresets({
+export const AngleInput = observer(function AngleInput({
   value,
   className,
   popoverClassName,
-}: StepsInputProps) {
+}: {
+  value: v.InferOutput<typeof angleWithAutoValidator>;
+  className?: string;
+  popoverClassName?: string;
+}) {
   const matches = useMatches();
-  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+  const isSeedRoute = matches.some((match) => match.routeId === '/$seed/');
   const navSelect = use$(uiTempStore$.navSelect);
 
   // Determine the source route for navigation
@@ -33,7 +32,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
 
   const navigate = useNavigate({ from });
   const previousValue = usePrevious(value);
-  const previewValue = use$(uiTempStore$.previewSteps);
+  const previewAngle = use$(uiTempStore$.previewAngle);
 
   // UI state
   const [open, setOpen] = useState(false);
@@ -42,9 +41,9 @@ export const StepsInput = observer(function NumberInputWithPresets({
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
-  // Validate number value
-  const validateNumber = (num: number): boolean => {
-    return num >= MIN_STEPS && num <= MAX_STEPS;
+  // Validate angle value
+  const validateAngle = (num: number): boolean => {
+    return num >= MIN_ANGLE && num <= MAX_ANGLE;
   };
 
   // Effect to handle open state based on focus
@@ -58,28 +57,24 @@ export const StepsInput = observer(function NumberInputWithPresets({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
-    if (newValue === '' || newValue === 'auto' || newValue === 'steps') {
+    if (newValue === '' || newValue === 'auto' || newValue === 'angle') {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: 'auto',
+          angle: 'auto',
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set('auto');
+      uiTempStore$.preferredOptions.angle.set('auto');
     } else {
       const numValue = Number.parseFloat(newValue);
       if (!isNaN(numValue)) {
         // Only apply if valid
-        if (validateNumber(numValue)) {
-          navigate({
-            search: (prev) => ({
-              ...prev,
-              steps: numValue,
-            }),
-            replace: true,
-          });
-          uiTempStore$.preferredOptions.steps.set(numValue);
+        if (validateAngle(numValue)) {
+          // Format to exactly one decimal place
+          const formattedAngle = parseFloat(numValue.toFixed(1));
+          uiTempStore$.previewAngle.set(formattedAngle);
+          uiTempStore$.preferredOptions.angle.set(formattedAngle);
         }
       }
     }
@@ -108,11 +103,11 @@ export const StepsInput = observer(function NumberInputWithPresets({
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: 'auto',
+          angle: 'auto',
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set('auto');
+      uiTempStore$.preferredOptions.angle.set('auto');
       return;
     }
 
@@ -124,23 +119,26 @@ export const StepsInput = observer(function NumberInputWithPresets({
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: previousValue || 'auto',
+          angle: previousValue || 'auto',
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set(previousValue || 'auto');
-    } else if (!validateNumber(numValue)) {
+      uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
+    } else if (!validateAngle(numValue)) {
       // Number out of range, revert to previous value
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: previousValue || 'auto',
+          angle: previousValue || 'auto',
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set(previousValue || 'auto');
+      uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
     }
     // If valid, no need to change anything
+
+    // Clear the preview
+    uiTempStore$.previewAngle.set(null);
   };
 
   // Handle input key down
@@ -149,20 +147,24 @@ export const StepsInput = observer(function NumberInputWithPresets({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
 
-      let currentValue = value === 'auto' ? DEFAULT_STEPS : Number(value);
-      if (isNaN(currentValue)) currentValue = DEFAULT_STEPS;
+      let currentValue = value === 'auto' ? DEFAULT_ANGLE : Number(value);
+      if (isNaN(currentValue)) currentValue = DEFAULT_ANGLE;
 
       const newValue = e.key === 'ArrowUp' ? currentValue + step : currentValue - step;
 
       // Only apply if valid
-      if (validateNumber(newValue)) {
+      if (validateAngle(newValue)) {
+        // Format to one decimal place
+        const formattedAngle = parseFloat(newValue.toFixed(1));
+
         navigate({
           search: (prev) => ({
             ...prev,
-            steps: newValue,
+            angle: formattedAngle,
           }),
           replace: true,
         });
+        uiTempStore$.preferredOptions.angle.set(formattedAngle);
       }
     }
 
@@ -170,29 +172,43 @@ export const StepsInput = observer(function NumberInputWithPresets({
     if (e.key === 'Enter') {
       e.preventDefault();
 
-      // If we're in auto mode, set the value to the defaultNumber
+      // If we're in auto mode, set the value to the defaultAngle
       if (value === 'auto') {
         navigate({
           search: (prev) => ({
             ...prev,
-            steps: DEFAULT_STEPS,
+            angle: DEFAULT_ANGLE,
           }),
           replace: true,
         });
+        uiTempStore$.preferredOptions.angle.set(DEFAULT_ANGLE);
       } else {
         // For non-auto, validate current input
         const currentInputValue = inputRef.current?.value || '';
         const numValue = Number.parseFloat(currentInputValue);
 
-        if (isNaN(numValue) || !validateNumber(numValue)) {
+        if (isNaN(numValue) || !validateAngle(numValue)) {
           // Invalid value, revert to previous value
           navigate({
             search: (prev) => ({
               ...prev,
-              steps: previousValue || 'auto',
+              angle: previousValue || 'auto',
             }),
             replace: true,
           });
+          uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
+        } else {
+          // Format to one decimal place
+          const formattedAngle = parseFloat(numValue.toFixed(1));
+
+          navigate({
+            search: (prev) => ({
+              ...prev,
+              angle: formattedAngle,
+            }),
+            replace: true,
+          });
+          uiTempStore$.preferredOptions.angle.set(formattedAngle);
         }
       }
 
@@ -206,11 +222,11 @@ export const StepsInput = observer(function NumberInputWithPresets({
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: previousValue || 'auto',
+          angle: previousValue || 'auto',
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set(previousValue || 'auto');
+      uiTempStore$.preferredOptions.angle.set(previousValue || 'auto');
       inputRef.current?.blur();
     }
   };
@@ -225,28 +241,28 @@ export const StepsInput = observer(function NumberInputWithPresets({
   };
 
   // Handle value selection from dropdown
-  const handleValueClick = (clickedValue: number) => {
-    // If clicking the already selected value, toggle to auto
-    if (clickedValue === value) {
+  const handleValueClick = (clickedAngle: number) => {
+    // If clicking the already selected angle, toggle to auto
+    if (clickedAngle === value) {
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: 'auto',
+          angle: 'auto',
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set('auto');
-      uiTempStore$.previewSteps.set(null);
+      uiTempStore$.preferredOptions.angle.set('auto');
+      uiTempStore$.previewAngle.set(null);
     } else {
       // Otherwise set to the new value
       navigate({
         search: (prev) => ({
           ...prev,
-          steps: clickedValue,
+          angle: clickedAngle,
         }),
         replace: true,
       });
-      uiTempStore$.preferredOptions.steps.set(clickedValue);
+      uiTempStore$.preferredOptions.angle.set(clickedAngle);
     }
   };
 
@@ -254,16 +270,17 @@ export const StepsInput = observer(function NumberInputWithPresets({
   const displayValue = () => {
     // Handle undefined or null value
     if (value === undefined || value === null) {
-      return DEFAULT_STEPS.toString();
+      return isFocused ? DEFAULT_ANGLE.toString() : DEFAULT_ANGLE.toString() + '°';
     }
 
     if (isFocused) {
-      return value === 'auto' ? DEFAULT_STEPS.toString() : value.toString();
+      // Don't show degree symbol when focused for easier editing
+      return value === 'auto' ? DEFAULT_ANGLE.toString() : value.toString();
     } else {
       if (value === 'auto') {
-        return previewValue !== null ? previewValue.toString() : 'steps';
+        return previewAngle !== null ? previewAngle.toString() + '°' : 'angle';
       }
-      return value.toString();
+      return value.toString() + '°';
     }
   };
 
@@ -278,6 +295,10 @@ export const StepsInput = observer(function NumberInputWithPresets({
     >
       <PopoverTrigger asChild>
         <div
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label="Angle input"
           className={cn(
             'flex items-center relative border border-input rounded-md',
             'bg-transparent hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 w-full',
@@ -290,10 +311,6 @@ export const StepsInput = observer(function NumberInputWithPresets({
               e.preventDefault();
             }
           }}
-          role="combobox"
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-label="Steps input"
         >
           <input
             ref={inputRef}
@@ -303,16 +320,15 @@ export const StepsInput = observer(function NumberInputWithPresets({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
-            aria-label="Steps value"
+            aria-label="Angle value"
             className={cn(
               'h-full px-3 rounded-md w-full',
               'bg-transparent',
               'focus-visible:outline-none',
               'disabled:cursor-not-allowed disabled:opacity-50',
-              'pr-10',
-              value === 'auto' && !isFocused && !previewValue ? 'text-muted-foreground' : '',
-              'disable-animation-on-theme-change',
-              'border-0',
+              'pr-10', // Space for the dropdown icon
+              value === 'auto' && !isFocused && !previewAngle ? 'text-muted-foreground' : '',
+              'border-0', // Remove input border since we're using a parent border
               'font-bold text-sm',
               'py-2',
             )}
@@ -321,12 +337,12 @@ export const StepsInput = observer(function NumberInputWithPresets({
             ref={buttonRef}
             className={cn(
               'absolute inset-y-0 right-0 flex items-center justify-center',
-              'text-muted-foreground hover:text-foreground cursor-pointer',
-              'focus:outline-none',
-              'ml-2 pr-3',
+              'text-muted-foreground hover:text-foreground',
+              'focus:outline-none cursor-pointer',
+              'ml-2 pr-3', // Match StyleSelect's icon spacing
             )}
             onClick={handleButtonClick}
-            aria-label="Toggle steps presets"
+            aria-label="Toggle angle presets"
           >
             <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
           </div>
@@ -343,13 +359,13 @@ export const StepsInput = observer(function NumberInputWithPresets({
         alignOffset={0}
         avoidCollisions={false}
         onMouseLeave={() => {
-          if (previewValue !== null) {
-            uiTempStore$.previewSteps.set(null);
+          if (previewAngle !== null) {
+            uiTempStore$.previewAngle.set(null);
           }
         }}
       >
         <Command className="border-0 rounded-md w-full bg-transparent [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-1.5 [&_[cmdk-item]]:font-bold [&_[cmdk-item]]:text-sm [&_[cmdk-item][data-selected=true]]:bg-background [&_[cmdk-item][data-selected=true]]:text-foreground [&_[cmdk-item]]:hover:bg-background [&_[cmdk-item]]:hover:text-foreground">
-          <CommandList className="max-h-[240px] w-full">
+          <CommandList className="w-full" style={{ height: 'auto' }}>
             <CommandGroup className="w-full">
               {presets.map((preset) => (
                 <CommandItem
@@ -357,11 +373,11 @@ export const StepsInput = observer(function NumberInputWithPresets({
                   value={preset.toString()}
                   onSelect={() => handleValueClick(preset)}
                   onMouseEnter={() => {
-                    uiTempStore$.previewSteps.set(preset);
+                    uiTempStore$.previewAngle.set(preset);
                   }}
                   className="cursor-pointer relative w-full h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
-                  {preset.toString()}
+                  {`${preset}°`}
                   <CheckIcon
                     className={cn(
                       'mr-2 h-3 w-3 absolute right-0',

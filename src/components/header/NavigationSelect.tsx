@@ -86,7 +86,7 @@ export const NavigationSelect = observer(function NavigationSelect({
           aria-label="Navigation"
           className={cn(
             'w-[150px] md:w-[170px] justify-between',
-            'font-bold text-sm h-10 px-3',
+            'font-bold text-sm h-8.5 lg:h-10 px-3',
             'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             className,
           )}

@@ -1,10 +1,10 @@
-import { ThemeToggle } from './theme/ThemeToggle';
+import { ThemeToggle } from '../theme/ThemeToggle';
 import { Link, useLocation, useNavigate, useSearch } from '@tanstack/react-router';
 import { StyleSelect } from './StyleSelect';
 import { StepsInput } from './StepsInput';
 import { AngleInput } from './AngleInput';
 import { useMatches } from '@tanstack/react-router';
-import { Route as SeedRoute } from '~/routes/_layout/$seed';
+import { Route as SeedRoute } from '~/routes/$seed/index';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Button } from '~/components/ui/button';
 import { Settings2, RefreshCw } from 'lucide-react';
@@ -17,7 +17,7 @@ import {
   useAuth,
 } from '@clerk/tanstack-react-start';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
-import { Badge } from './ui/badge';
+import { Badge } from '../ui/badge';
 import { cn } from '~/lib/utils';
 import { PALETTE_CATEGORIES, getCategoryDisplayName } from '~/validators';
 import type { PaletteCategoryKey } from '~/validators';
@@ -25,10 +25,10 @@ import { DEFAULT_CATEGORIES, paletteStore$, REGENERATE_PALETTES_EVENT } from '~/
 import { observer, use$ } from '@legendapp/state/react';
 import { PaletteCategories } from '~/lib/generation';
 import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
-import { PaletteCategoryDisplay } from './PaletteCategoryDisplay';
+import { PaletteCategoryDisplay } from '../PaletteCategoryDisplay';
 import { useMounted } from '@mantine/hooks';
 import { uiTempStore$ } from '~/stores/ui';
-import { GrabientLogo } from './GrabientLogo';
+import { GrabientLogo } from '../GrabientLogo';
 
 // Category badge component for selection
 function CategoryBadge({

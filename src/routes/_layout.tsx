@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, stripSearchParams } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import * as v from 'valibot';
-import { AppHeader } from '~/components/AppHeader';
+import { AppHeader } from '~/components/header/AppHeader';
 import { ScrollToTop } from '~/components/ScrollToTop';
 import { FooterSection } from '~/components/FooterSection';
 import { uiTempStore$ } from '~/stores/ui';
@@ -10,12 +10,12 @@ import {
   stepsWithAutoValidator,
   angleWithAutoValidator,
 } from '~/validators';
-import { Route as SeedRoute } from './_layout/$seed';
+import { Route as SeedRoute } from './$seed';
 import { observer, use$ } from '@legendapp/state/react';
-import { SubHeader } from '~/components/SubHeader';
+import { SubHeader } from '~/components/header/PrimarySubHeader';
 import useScrollThreshold from '~/hooks/useScrollThreshold';
 import { useLocation } from '@tanstack/react-router';
-import { ROUTES, type NavigationItemPath } from '~/components/NavigationSelect';
+import { ROUTES, type NavigationItemPath } from '~/components/header/NavigationSelect';
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -55,9 +55,6 @@ function RouteComponent() {
       uiTempStore$.navSelect.set(route.path);
     }
   }, [location.pathname]);
-
-  // const matches = useMatches();
-  // const isSeedRoute = matches.some((match) => match.routeId === SeedRoute.id);
 
   return <Layout />;
 }

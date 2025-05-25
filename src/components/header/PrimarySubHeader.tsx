@@ -1,5 +1,5 @@
 import { cn } from '~/lib/utils';
-import { NavigationSelect, ROUTES } from '~/components/NavigationSelect';
+import { NavigationSelect, ROUTES } from '~/components/header/NavigationSelect';
 import { ViewOptions } from './ViewOptions';
 import { useSearch, useNavigate, useLocation, useMatches } from '@tanstack/react-router';
 import { Menu, X } from 'lucide-react';
@@ -8,35 +8,23 @@ import { useState, useEffect, useRef } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
 import { collectionStore$ } from '~/stores/collection';
 import { INITIAL_UI_TEMP_STATE, uiTempStore$ } from '~/stores/ui';
-import { PrimaryDivider } from './Divider';
+import { PrimaryDivider } from '../Divider';
+import { ActionButton } from './ActionButton';
 
 interface SubHeaderProps {
   className?: string;
   isHeroVisible?: boolean;
 }
 
-const ActionButton = ({
-  onClick,
-  children,
-}: {
-  onClick: () => void;
-  children: React.ReactNode;
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className="text-sm font-poppins text-muted-foreground hover:text-foreground cursor-pointer ml-2 sm:mr-2 transition-colors duration-200 select-none leading-none translate-y-0.5"
-    >
-      {children}
-    </div>
-  );
-};
-
 export const SubHeader = observer(function SubHeader({
   className,
   isHeroVisible = true,
 }: SubHeaderProps) {
-  const search = useSearch({ from: '/_layout' });
+  const matches = useMatches();
+  const isSeedRoute = matches.some(
+    (match) => match.routeId === '/$seed/' || match.routeId === '/$seed/full',
+  );
+  const search = useSearch({ from: isSeedRoute ? '/$seed' : '/_layout' });
   const searchList = [search.style, search.steps, search.angle];
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -49,12 +37,8 @@ export const SubHeader = observer(function SubHeader({
   const style = search.style === 'auto' ? (activeCollection?.style ?? search.style) : search.style;
   const steps = search.steps === 'auto' ? (activeCollection?.steps ?? search.steps) : search.steps;
   const angle = search.angle === 'auto' ? (activeCollection?.angle ?? search.angle) : search.angle;
-  // Clear all search parameters
   const location = useLocation();
-  const matches = useMatches();
-  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
   const navSelect = use$(uiTempStore$.navSelect);
-
   // Determine the source route for navigation
   // If we're on a seed route, use that, otherwise use the preferred navigation route
   const from = isSeedRoute ? '/$seed' : navSelect === '/' ? '/' : navSelect;
@@ -116,6 +100,11 @@ export const SubHeader = observer(function SubHeader({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const renderResetButton = Boolean(
+    (activeItemId && allSearchSet) || (!activeItemId && anySearchSet),
+  );
+  const renderApplyButton = Boolean(activeItemId && !allSearchSet);
+
   return (
     <header className={cn('w-full bg-background/90 backdrop-blur-sm py-3 relative', className)}>
       <PrimaryDivider />
@@ -123,7 +112,8 @@ export const SubHeader = observer(function SubHeader({
         className={cn(
           'mx-auto w-full px-5 lg:px-14 transition-[margin-top] duration-100 ease-in-out transform-gpu',
           {
-            'mt-5': isHeroVisible,
+            'mt-3': isHeroVisible,
+            'lg:mt-5': isHeroVisible,
             'mt-0': !isHeroVisible,
           },
         )}
@@ -140,13 +130,9 @@ export const SubHeader = observer(function SubHeader({
           <div className="hidden sm:flex items-center relative">
             <div className="mr-2 relative">
               {/* Render apply button when activeItemId exists and not all searches are set */}
-              {activeItemId && !allSearchSet && (
-                <ActionButton onClick={setActiveSearch}>apply</ActionButton>
-              )}
+              {renderApplyButton && <ActionButton onClick={setActiveSearch}>apply</ActionButton>}
               {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
-              {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) && (
-                <ActionButton onClick={clearSearchParams}>reset</ActionButton>
-              )}
+              {renderResetButton && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
             </div>
             <ViewOptions style={style} steps={steps} angle={angle} variant="fixed" />
           </div>
@@ -154,18 +140,19 @@ export const SubHeader = observer(function SubHeader({
           {/* Mobile view (≤ 450px) */}
           <div className="sm:hidden relative flex items-center" ref={menuRef}>
             <div className="mr-4 relative -top-0.5">
-              {activeItemId && !allSearchSet && isMenuOpen && (
+              {renderApplyButton && isMenuOpen && (
                 <ActionButton onClick={setActiveSearch}>apply</ActionButton>
               )}
-              {((activeItemId && allSearchSet) || (!activeItemId && anySearchSet)) &&
-                isMenuOpen && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
+              {renderResetButton && isMenuOpen && (
+                <ActionButton onClick={clearSearchParams}>reset</ActionButton>
+              )}
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleMenu}
               aria-label="Toggle menu"
-              className="h-10 w-10 cursor-pointer hover:bg-background hover:border-input"
+              className="h-8 w-8 cursor-pointer hover:bg-background hover:border-input"
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -179,10 +166,12 @@ export const SubHeader = observer(function SubHeader({
         <div
           ref={menuContentRef}
           className={cn(
-            'sm:hidden fixed left-0 right-0 z-50 w-full bg-background/90 backdrop-blur-sm border-b border-dashed border-border/70 shadow-md transition-[top] duration-100 ease-in-out transform-gpu',
+            'sm:hidden fixed left-0 right-0 z-50 w-full bg-background/90 backdrop-blur-sm border-b border-dashed border-border/70 shadow-md transition-[top] duration-200 ease-in-out transform-gpu',
             {
-              'top-16': !isHeroVisible,
-              'top-20': isHeroVisible,
+              'top-14': !isHeroVisible,
+              'top-16': isHeroVisible,
+              'lg:top-16': !isHeroVisible,
+              'lg:top-20': isHeroVisible,
               'bg-background/100': isHeroVisible,
             },
           )}

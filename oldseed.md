@@ -1,3 +1,5 @@
+```tsx
+
 import { createFileRoute, useLocation, useParams, useSearch } from '@tanstack/react-router';
 import type { AppCollection, CosineCoeffs, GlobalModifierType } from '~/types';
 import { useRef, useState, useEffect } from 'react';

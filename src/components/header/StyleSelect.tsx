@@ -31,7 +31,7 @@ export const StyleSelect = observer(function StyleSelect({
   popoverClassName,
 }: StyleSelectProps) {
   const matches = useMatches();
-  const isSeedRoute = matches.some((match) => match.routeId === '/_layout/$seed');
+  const isSeedRoute = matches.some((match) => match.routeId === '/$seed/');
   const navSelect = use$(uiTempStore$.navSelect);
 
   // Determine the source route for navigation

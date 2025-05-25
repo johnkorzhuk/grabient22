@@ -24,18 +24,18 @@ export const ViewOptions: React.FC<ViewOptionsProps> = ({
   if (variant === 'fixed') {
     return (
       <div className={cn('flex items-center gap-3', className)}>
-        <StyleSelect value={style} className="w-[170px] lg:w-[190px] h-10" />
-        <StepsInput value={steps} className="w-[90px] lg:w-[110px] h-10" />
-        <AngleInput value={angle} className="w-[90px] lg:w-[110px] h-10" />
+        <StyleSelect value={style} className="w-[175px] lg:w-[190px] h-8.5 lg:h-10" />
+        <StepsInput value={steps} className="w-[90px] lg:w-[110px] h-8.5 lg:h-10" />
+        <AngleInput value={angle} className="w-[90px] lg:w-[110px] h-8.5 lg:h-10" />
       </div>
     );
   }
 
   return (
     <div className={cn('flex items-center gap-2 w-full overflow-x-auto', className)}>
-      <StyleSelect value={style} className="w-[50%] min-w-[160px] h-10" />
-      <StepsInput value={steps} className="w-[25%] min-w-[80px] h-10" />
-      <AngleInput value={angle} className="w-[25%] min-w-[80px] h-10" />
+      <StyleSelect value={style} className="w-[50%] min-w-[160px] h-8.5 lg:h-10" />
+      <StepsInput value={steps} className="w-[25%] min-w-[80px] h-8.5 lg:h-10" />
+      <AngleInput value={angle} className="w-[25%] min-w-[80px] h-8.5 lg:h-10" />
     </div>
   );
 };
