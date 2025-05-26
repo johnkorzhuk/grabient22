@@ -214,7 +214,7 @@ export const AppHeader = observer(function AppHeader({ className }: { className?
           <div
             className={cn(
               'flex items-center justify-end',
-              isSignedIn ? 'w-[48px] sm:w-[72px]' : 'w-[72px]',
+              isSignedIn ? 'w-[48px] sm:w-[72px]' : 'w-[80px]',
             )}
           >
             {mounted ? (
@@ -229,9 +229,9 @@ export const AppHeader = observer(function AppHeader({ className }: { className?
                     <Button
                       size="default"
                       variant="outline"
-                      className="cursor-pointer disable-animation-on-theme-change relative right-[2px]"
+                      className="font-poppins cursor-pointer disable-animation-on-theme-change relative right-[2px]"
                     >
-                      Sign in
+                      Sign In
                     </Button>
                   </SignInButton>
                 </SignedOut>

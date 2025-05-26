@@ -101,17 +101,16 @@ export function RGBChannelSliders({
   ];
 
   return (
-    <div className={cn('flex flex-col', 'gap-2')}>
-      {/* <h3 className={cn('text-lg font-medium')}>RGB Channel Controls</h3> */}
-
-      <div className={cn('flex flex-col', 'gap-2')}>
+    <div className={cn('flex flex-col', 'gap-4')}>
+      <div className={cn('flex flex-col', 'gap-4')}>
         {channels.map((channel, channelIndex) => (
           <div
             key={channel.key}
             className={cn(
-              'flex flex-col relative',
+              'flex flex-col relative group',
               'rounded',
-              'gap-3 p-1.5 pl-3 -ml-3', // use 2xl spacing for all
+              'gap-2 p-2 border border-input shadow-sm bg-background/80 backdrop-blur-sm',
+              'transition-colors duration-200'
             )}
           >
             <div
@@ -119,9 +118,9 @@ export function RGBChannelSliders({
               style={{ backgroundColor: channel.color }}
             />
 
-            <div className={cn('flex justify-between')}>
-              <label className={cn('text-sm font-medium')}>{channel.name}</label>
-              <span className={cn('text-sm', 'text-gray-500')}>
+            <div className={cn('flex justify-between pl-2')}>
+              <label className={cn('font-medium text-muted-foreground group-hover:text-foreground transition-colors duration-200')}>{channel.name}</label>
+              <span className={cn('text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-200')}>
                 {channel.value.toFixed(COEFF_PRECISION)}
               </span>
             </div>

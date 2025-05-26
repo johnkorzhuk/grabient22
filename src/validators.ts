@@ -44,6 +44,11 @@ export const MAX_ANGLE = 360;
 export const angleValidator = v.pipe(v.number(), v.minValue(MIN_ANGLE), v.maxValue(MAX_ANGLE));
 export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator]);
 
+export const DEFAULT_MODIFIER = 'global' as const;
+export const MODIFIERS = ['global', 'exposure', 'contrast', 'frequency', 'phase'] as const;
+
+export const modifierValidator = v.union(MODIFIERS.map((t) => v.literal(t)));
+
 export const PI = Math.PI;
 /**
  * Very important constant here.

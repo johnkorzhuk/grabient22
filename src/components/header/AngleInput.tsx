@@ -254,7 +254,7 @@ export const AngleInput = observer(function AngleInput({
       uiTempStore$.preferredOptions.angle.set('auto');
       uiTempStore$.previewAngle.set(null);
     } else {
-      // Otherwise set to the new value
+      // Otherwise set to the new angle
       navigate({
         search: (prev) => ({
           ...prev,
@@ -264,6 +264,9 @@ export const AngleInput = observer(function AngleInput({
       });
       uiTempStore$.preferredOptions.angle.set(clickedAngle);
     }
+    
+    // Close the popover after selection
+    setOpen(false);
   };
 
   // Determine the display value

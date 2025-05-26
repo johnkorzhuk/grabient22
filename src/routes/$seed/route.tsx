@@ -38,10 +38,6 @@ import { Button } from '~/components/ui/button';
 import type { NavigationItemPath } from '~/components/header/NavigationSelect';
 import { cn } from '~/lib/utils';
 import { ActionButton } from '~/components/header/ActionButton';
-import { convexQuery } from '@convex-dev/react-query';
-import { api } from '../../../convex/_generated/api';
-
-import { fetchClerkAuth } from '~/utils/auth';
 
 export const searchValidatorSchema = v.object({
   style: v.optional(

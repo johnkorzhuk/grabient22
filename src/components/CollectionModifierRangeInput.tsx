@@ -59,7 +59,7 @@ const CollectionModifierRangeInput = React.forwardRef<
           {/* Filled track - only show when not at middle */}
           {!valueIsMiddle && (
             <div
-              className="absolute h-full bg-gray-700 dark:bg-gray-300"
+              className="absolute h-full text-muted-foreground group-hover:text-foreground transition-colors duration-200 bg-current"
               style={{
                 left: `${barStart}%`,
                 width: `${barWidth}%`,
@@ -81,8 +81,8 @@ const CollectionModifierRangeInput = React.forwardRef<
 
         <SliderPrimitive.Thumb
           className={cn(
-            'block h-[8px] w-[8px] rounded-full border border-gray-700 dark:border-gray-300 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-            valueIsMiddle ? 'bg-background' : 'bg-gray-700 dark:bg-gray-300',
+            'block h-[8px] w-[8px] rounded-full border text-muted-foreground group-hover:text-foreground transition-colors duration-200 border-current shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+            valueIsMiddle ? 'bg-background' : 'bg-current',
           )}
         />
       </SliderPrimitive.Root>

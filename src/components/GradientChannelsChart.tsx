@@ -141,8 +141,8 @@ const Chart = lazy(() =>
       const margins = {
         left: isLargeScreen ? 20 : 0,
         right: isLargeScreen ? 0 : 20,
-        top: 32,
-        bottom: 16,
+        top: isLargeScreen ? 28 : 16,
+        bottom: isLargeScreen ? 16 : 4,
       };
 
       // If we have valid dimensions from useElementSize, use them directly
@@ -249,7 +249,7 @@ const GraphBG: React.FC<{
             return (
               <div
                 key={`line-${value}`}
-                className="absolute inset-x-0 w-full"
+                className="absolute inset-x-0 w-full dark:opacity-60"
                 style={{
                   top: `${topPercent}%`,
                   height: '1px',
@@ -272,7 +272,7 @@ const GraphBG: React.FC<{
             return (
               <div
                 key={`label-${value}`}
-                className="absolute right-4 bg-background/20 backdrop-blur-sm text-muted-foreground text-xs font-mono px-1.5 py-0.5 rounded-sm border border-border select-none z-10 whitespace-nowrap inline-flex justify-center items-center"
+                className="disable-animation-on-theme-change absolute font-semibold right-4 bg-background/20 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors duration-200 text-xs font-mono px-1.5 py-0.5 rounded-sm border border-border select-none z-10 whitespace-nowrap inline-flex justify-center items-center"
                 style={{
                   top: `${topPercent}%`,
                   transform: 'translateY(-50%)',
@@ -339,7 +339,7 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
     >
       {/* GraphBG provides the background grid and labels */}
       <GraphBG
-        className="absolute inset-0 w-full h-full pt-8 lg:pl-5 pr-5 lg:pr-0 pb-4"
+        className="absolute inset-0 w-full h-full pt-4 lg:pt-7 lg:pl-5 pr-5 lg:pr-0 pb-1 lg:pb-4"
         showLabels={showLabels}
         showGrid={showGrid}
       />

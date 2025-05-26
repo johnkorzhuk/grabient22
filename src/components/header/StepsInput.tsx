@@ -248,6 +248,9 @@ export const StepsInput = observer(function NumberInputWithPresets({
       });
       uiTempStore$.preferredOptions.steps.set(clickedValue);
     }
+    
+    // Close the popover after selection
+    setOpen(false);
   };
 
   // Determine the display value

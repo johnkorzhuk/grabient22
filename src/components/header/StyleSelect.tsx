@@ -1,6 +1,7 @@
 import { observer, use$ } from '@legendapp/state/react';
 import { useNavigate, useMatches } from '@tanstack/react-router';
 import * as v from 'valibot';
+import { useState } from 'react';
 import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Button } from '~/components/ui/button';
@@ -33,6 +34,7 @@ export const StyleSelect = observer(function StyleSelect({
   const matches = useMatches();
   const isSeedRoute = matches.some((match) => match.routeId === '/$seed/');
   const navSelect = use$(uiTempStore$.navSelect);
+  const [open, setOpen] = useState(false);
 
   // Determine the source route for navigation
   // If we're on a seed route, use that, otherwise use the preferred navigation route
@@ -63,10 +65,13 @@ export const StyleSelect = observer(function StyleSelect({
       });
       uiTempStore$.preferredOptions.style.set(clickedStyle);
     }
+    
+    // Close the popover after selection
+    setOpen(false);
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

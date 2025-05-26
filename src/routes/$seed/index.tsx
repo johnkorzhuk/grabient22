@@ -4,12 +4,13 @@ import {
   useRouteContext,
   useLocation,
   useNavigate,
+  stripSearchParams,
 } from '@tanstack/react-router';
 import { cn } from '~/lib/utils';
 import { CollectionSeedDisplay } from '~/components/CollectionSeedDisplay';
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
-import type { AppCollection } from '~/types';
+import type { AppCollection, CosineCoeffs } from '~/types';
 import { deserializeCoeffs, serializeCoeffs } from '~/lib/serialization';
 import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
@@ -17,9 +18,27 @@ import { useAuth } from '@clerk/tanstack-react-start';
 import { api } from '../../../convex/_generated/api';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
+import * as v from 'valibot';
+import { DEFAULT_MODIFIER, MODIFIERS, modifierValidator } from '~/validators';
+import { ModifierSelect, type SelectModifier } from '~/components/ModifierSelect';
+import { ModifierSlider } from '~/components/ModifierSlider';
+import { rgbChannelConfig } from '~/constants/colors';
+import React, { useState, useEffect } from 'react';
+
+export const SEARCH_DEFAULTS = {
+  mod: DEFAULT_MODIFIER,
+};
+
+export const searchValidatorSchema = v.object({
+  mod: v.optional(v.fallback(modifierValidator, SEARCH_DEFAULTS.mod), SEARCH_DEFAULTS.mod),
+});
 
 export const Route = createFileRoute('/$seed/')({
   component: RouteComponent,
+  validateSearch: searchValidatorSchema,
+  search: {
+    middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
+  },
 });
 
 function RouteComponent() {
@@ -97,7 +116,7 @@ const PageContent = observer(function PageContent() {
           <div
             className={cn(
               'group relative lg:pr-5 pt-5',
-              'h-[calc(100%-320px)] lg:h-full w-full lg:flex-1',
+              'h-[calc(100%-280px)] lg:h-full w-full lg:flex-1',
               'font-poppins',
             )}
             onClick={() => {
@@ -131,14 +150,14 @@ const PageContent = observer(function PageContent() {
           </div>
 
           {/* Bottom container (right on lg+) */}
-          <div className="h-[320px] lg:h-full lg:w-[454px] xl:w-[520px] 2xl:w-[600px] w-full">
+          <div className="h-[280px] lg:h-full lg:w-[454px] w-full">
             {/* Bottom/Right container with nested split for md-sm */}
             <div className="h-full w-full flex flex-col">
               {/* Main content area */}
               <div className="flex-1 w-full flex flex-row">
                 {/* Left panel for sm-md - contains graph */}
                 <GradientChannelsChart
-                  className="h-full flex-1 md:border-r hidden sm:block lg:hidden"
+                  className="h-full flex-1 hidden sm:block lg:hidden"
                   processedCoeffs={processedCoeffs}
                   steps={numStops}
                   showLabels={true}
@@ -148,7 +167,9 @@ const PageContent = observer(function PageContent() {
                 {/* Right panel content - visible only on xs-md screens */}
                 <div className="h-full w-full md:w-[420px] flex-1 lg:hidden">
                   {/* Content for the right panel */}
-                  <div className="pt-3 sm:pl-5 h-full w-full">Right panel content</div>
+                  <div className="pt-1 sm:pl-5 h-full w-full">
+                    <ModifierSelectWrapper />
+                  </div>
                 </div>
 
                 {/* Graph for lg+ screens */}
@@ -162,9 +183,11 @@ const PageContent = observer(function PageContent() {
               </div>
 
               {/* Large screen container at bottom with full width - only visible on lg screens */}
-              <div className="hidden lg:block lg:h-[320px] w-full border border-gray-300 rounded-md mt-4">
+              <div className="hidden lg:block lg:h-[280px] w-full rounded-md mt-4">
                 {/* Right panel content moved to bottom container on lg+ */}
-                <div className="h-full w-full">Right panel content</div>
+                <div className="h-full w-full">
+                  <ModifierSelectWrapper className="pl-5" />
+                </div>
               </div>
             </div>
           </div>
@@ -173,3 +196,230 @@ const PageContent = observer(function PageContent() {
     </div>
   );
 });
+
+function ModifierSelectWrapper({ className }: { className?: string }) {
+  const { mod } = Route.useSearch();
+  const { seed } = useParams({
+    from: '/$seed/',
+  });
+  const { seedData } = useRouteContext({
+    from: '/$seed',
+  });
+  const navigate = Route.useNavigate();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  // Use type assertion to handle 'global' which is in MODIFIERS but not in GlobalModifierType
+
+  // Get preview values from store
+  const previewSeed = use$(uiTempStore$.previewSeed);
+  const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
+  const renderPreviewGlobals = Boolean(previewData);
+  const globals = seedData.collection.globals;
+  const seedCollection = seedData.collection;
+
+  // Toggle active modifier
+  const toggleActiveModifier = (modifier: SelectModifier) => {
+    // If clicking the already active modifier, deactivate it
+    if (modifier === mod) {
+      navigate({
+        search: { mod: DEFAULT_MODIFIER },
+        replace: true,
+      });
+    } else {
+      navigate({
+        search: { mod: modifier as any },
+        replace: true,
+      });
+    }
+  };
+
+  // Handle global modifier changes
+  const handleGlobalChange = (modifierIndex: number, value: number) => {
+    // Create a copy of the globals array
+    const newGlobals = [...(renderPreviewGlobals ? previewData!.globals : globals)] as [
+      number,
+      number,
+      number,
+      number,
+    ];
+    newGlobals[modifierIndex] = value;
+
+    // Update the preview data
+    const newPreviewData = {
+      coeffs: previewData ? previewData.coeffs : seedCollection.coeffs,
+      globals: newGlobals,
+    };
+
+    // Set the preview seed
+    const newSeed = serializeCoeffs(newPreviewData.coeffs, newPreviewData.globals);
+    uiTempStore$.previewSeed.set(newSeed);
+  };
+
+  // Handle RGB channel changes
+  const handleRGBChannelChange = (modifierIndex: number, channelIndex: number, value: number) => {
+    // Create a copy of the coefficients
+    const newCoeffs = JSON.parse(
+      JSON.stringify(previewData ? previewData.coeffs : seedCollection.coeffs),
+    ) as CosineCoeffs;
+
+    // Update the specific channel value
+    newCoeffs[modifierIndex][channelIndex] = value;
+
+    // Update the preview data
+    const newPreviewData = {
+      coeffs: newCoeffs,
+      globals: renderPreviewGlobals ? previewData!.globals : globals,
+    };
+
+    // Set the preview seed
+    const newSeed = serializeCoeffs(newPreviewData.coeffs, newPreviewData.globals);
+    uiTempStore$.previewSeed.set(newSeed);
+  };
+
+  // Handle drag end - update URL
+  const handleDragEnd = () => {
+    if (!previewSeed) return;
+
+    // Update the URL with the new seed
+    navigate({
+      params: { seed: previewSeed },
+      search: (search) => search,
+      replace: true,
+    });
+
+    // Clear the preview seed
+    uiTempStore$.previewSeed.set(null);
+
+    // Update active collection ID if needed
+    if (seed !== previewSeed) {
+      uiTempStore$.activeCollectionId.set(previewSeed);
+    }
+  };
+
+  // Helper function to get min/max values for a modifier
+  const getModifierRange = (modifier: string) => {
+    switch (modifier) {
+      case 'exposure':
+        return { min: -1, max: 1 };
+      case 'phase':
+        return { min: -Math.PI, max: Math.PI };
+      default: // contrast, frequency
+        return { min: 0, max: 2 };
+    }
+  };
+
+  // Get the modifier index from its name
+  const getModifierIndex = (modifier: string) => {
+    const index = MODIFIERS.findIndex((m) => m === modifier);
+    if (index === -1) return -1;
+    return index - 1; // Subtract 1 to account for 'global'
+  };
+
+  // RGB channel configuration
+  const rgbChannels = [
+    { key: 'red', label: 'Red', color: rgbChannelConfig.red.color },
+    { key: 'green', label: 'Green', color: rgbChannelConfig.green.color },
+    { key: 'blue', label: 'Blue', color: rgbChannelConfig.blue.color },
+  ];
+
+  return (
+    <div className={cn('w-full h-full flex flex-col', className)} ref={containerRef}>
+      <div className="flex justify-end lg:justify-start mb-4">
+        <ModifierSelect value={mod} className="w-[200px]" popoverClassName="w-[200px]" />
+      </div>
+
+      <div className="flex flex-col flex-1 relative -bottom-3 lg:-bottom-0">
+        {mod !== 'global' ? (
+          // Show active modifier + RGB channels
+          <div className="h-full flex flex-col justify-between">
+            {/* Active global modifier */}
+            {(() => {
+              const modifierIndex = getModifierIndex(mod);
+              if (modifierIndex === -1) return null;
+
+              const modifierValue = renderPreviewGlobals
+                ? previewData!.globals[modifierIndex]
+                : globals[modifierIndex];
+
+              const { min, max } = getModifierRange(mod);
+
+              return (
+                <div className="flex-1 flex flex-col justify-center">
+                  <ModifierSlider
+                    key={mod}
+                    label={mod}
+                    value={modifierValue}
+                    min={min}
+                    max={max}
+                    onValueChange={(value) => handleGlobalChange(modifierIndex, value)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => toggleActiveModifier(mod)}
+                    isActive={true}
+                    className="h-full"
+                  />
+                </div>
+              );
+            })()}
+
+            {/* RGB Channels for the active modifier */}
+            {(() => {
+              const modifierIndex = getModifierIndex(mod);
+              if (modifierIndex === -1) return null;
+
+              const coeffs = previewData ? previewData.coeffs : seedCollection.coeffs;
+
+              return rgbChannels.map((channel, channelIndex) => {
+                const channelValue = coeffs[modifierIndex][channelIndex];
+
+                return (
+                  <div key={channel.key} className="flex-1 flex flex-col justify-center">
+                    <ModifierSlider
+                      label={channel.label}
+                      value={channelValue}
+                      min={-Math.PI}
+                      max={Math.PI}
+                      colorBar={channel.color}
+                      onValueChange={(value) =>
+                        handleRGBChannelChange(modifierIndex, channelIndex, value)
+                      }
+                      onDragEnd={handleDragEnd}
+                      className="h-full"
+                    />
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        ) : (
+          // Show all global modifiers
+          <div className="h-full flex flex-col justify-between">
+            {MODIFIERS.filter((modifier) => modifier !== 'global').map((modifier) => {
+              const modifierIndex = getModifierIndex(modifier);
+              if (modifierIndex === -1) return null;
+
+              const modifierValue = renderPreviewGlobals
+                ? previewData!.globals[modifierIndex]
+                : globals[modifierIndex];
+
+              const { min, max } = getModifierRange(modifier);
+
+              return (
+                <div key={modifier} className="flex-1 flex flex-col justify-center">
+                  <ModifierSlider
+                    label={modifier}
+                    value={modifierValue}
+                    min={min}
+                    max={max}
+                    onValueChange={(value) => handleGlobalChange(modifierIndex, value)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => toggleActiveModifier(modifier)}
+                    className="h-full"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
