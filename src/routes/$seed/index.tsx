@@ -183,7 +183,7 @@ const PageContent = observer(function PageContent() {
               </div>
 
               {/* Large screen container at bottom with full width - only visible on lg screens */}
-              <div className="hidden lg:block lg:h-[280px] w-full rounded-md mt-4">
+              <div className="hidden lg:block lg:h-[300px] w-full rounded-md mt-4">
                 {/* Right panel content moved to bottom container on lg+ */}
                 <div className="h-full w-full">
                   <ModifierSelectWrapper className="pl-5" />
@@ -234,13 +234,11 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
 
   // Handle global modifier changes
   const handleGlobalChange = (modifierIndex: number, value: number) => {
-    // Create a copy of the globals array
-    const newGlobals = [...(renderPreviewGlobals ? previewData!.globals : globals)] as [
-      number,
-      number,
-      number,
-      number,
-    ];
+    // Get the current globals
+    const currentGlobals = renderPreviewGlobals ? previewData!.globals : globals;
+
+    // Create a new globals array with the updated value
+    const newGlobals = [...currentGlobals] as [number, number, number, number];
     newGlobals[modifierIndex] = value;
 
     // Update the preview data
@@ -256,13 +254,15 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
 
   // Handle RGB channel changes
   const handleRGBChannelChange = (modifierIndex: number, channelIndex: number, value: number) => {
-    // Create a copy of the coefficients
-    const newCoeffs = JSON.parse(
-      JSON.stringify(previewData ? previewData.coeffs : seedCollection.coeffs),
-    ) as CosineCoeffs;
+    // Get the current coefficients
+    const currentCoeffs = previewData ? previewData.coeffs : seedCollection.coeffs;
 
-    // Update the specific channel value
-    newCoeffs[modifierIndex][channelIndex] = value;
+    // Create a new coefficients array with the updated value
+    const newCoeffs = currentCoeffs.map((modifierCoeffs, mIdx) =>
+      mIdx === modifierIndex
+        ? modifierCoeffs.map((coeff, cIdx) => (cIdx === channelIndex ? value : coeff))
+        : [...modifierCoeffs],
+    ) as CosineCoeffs;
 
     // Update the preview data
     const newPreviewData = {
@@ -327,7 +327,7 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
         <ModifierSelect value={mod} className="w-[200px]" popoverClassName="w-[200px]" />
       </div>
 
-      <div className="flex flex-col flex-1 relative -bottom-3 lg:-bottom-0">
+      <div className="flex flex-col flex-1 relative -bottom-3 lg:-bottom-2">
         {mod !== 'global' ? (
           // Show active modifier + RGB channels
           <div className="h-full flex flex-col justify-between">
