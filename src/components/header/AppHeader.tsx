@@ -204,7 +204,7 @@ export const AppHeader = observer(function AppHeader({ className }: { className?
               };
             }}
           >
-            <div className="md:w-[200px] relative">
+            <div className="md:w-[200px] relative flex items-center">
               <GrabientLogo />
             </div>
           </Link>
