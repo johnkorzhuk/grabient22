@@ -94,13 +94,11 @@ export function CopyButton({
         <div className={cn('p-1.5 rounded-full transition-colors cursor-pointer hover:text-foreground group', copyClassName)}>
           {clipboard.copied ? (
             <Check
-              className="w-5 h-5 text-muted-foreground transition-colors duration-200 group-hover:text-foreground focus:text-foreground active:text-foreground"
+              className="w-5 h-5 text-foreground"
             />
           ) : (
             <Copy
-              className={cn(
-                'w-5 h-5 text-muted-foreground transition-colors duration-200 group-hover:text-foreground focus:text-foreground active:text-foreground',
-              )}
+              className="w-5 h-5 text-foreground"
             />
           )}
         </div>

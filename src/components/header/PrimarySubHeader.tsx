@@ -21,9 +21,7 @@ export const SubHeader = observer(function SubHeader({
   isHeroVisible = true,
 }: SubHeaderProps) {
   const matches = useMatches();
-  const isSeedRoute = matches.some(
-    (match) => match.routeId === '/$seed/' || match.routeId === '/$seed/full',
-  );
+  const isSeedRoute = matches.some((match) => match.routeId === '/$seed/');
   const search = useSearch({ from: isSeedRoute ? '/$seed' : '/_layout' });
   const searchList = [search.style, search.steps, search.angle];
   const [isMenuOpen, setIsMenuOpen] = useState(false);

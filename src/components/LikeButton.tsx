@@ -27,9 +27,7 @@ export function LikeButton({
   collectionAngle?: number;
 }) {
   const matches = useMatches();
-  const isSeedRoute = matches.some(
-    (match) => match.routeId === '/$seed/' || match.routeId === '/$seed/full',
-  );
+  const isSeedRoute = matches.some((match) => match.routeId === '/$seed/');
   const location = useLocation();
   const likedRoute = location.pathname === CollectionRoute.fullPath;
   const isLiked = likedRoute ? true : _isLiked;

@@ -194,7 +194,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <SquarePen className="w-5 h-5 text-muted-foreground transition-colors duration-200 group-hover:text-foreground focus:text-foreground active:text-foreground" />
+                              <SquarePen className="w-5 h-5 text-foreground" />
                             </TooltipTrigger>
                             <TooltipContent>
                               <span>Edit Palette</span>
