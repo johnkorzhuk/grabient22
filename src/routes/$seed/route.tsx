@@ -183,7 +183,7 @@ const Layout = observer(function Layout() {
               ...preferredOptions,
             };
           }}
-          className="absolute top-3 lg:top-6 left-5 lg:left-14 z-10"
+          className="absolute top-4 lg:top-8 left-5 lg:left-14 z-10"
         >
           <Button
             variant="outline"
@@ -199,7 +199,7 @@ const Layout = observer(function Layout() {
           </Button>
         </Link>
 
-        <div className="flex items-center gap-3 absolute top-3 lg:top-6 right-5 lg:right-14 z-10">
+        <div className="flex items-center gap-3 absolute top-4 lg:top-8 right-5 lg:right-14 z-10">
           <div className="mr-2 relative">
             {renderResetButton && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
           </div>

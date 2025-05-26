@@ -40,10 +40,10 @@ export const GrabientLogo = observer(function GrabientLogo({
 
   // Check if we have a valid collection with coefficients
   const hasValidCollection = collection && collection.coeffs && collection.globals;
-  
+
   // Use collection colors or fallback to animation
   const useCollectionColors = Boolean(hasValidCollection);
-  
+
   // Only create animation refs if we're using animation
   const gradientRef = useRef<SVGLinearGradientElement | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -72,63 +72,63 @@ export const GrabientLogo = observer(function GrabientLogo({
     easedProgress,
   );
 
-    // Helper function to smoothly interpolate coefficients
-    function interpolateCoeffs(
-      coeffsA: CosineCoeffs,
-      coeffsB: CosineCoeffs,
-      progress: number,
-    ): CosineCoeffs {
-      return coeffsA.map((vector, i) =>
-        vector.map((value, j) => {
-          // Special handling for phase values (index 3)
-          if (i === 3) {
-            const targetValue = coeffsB[i][j];
-            // Handle phase wrapping for continuous rotation
-            let delta = targetValue - value;
+  // Helper function to smoothly interpolate coefficients
+  function interpolateCoeffs(
+    coeffsA: CosineCoeffs,
+    coeffsB: CosineCoeffs,
+    progress: number,
+  ): CosineCoeffs {
+    return coeffsA.map((vector, i) =>
+      vector.map((value, j) => {
+        // Special handling for phase values (index 3)
+        if (i === 3) {
+          const targetValue = coeffsB[i][j];
+          // Handle phase wrapping for continuous rotation
+          let delta = targetValue - value;
 
-            // Normalize to find the shortest angular path
-            if (Math.abs(delta) > Math.PI) {
-              delta = delta > 0 ? delta - TAU : delta + TAU;
-            }
-
-            return value + delta * progress;
+          // Normalize to find the shortest angular path
+          if (Math.abs(delta) > Math.PI) {
+            delta = delta > 0 ? delta - TAU : delta + TAU;
           }
 
-          // Linear interpolation for other values
-          return value + (coeffsB[i][j] - value) * progress;
-        }),
-      ) as CosineCoeffs;
+          return value + delta * progress;
+        }
+
+        // Linear interpolation for other values
+        return value + (coeffsB[i][j] - value) * progress;
+      }),
+    ) as CosineCoeffs;
+  }
+
+  // Generate gradient colors using the cosine formula
+  function generateColor(t: number, coeffs: CosineCoeffs): [number, number, number] {
+    const color: [number, number, number] = [0, 0, 0];
+
+    for (let i = 0; i < 3; i++) {
+      // a + b * cos(2π(c*t + d))
+      color[i] = coeffs[0][i] + coeffs[1][i] * Math.cos(TAU * (coeffs[2][i] * t + coeffs[3][i]));
+      // Clamp values between 0 and 1
+      color[i] = Math.max(0, Math.min(1, color[i]));
     }
 
-    // Generate gradient colors using the cosine formula
-    function generateColor(t: number, coeffs: CosineCoeffs): [number, number, number] {
-      const color: [number, number, number] = [0, 0, 0];
+    return color;
+  }
 
-      for (let i = 0; i < 3; i++) {
-        // a + b * cos(2π(c*t + d))
-        color[i] = coeffs[0][i] + coeffs[1][i] * Math.cos(TAU * (coeffs[2][i] * t + coeffs[3][i]));
-        // Clamp values between 0 and 1
-        color[i] = Math.max(0, Math.min(1, color[i]));
-      }
-
-      return color;
-    }
-
-    // Convert RGB array to hex color string
-    function rgbToHex(rgb: [number, number, number]): string {
-      return `#${rgb
-        .map((x) =>
-          Math.round(x * 255)
-            .toString(16)
-            .padStart(2, '0'),
-        )
-        .join('')}`;
-    }
+  // Convert RGB array to hex color string
+  function rgbToHex(rgb: [number, number, number]): string {
+    return `#${rgb
+      .map((x) =>
+        Math.round(x * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')}`;
+  }
 
   // Generate the initial colors
   const startColor = generateColor(0, initialCoeffs);
   const endColor = generateColor(1, initialCoeffs);
-  
+
   const initialColors = {
     startColor: rgbToHex(startColor),
     endColor: rgbToHex(endColor),
@@ -137,7 +137,7 @@ export const GrabientLogo = observer(function GrabientLogo({
   useEffect(() => {
     // Even when using collection colors, we'll keep the animation running
     // This ensures a smooth transition if we switch back to animated mode
-    
+
     const TAU = Math.PI * 2;
     let lastTimestamp = 0;
 
@@ -279,47 +279,48 @@ export const GrabientLogo = observer(function GrabientLogo({
             <stop offset="0%" stopColor={initialColors.startColor} suppressHydrationWarning />
             <stop offset="100%" stopColor={initialColors.endColor} suppressHydrationWarning />
           </linearGradient>
-          
+
           <linearGradient id="collectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            {gradientColors.length > 0 && gradientColors.map((color, index) => (
-              <stop 
-                key={index} 
-                offset={`${(index / (gradientColors.length - 1)) * 100}%`} 
-                stopColor={`rgb(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)})`} 
-              />
-            ))}
+            {gradientColors.length > 0 &&
+              gradientColors.map((color, index) => (
+                <stop
+                  key={index}
+                  offset={`${(index / (gradientColors.length - 1)) * 100}%`}
+                  stopColor={`rgb(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)})`}
+                />
+              ))}
           </linearGradient>
         </defs>
         <g fill="none" fillRule="evenodd">
           <path d={LOGO_PATH} fill="currentColor" />
-          
+
           {/* Render both rectangles with opacity transitions */}
-          <rect 
-            x="93" 
-            y="43" 
-            width="34" 
-            height="7" 
-            fill="url(#collectionGradient)" 
+          <rect
+            x="93"
+            y="43"
+            width="34"
+            height="7"
+            fill="url(#collectionGradient)"
             style={{
               opacity: useCollectionColors ? 1 : 0,
               transition: 'opacity 0.5s ease-in-out',
               position: 'relative',
-              zIndex: useCollectionColors ? 2 : 1
+              zIndex: useCollectionColors ? 2 : 1,
             }}
           />
-          
+
           {/* Animated gradient is always running in the background */}
-          <rect 
-            x="93" 
-            y="43" 
-            width="34" 
-            height="7" 
-            fill="url(#animatedGradient)" 
+          <rect
+            x="93"
+            y="43"
+            width="34"
+            height="7"
+            fill="url(#animatedGradient)"
             style={{
               opacity: useCollectionColors ? 0 : 1,
               transition: 'opacity 0.5s ease-in-out',
               position: 'relative',
-              zIndex: useCollectionColors ? 1 : 2
+              zIndex: useCollectionColors ? 1 : 2,
             }}
           />
         </g>
