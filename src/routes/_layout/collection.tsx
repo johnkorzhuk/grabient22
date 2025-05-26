@@ -24,6 +24,7 @@ function CollectionRoute() {
     results: likedSeeds,
     status,
     loadMore,
+    isLoading: collectionsLoading,
   } = usePaginatedQuery(
     api.likes.getAllLikedSeedsByUser,
     userId ? { userId } : 'skip',
@@ -100,6 +101,11 @@ function CollectionRoute() {
   // }
 
   return (
-    <CollectionsDisplay collections={collections} likedSeeds={data} likesPending={likesPending} />
+    <CollectionsDisplay 
+      collections={collections} 
+      likedSeeds={data} 
+      likesPending={likesPending} 
+      isLoading={collectionsLoading || isLoading} 
+    />
   );
 }
