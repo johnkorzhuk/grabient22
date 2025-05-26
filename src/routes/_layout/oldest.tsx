@@ -25,7 +25,7 @@ function OldestCollections() {
 
   const { userId } = useAuth();
 
-  const { data: likedSeeds } = useQuery({
+  const { data: likedSeeds, isPending: likesPending } = useQuery({
     ...convexQuery(api.likes.checkUserLikedSeeds, {
       userId,
       seeds: collections.map((c) => c.seed),
@@ -34,5 +34,11 @@ function OldestCollections() {
     enabled: Boolean(userId),
   });
 
-  return <CollectionsDisplay collections={collections} likedSeeds={likedSeeds} />;
+  return (
+    <CollectionsDisplay
+      collections={collections}
+      likedSeeds={likedSeeds}
+      likesPending={likesPending}
+    />
+  );
 }

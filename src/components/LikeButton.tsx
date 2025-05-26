@@ -5,7 +5,7 @@ import { SignInButton, useAuth } from '@clerk/tanstack-react-start';
 import { useLikeSeedMutation } from '~/queries';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { useEffect, useState } from 'react';
-import { useLocation, useSearch } from '@tanstack/react-router';
+import { useLocation, useMatches, useSearch } from '@tanstack/react-router';
 import { Route as CollectionRoute } from '~/routes/_layout/collection';
 import type { CollectionStyle } from '~/types';
 
@@ -26,12 +26,16 @@ export function LikeButton({
   collectionStyle?: CollectionStyle;
   collectionAngle?: number;
 }) {
+  const matches = useMatches();
+  const isSeedRoute = matches.some(
+    (match) => match.routeId === '/$seed/' || match.routeId === '/$seed/full',
+  );
   const location = useLocation();
   const likedRoute = location.pathname === CollectionRoute.fullPath;
   const isLiked = likedRoute ? true : _isLiked;
   const { userId } = useAuth();
   const mounted = useMounted();
-  const search = useSearch({ from: '/_layout' });
+  const search = useSearch({ from: isSeedRoute ? '/$seed' : '/_layout' });
   const steps = search.steps === 'auto' ? collectionSteps : search.steps;
   const angle = search.angle === 'auto' ? collectionAngle : search.angle;
   const style = search.style === 'auto' ? collectionStyle : search.style;
@@ -41,7 +45,6 @@ export function LikeButton({
 
   // Debounced mutation to avoid spamming
   const debouncedMutate = useDebouncedCallback((liked: boolean) => {
-    console.log(steps, angle, style);
     if (!userId || liked === isLiked) return;
     likedSeedMutation.mutate({
       userId,

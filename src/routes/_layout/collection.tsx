@@ -63,7 +63,7 @@ function CollectionRoute() {
         .filter(Boolean) as AppCollection[])
     : [];
 
-  const { data } = useQuery({
+  const { data, isPending: likesPending } = useQuery({
     ...convexQuery(api.likes.checkUserLikedSeeds, {
       userId,
       seeds: collections.map((c) => c.seed),
@@ -99,5 +99,7 @@ function CollectionRoute() {
   //   );
   // }
 
-  return <CollectionsDisplay collections={collections} likedSeeds={data} />;
+  return (
+    <CollectionsDisplay collections={collections} likedSeeds={data} likesPending={likesPending} />
+  );
 }

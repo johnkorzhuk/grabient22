@@ -7,8 +7,6 @@ import type {
 import * as v from 'valibot';
 import type { Doc } from '../convex/_generated/dataModel';
 
-export type CollectionPreset = v.InferOutput<typeof collectionSchema>;
-
 // Cosine gradient types
 export type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
 export type CosineGlobals = v.InferOutput<typeof globalsSchema>;

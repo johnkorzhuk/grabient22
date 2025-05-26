@@ -13,7 +13,7 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import { rgbChannelConfig } from '../constants/colors';
-import type { CollectionPreset, CosineCoeffs } from '../types';
+import type { AppCollection, CosineCoeffs } from '../types';
 import { applyGlobals, cosineGradient } from '../lib/cosineGradient';
 import { uiTempStore$ } from '../stores/ui';
 
@@ -32,8 +32,8 @@ interface SortableTabProps {
 }
 
 interface RGBTabsProps {
-  collection: CollectionPreset;
-  onOrderChange: (coeffs: CollectionPreset['coeffs']) => void;
+  collection: AppCollection;
+  onOrderChange: (coeffs: AppCollection['coeffs'], collection: AppCollection) => void;
 }
 
 function SortableTab({ id, color, label }: SortableTabProps) {
@@ -145,7 +145,7 @@ export function RGBTabs({ collection, onOrderChange }: RGBTabsProps) {
   const handleDragEnd = (event: DragEndEvent) => {
     // Set isDragging back to false when drag ends
     uiTempStore$.isDragging.set(false);
-    
+
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -171,7 +171,7 @@ export function RGBTabs({ collection, onOrderChange }: RGBTabsProps) {
       }) as CosineCoeffs;
 
       // Notify parent of the change
-      onOrderChange(newCoeffs);
+      onOrderChange(newCoeffs, collection);
     }
   };
 

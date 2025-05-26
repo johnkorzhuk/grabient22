@@ -48,7 +48,7 @@ function Home() {
 
   const { userId } = useAuth();
 
-  const { data: likedSeeds } = useQuery({
+  const { data: likedSeeds, isPending: likesPending } = useQuery({
     ...convexQuery(api.likes.checkUserLikedSeeds, {
       userId,
       seeds: collections.map((c) => c.seed),
@@ -57,5 +57,11 @@ function Home() {
     enabled: Boolean(userId),
   });
 
-  return <CollectionsDisplay collections={collections} likedSeeds={likedSeeds} />;
+  return (
+    <CollectionsDisplay
+      collections={collections}
+      likedSeeds={likedSeeds}
+      likesPending={likesPending}
+    />
+  );
 }

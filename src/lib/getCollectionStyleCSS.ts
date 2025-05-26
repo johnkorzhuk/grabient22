@@ -54,15 +54,16 @@ export function getCollectionStyleCSS(
         // Create a gradient with a solid color segment for the active index
         if (activeIndex === 0) {
           // If first segment is active
+          // Start with the active segment with hard stops
+          gradientString += ` ${getRgbaString(processedColors[0])} 0%,`;
           gradientString += ` ${getRgbaString(processedColors[0])} ${activeEndPos}%,`;
+          gradientString += ` ${getRgbaString(processedColors[0], inactiveAlpha)} ${activeEndPos}%`;
 
           // Continue with the rest of the gradient with reduced alpha
           for (let i = 1; i < processedColors.length; i++) {
             const position = ((i / (processedColors.length - 1)) * 100).toFixed(3);
+            gradientString += `,`;
             gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${position}%`;
-            if (i < processedColors.length - 1) {
-              gradientString += ',';
-            }
           }
         } else if (activeIndex === processedColors.length - 1) {
           // If last segment is active
@@ -174,15 +175,16 @@ export function getCollectionStyleCSS(
         // Create a gradient with a solid color segment for the active index
         if (activeIndex === 0) {
           // If first segment is active
+          // Start with the active segment with hard stops
+          gradientString += ` ${getRgbaString(processedColors[0])} 0deg,`;
           gradientString += ` ${getRgbaString(processedColors[0])} ${activeEndAngle}deg,`;
+          gradientString += ` ${getRgbaString(processedColors[0], inactiveAlpha)} ${activeEndAngle}deg`;
 
           // Continue with the rest of the gradient with reduced alpha
           for (let i = 1; i < processedColors.length; i++) {
             const anglePos = ((i / (processedColors.length - 1)) * 360).toFixed(3);
+            gradientString += `,`;
             gradientString += ` ${getRgbaString(processedColors[i], inactiveAlpha)} ${anglePos}deg`;
-            if (i < processedColors.length - 1) {
-              gradientString += ',';
-            }
           }
         } else if (activeIndex === processedColors.length - 1) {
           // If last segment is active

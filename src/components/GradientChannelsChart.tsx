@@ -1,30 +1,23 @@
 import { ChartContainer } from '~/components/ui/chart';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts';
+import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { coeffsSchema } from '~/validators';
 import * as v from 'valibot';
 import { lazy, Suspense } from 'react';
 import { observer, use$ } from '@legendapp/state/react';
 import { applyGlobals, cosineGradient } from '~/lib/cosineGradient';
 import { uiTempStore$ } from '~/stores/ui';
-import { useHotkeys, useClipboard, useElementSize, useMediaQuery } from '@mantine/hooks';
+import { useHotkeys, useClipboard, useMediaQuery, useElementSize } from '@mantine/hooks';
 import { Copy, Check } from 'lucide-react';
 import { deserializeCoeffs } from '~/lib/serialization';
 import { rgbChannelConfig } from '~/constants/colors';
-import { getCollectionStyleCSS } from '~/lib/getCollectionStyleCSS';
-import { useLocation } from '@tanstack/react-router';
+import { cn } from '~/lib/utils';
 
 interface GradientChannelsChartProps {
   steps: number;
   processedCoeffs: v.InferOutput<typeof coeffsSchema>;
-  seed: string;
+  className?: string;
+  showLabels?: boolean;
+  showGrid?: boolean;
 }
 
 // Define proper types for the tooltip props
@@ -56,22 +49,22 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
   const hexColor = data.hex;
 
   return (
-    <div className="rounded-lg border border-border/50 bg-background/85 shadow-xl p-2">
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2">
+    <div className="rounded-lg border border-border/50 bg-background/20 backdrop-blur-sm shadow-xl p-2 z-20">
+      <div className="flex flex-col gap-2.5 font-poppins">
+        <div className="flex items-center gap-3">
           <div className="h-5 w-5 rounded-sm" style={{ backgroundColor: rgbColor }}></div>
           <span className="font-mono text-xs">{hexColor}</span>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
             <span>cmd + c</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <span className="font-mono text-xs flex items-center">
             rgb(
             <span className="inline-flex items-center">
               <span
-                className="h-2 w-2 mx-0.5 rounded-sm"
+                className="h-2 w-2 mx-1 rounded-sm"
                 style={{ backgroundColor: rgbChannelConfig.red.color }}
               ></span>
               {r}
@@ -79,7 +72,7 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
             ,
             <span className="inline-flex items-center">
               <span
-                className="h-2 w-2 mx-0.5 rounded-sm"
+                className="h-2 w-2 mx-1 rounded-sm"
                 style={{ backgroundColor: rgbChannelConfig.green.color }}
               ></span>
               {g}
@@ -87,7 +80,7 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
             ,
             <span className="inline-flex items-center">
               <span
-                className="h-2 w-2 mx-0.5 rounded-sm"
+                className="h-2 w-2 mx-1 rounded-sm"
                 style={{ backgroundColor: rgbChannelConfig.blue.color }}
               ></span>
               {b}
@@ -95,7 +88,7 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
             )
           </span>
         </div>
-        <div className="flex flex-col gap-1 border-t border-border/30 pt-1.5">
+        {/* <div className="flex flex-col gap-1 border-t border-border/30 pt-1.5">
           {[
             { channel: 'red', value: data.red, color: rgbChannelConfig.red.color },
             { channel: 'green', value: data.green, color: rgbChannelConfig.green.color },
@@ -111,97 +104,11 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
                 <span className="font-mono text-xs">{value.toFixed(3)}</span>
               </div>
             ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );
 };
-
-// Custom X-axis tick component that renders a gradient color bar
-// interface CustomXAxisTickProps {
-//   x: number;
-//   y: number;
-//   payload: {
-//     value: number;
-//     coordinate: number;
-//     index: number;
-//     offset: number;
-//   };
-//   gradientColors: number[][];
-//   isVertical?: boolean;
-//   seed: string;
-// }
-
-// function CustomXAxisTick(props: CustomXAxisTickProps) {
-//   const { y, gradientColors, isVertical = false } = props;
-//   const { href } = useLocation();
-//   const barHeight = 25;
-//   // Position the bar based on vertical/horizontal orientation
-//   // For horizontal mode with large negative margin, position the bar at the bottom of the visible area
-//   const barY = isVertical ? y - barHeight - 2 : y - 25; // Adjusted position to account for smaller height
-
-//   return (
-//     <g>
-//       <foreignObject x={isVertical ? 10 : 16} y={barY} width="calc(100% - 42px)" height={barHeight}>
-//         <div
-//           style={{
-//             width: '100%',
-//             height: '100%',
-//             ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
-//               seed: props.seed,
-//               href,
-//             }),
-//           }}
-//         />
-//       </foreignObject>
-//     </g>
-//   );
-// }
-
-// // Custom Y-axis tick component for vertical chart
-// interface CustomYAxisTickProps {
-//   x: number;
-//   y: number;
-//   payload: {
-//     value: number;
-//     coordinate: number;
-//     index: number;
-//     offset: number;
-//   };
-//   gradientColors: number[][];
-//   isVertical?: boolean;
-//   seed: string;
-// }
-
-// function CustomYAxisTick(props: CustomYAxisTickProps) {
-//   const { href } = useLocation();
-//   const { x, gradientColors, isVertical = true } = props;
-//   const barWidth = 25; // Reduced width from 40px to 25px
-//   // Adjust position based on vertical/horizontal orientation
-//   const barX = isVertical ? x - barWidth + 40 : x - barWidth - 5; // Adjusted position to account for smaller width
-
-//   return (
-//     <g>
-//       <foreignObject
-//         x={isVertical ? 0 : barX}
-//         y={isVertical ? 24 : 18}
-//         width={barWidth}
-//         height={`calc(100% - ${isVertical ? 24 : 36}px)`}
-//       >
-//         <div
-//           style={{
-//             width: '100%',
-//             height: '100%',
-//             ...getCollectionStyleCSS('linearSwatches', gradientColors, 90, {
-//               seed: props.seed,
-//               href,
-//             }),
-//           }}
-//         />
-//       </foreignObject>
-//     </g>
-//   );
-// }
 
 interface ChartProps {
   data: Array<{
@@ -212,18 +119,13 @@ interface ChartProps {
     rgb: string;
     hex: string;
   }>;
-
   isPreview?: boolean;
-  gradientColors: number[][];
   onIndexChange?: (index: number | null) => void;
   copied?: boolean;
-  isVertical?: boolean;
   width?: number;
   height?: number;
-  seed: string;
 }
 
-// Client-side only chart component
 const Chart = lazy(() =>
   Promise.resolve({
     default: ({
@@ -231,224 +133,166 @@ const Chart = lazy(() =>
       isPreview = false,
       onIndexChange,
       copied = false,
-      isVertical = false,
       width,
       height,
     }: ChartProps) => {
-      // For vertical layout, we need to transform the data
-      // In vertical layout, the data point's "t" value becomes the y-coordinate
-      return (
-        <div className="h-full w-full" style={{ height: '100%' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            {isVertical ? (
-              // Vertical chart
-              <LineChart
-                accessibilityLayer
-                data={data}
-                layout="vertical"
-                width={isVertical && width}
-                height={isVertical && height ? height - 20 : undefined}
-                margin={{
-                  left: -56,
-                  right: 2,
-                  top: -12,
-                  bottom: 0,
-                }}
-                onMouseMove={(state) => {
-                  if (!isPreview && onIndexChange && state?.activeTooltipIndex !== undefined) {
-                    onIndexChange(state.activeTooltipIndex);
-                  }
-                }}
-                onMouseLeave={() => {
-                  if (!isPreview && onIndexChange) {
-                    onIndexChange(null);
-                  }
-                }}
-              >
-                <CartesianGrid horizontal={false} vertical={true} />
-                <YAxis
-                  dataKey="t"
-                  type="number"
-                  domain={[0, 1]}
-                  ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-                  tickFormatter={(value) =>
-                    value === 0 || value === 1
-                      ? value.toString()
-                      : `.${String(value).split('.')[1]}`
-                  }
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  // tick={
-                  //   !isPreview
-                  //     ? (props) => (
-                  //         <CustomYAxisTick
-                  //           {...props}
-                  //           gradientColors={gradientColors}
-                  //           isVertical={isVertical}
-                  //           seed={seed}
-                  //         />
-                  //       )
-                  //     : false
-                  // }
-                  width={55} // Reduced width from 70px to 55px
-                />
-                <XAxis
-                  type="number"
-                  domain={[-0.15, 1]}
-                  ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-                  tickFormatter={(value) => value.toString()}
-                  tickLine={false}
-                  axisLine={false}
-                  orientation="top"
-                />
-                <Tooltip content={<CustomTooltip copied={copied} />} isAnimationActive={false} />
-                <Line
-                  dataKey="red"
-                  type="linear"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.red.color }}
-                  isAnimationActive={false}
-                  animationDuration={200}
-                  stroke={rgbChannelConfig.red.color}
-                  strokeOpacity={1}
-                />
-                <Line
-                  dataKey="green"
-                  type="linear"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.green.color }}
-                  isAnimationActive={false}
-                  animationDuration={200}
-                  stroke={rgbChannelConfig.green.color}
-                  strokeOpacity={1}
-                />
-                <Line
-                  dataKey="blue"
-                  type="linear"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.blue.color }}
-                  isAnimationActive={false}
-                  animationDuration={200}
-                  stroke={rgbChannelConfig.blue.color}
-                  strokeOpacity={1}
-                />
-              </LineChart>
-            ) : (
-              // Horizontal chart (original implementation)
-              <LineChart
-                accessibilityLayer
-                data={data}
-                width={!isVertical && width ? width - 40 : undefined}
-                height={!isVertical && height ? height - 40 : undefined}
-                margin={{
-                  left: 16,
-                  right: -36,
-                  top: 16,
-                  bottom: -40,
-                }}
-                onMouseMove={(state) => {
-                  if (!isPreview && onIndexChange && state?.activeTooltipIndex !== undefined) {
-                    onIndexChange(state.activeTooltipIndex);
-                  }
-                }}
-                onMouseLeave={() => {
-                  if (!isPreview && onIndexChange) {
-                    onIndexChange(null);
-                  }
-                }}
-              >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="t"
-                  ticks={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-                  tickFormatter={(value) =>
-                    value === 0 || value === 1
-                      ? value.toString()
-                      : `.${String(value).split('.')[1]}`
-                  }
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={2}
-                  // tick={
-                  //   !isPreview
-                  //     ? (props) => (
-                  //         <CustomXAxisTick
-                  //           {...props}
-                  //           gradientColors={gradientColors}
-                  //           isVertical={isVertical}
-                  //           seed={seed}
-                  //         />
-                  //       )
-                  //     : false
-                  // }
-                  height={45} // Reduced height from 60px to 45px
-                  padding={{ left: 0, right: 0 }}
-                />
-                <YAxis
-                  orientation="right"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={0}
-                  domain={[-0.1, 1]} // Reverted back to original domain without negative values
-                  ticks={[0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}
-                  tickFormatter={(value) => value.toString()}
-                />
-                <Tooltip
-                  content={<CustomTooltip copied={copied} />}
-                  // Keep the tooltip active even when not directly hovering over the chart
-                  // This allows the cursor to remain visible when hovering over the X-axis
-                  isAnimationActive={false}
-                />
-                <Line
-                  dataKey="red"
-                  type="linear"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.red.color }}
-                  isAnimationActive={false}
-                  animationDuration={200}
-                  stroke={rgbChannelConfig.red.color}
-                  strokeOpacity={1}
-                />
-                <Line
-                  dataKey="green"
-                  type="linear"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.green.color }}
-                  isAnimationActive={false}
-                  animationDuration={200}
-                  stroke={rgbChannelConfig.green.color}
-                  strokeOpacity={1}
-                />
-                <Line
-                  dataKey="blue"
-                  type="linear"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.blue.color }}
-                  isAnimationActive={false}
-                  animationDuration={200}
-                  stroke={rgbChannelConfig.blue.color}
-                  strokeOpacity={1}
-                />
-              </LineChart>
-            )}
-          </ResponsiveContainer>
-        </div>
-      );
+      const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+
+      const margins = {
+        left: isLargeScreen ? 20 : 0,
+        right: isLargeScreen ? 0 : 20,
+        top: 32,
+        bottom: 16,
+      };
+
+      // If we have valid dimensions from useElementSize, use them directly
+      if (width && height && width > 0 && height > 0) {
+        return (
+          <div className="h-full w-full">
+            <LineChart
+              accessibilityLayer
+              data={data}
+              width={width}
+              height={height}
+              margin={margins}
+              onMouseMove={(state) => {
+                if (!isPreview && onIndexChange && state?.activeTooltipIndex !== undefined) {
+                  onIndexChange(state.activeTooltipIndex);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!isPreview && onIndexChange) {
+                  onIndexChange(null);
+                }
+              }}
+            >
+              {/* Force exact domain to match GraphBG */}
+              <XAxis dataKey="t" hide={true} domain={[0, 1]} type="number" scale="linear" />
+
+              {/* Force exact Y domain and disable automatic scaling */}
+              <YAxis
+                hide={true}
+                domain={[0, 1]}
+                type="number"
+                scale="linear"
+                allowDataOverflow={false}
+              />
+
+              <Tooltip content={<CustomTooltip copied={copied} />} isAnimationActive={false} />
+
+              <Line
+                dataKey="red"
+                type="linear"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.red.color }}
+                isAnimationActive={false}
+                animationDuration={200}
+                stroke={rgbChannelConfig.red.color}
+                strokeOpacity={1}
+              />
+              <Line
+                dataKey="green"
+                type="linear"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.green.color }}
+                isAnimationActive={false}
+                animationDuration={200}
+                stroke={rgbChannelConfig.green.color}
+                strokeOpacity={1}
+              />
+              <Line
+                dataKey="blue"
+                type="linear"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.blue.color }}
+                isAnimationActive={false}
+                animationDuration={200}
+                stroke={rgbChannelConfig.blue.color}
+                strokeOpacity={1}
+              />
+            </LineChart>
+          </div>
+        );
+      }
+
+      // Fallback: show a loading state while dimensions are being measured
+      return <div className="h-full w-full flex items-center justify-center"></div>;
     },
   }),
 );
 
+/**
+ * GraphBG component provides a styled background for gradient charts
+ * with optional grid lines and Y-axis labels
+ */
+const GraphBG: React.FC<{
+  className?: string;
+  showLabels?: boolean;
+  showGrid?: boolean;
+}> = ({ className = '', showLabels = true, showGrid = true }) => {
+  // Y-axis values from 0 to 1.0 in increments of 0.2
+  const yAxisValues = [1, 0.8, 0.6, 0.4, 0.2, 0];
+
+  return (
+    <div className={cn('relative w-full h-full rounded-md overflow-hidden', className)}>
+      {/* Graph area container */}
+      <div className="relative w-full h-full">
+        {/* Horizontal grid lines */}
+        {showGrid &&
+          yAxisValues.map((value) => {
+            // Calculate position from top (0% for 1.0, 100% for 0)
+            const topPercent = (1 - value) * 100;
+
+            return (
+              <div
+                key={`line-${value}`}
+                className="absolute inset-x-0 w-full"
+                style={{
+                  top: `${topPercent}%`,
+                  height: '1px',
+                  backgroundImage:
+                    'linear-gradient(to right, var(--ring) 0%, var(--ring) 2px, transparent 2px, transparent 4px)',
+                  backgroundSize: '6px 1px',
+                  backgroundRepeat: 'repeat-x',
+                  width: '100%',
+                }}
+              />
+            );
+          })}
+
+        {/* Floating Y-axis labels */}
+        {showLabels &&
+          yAxisValues.map((value) => {
+            // Calculate position from top (0% for 1.0, 100% for 0)
+            const topPercent = (1 - value) * 100;
+
+            return (
+              <div
+                key={`label-${value}`}
+                className="absolute right-4 bg-background/20 backdrop-blur-sm text-muted-foreground text-xs font-mono px-1.5 py-0.5 rounded-sm border border-border select-none z-10 whitespace-nowrap inline-flex justify-center items-center"
+                style={{
+                  top: `${topPercent}%`,
+                  transform: 'translateY(-50%)',
+                }}
+              >
+                {value.toFixed(value === 1 || value === 0 ? 0 : 1)}
+              </div>
+            );
+          })}
+      </div>
+    </div>
+  );
+};
+
 export const GradientChannelsChart = observer(function GradientChannelsChart({
   processedCoeffs,
   steps,
-  seed,
+  className = '',
+  showLabels = true,
+  showGrid = true,
 }: GradientChannelsChartProps) {
   const previewSeed = use$(uiTempStore$.previewSeed);
   const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
@@ -462,15 +306,6 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   const activeIndex = use$(uiTempStore$.previewColorIndex);
   const clipboard = useClipboard({ timeout: 1500 });
   const { ref, width, height } = useElementSize();
-  const is1000px = useMediaQuery('(max-width: 1000px)');
-
-  // Determine if the chart should be rendered vertically based on width and viewport
-  // Only render vertically if the viewport is less than 700px AND either:
-  // 1. Width is explicitly measured and less than 500, OR
-  // 2. The height is at least 1.3x the width (very tall portrait orientation)
-  const isVertical = Boolean(
-    is1000px && ((width ? width < 500 : false) || (width && height && height > width * 1.3)),
-  );
 
   const handleChartIndexChange = (index: number | null) => {
     if (index !== undefined) {
@@ -495,12 +330,23 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   ]);
 
   return (
-    <div className="flex h-full flex-col" style={{ height: '100%' }}>
-      <div
-        className="relative flex-1 w-full h-full"
-        ref={ref}
-        style={{ minHeight: '150px', height: '100%' }}
-      >
+    <figure
+      className={cn('flex h-full flex-col relative', className)}
+      role="img"
+      ref={ref}
+      aria-labelledby="palette-graph-title"
+      aria-describedby="palette-graph-description"
+    >
+      {/* GraphBG provides the background grid and labels */}
+      <GraphBG
+        className="absolute inset-0 w-full h-full pt-8 lg:pl-5 pr-5 lg:pr-0 pb-4"
+        showLabels={showLabels}
+        showGrid={showGrid}
+      />
+
+      {/* Chart layers on top of GraphBG */}
+      <div className="relative flex-1 w-full h-full" style={{ minHeight: '150px', height: '100%' }}>
+        {/* Preview chart layer with reduced opacity */}
         <ChartContainer
           config={rgbChannelConfig}
           className="absolute inset-0 h-full w-full"
@@ -510,30 +356,36 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
             <Chart
               isPreview
               data={previewChartData}
-              gradientColors={gradientColors}
-              isVertical={isVertical}
               width={width || undefined}
               height={height || undefined}
-              seed={seed}
             />
           </Suspense>
         </ChartContainer>
+
+        {/* Main chart layer */}
         <ChartContainer config={rgbChannelConfig} className="absolute inset-0 h-full w-full">
           <Suspense fallback={<div className="w-full h-full" />}>
             <Chart
               data={chartData}
-              gradientColors={gradientColors}
               onIndexChange={handleChartIndexChange}
               copied={clipboard.copied}
-              isVertical={isVertical}
               width={width || undefined}
               height={height || undefined}
-              seed={seed}
             />
           </Suspense>
         </ChartContainer>
       </div>
-    </div>
+
+      {/* Accessibility labels */}
+      <div id="palette-graph-title" className="sr-only">
+        RGB Color Palette Visualization
+      </div>
+
+      <div id="palette-graph-description" className="sr-only">
+        Interactive graph showing red, green, and blue color channel curves generated. X- axis is
+        color(t). Y-axis is 0 to 1.
+      </div>
+    </figure>
   );
 });
 

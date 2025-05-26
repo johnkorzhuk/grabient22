@@ -38,6 +38,10 @@ import { Button } from '~/components/ui/button';
 import type { NavigationItemPath } from '~/components/header/NavigationSelect';
 import { cn } from '~/lib/utils';
 import { ActionButton } from '~/components/header/ActionButton';
+import { convexQuery } from '@convex-dev/react-query';
+import { api } from '../../../convex/_generated/api';
+
+import { fetchClerkAuth } from '~/utils/auth';
 
 export const searchValidatorSchema = v.object({
   style: v.optional(
@@ -60,8 +64,24 @@ export const Route = createFileRoute('/$seed')({
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
-  beforeLoad: ({ params, search }) => {
+
+  beforeLoad: async ({ params, search, context }) => {
     const { seed } = params;
+    // let userLikedSeed = false;
+    // try {
+    //   const { userId } = await fetchClerkAuth();
+
+    //   userLikedSeed = await context.queryClient.fetchQuery({
+    //     ...convexQuery(api.likes.checkUserLikedSeed, {
+    //       userId: userId!,
+    //       seed,
+    //     }),
+    //     gcTime: 2000,
+    //   });
+    // } catch (error) {
+    //   console.error('Error fetching liked seed:', error);
+    // }
+
     try {
       // Try to deserialize the data - if it fails, redirect to home
       const { coeffs, globals } = deserializeCoeffs(seed);
@@ -104,6 +124,10 @@ export const Route = createFileRoute('/$seed')({
       throw redirect({ to: '/', search });
     }
   },
+  onLeave: () => {
+    uiTempStore$.previewSeed.set(null);
+    uiTempStore$.activeCollectionId.set(null);
+  },
 });
 
 function RouteComponent() {
@@ -116,6 +140,8 @@ const Layout = observer(function Layout() {
   const navigate = useNavigate({ from: '/$seed' });
   const isDragging = use$(uiTempStore$.isDragging);
   const navSelect = use$(uiTempStore$.navSelect);
+  const activeCollectionId = use$(uiTempStore$.activeCollectionId);
+  const itemActive = activeCollectionId === seed;
   const preferredOptions = use$(uiTempStore$.preferredOptions);
   const initialSearchDataRef = useRef({
     style: style === 'auto' ? DEFAULT_STYLE : style,
@@ -138,13 +164,6 @@ const Layout = observer(function Layout() {
     });
   };
 
-  useEffect(() => {
-    uiTempStore$.activeCollectionId.set(seed);
-    return () => {
-      uiTempStore$.activeCollectionId.set(null);
-    };
-  }, []);
-
   const renderResetButton =
     style !== initialSearchDataRef.current.style ||
     steps !== initialSearchDataRef.current.steps ||
@@ -158,7 +177,7 @@ const Layout = observer(function Layout() {
 
       <PrimaryDivider className="absolute top-17.5 lg:top-21.5 z-50" />
 
-      <main className="h-[calc(100vh-theme(spacing.16))] lg:h-[calc(100vh-theme(spacing.20))] min-h-[600px] relative flex flex-col">
+      <main className="h-[calc(100vh-theme(spacing.16)-8px)] lg:h-[calc(100vh-theme(spacing.24)+8px)] min-h-[600px] relative flex flex-col">
         {/* Link Button that uses the navSelect state and lucid icon navSelect */}
         <Link
           to={navSelect}

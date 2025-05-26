@@ -1,4 +1,4 @@
-import type { CollectionPreset, CollectionStyle, CosineCoeffs } from '../types';
+import type { CosineCoeffs } from '../types';
 import type { AppCollection } from '../types';
 import { nanoid } from 'nanoid';
 import { COEFF_PRECISION, PI, coeffsSchema } from '../validators';
@@ -7,8 +7,8 @@ import * as v from 'valibot';
 import type { Id } from '../../convex/_generated/dataModel';
 
 export const applyGlobals = (
-  cosCoeffs: CollectionPreset['coeffs'],
-  globals: CollectionPreset['globals'],
+  cosCoeffs: AppCollection['coeffs'],
+  globals: AppCollection['globals'],
 ): v.InferOutput<typeof coeffsSchema> => {
   return cosCoeffs.map((coeff: number[], i: number) => {
     const alpha = coeff[3] ?? 1;
