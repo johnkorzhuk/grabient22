@@ -171,7 +171,7 @@ const Layout = observer(function Layout() {
     >
       <AppHeader className="sticky top-0 z-40 bg-background" />
 
-      <PrimaryDivider className="absolute top-19.5 lg:top-22 z-50" />
+      <PrimaryDivider className="absolute top-19 lg:top-22 z-50" />
 
       <main className="h-[calc(100vh-theme(spacing.16)-8px)] lg:h-[calc(100vh-theme(spacing.24)+8px)] min-h-[600px] relative flex flex-col">
         {/* Link Button that uses the navSelect state and lucid icon navSelect */}
@@ -183,7 +183,7 @@ const Layout = observer(function Layout() {
               ...preferredOptions,
             };
           }}
-          className="absolute top-8 left-5 lg:left-14 z-10"
+          className="absolute top-3 lg:top-6 left-5 lg:left-14 z-10"
         >
           <Button
             variant="outline"
@@ -199,7 +199,7 @@ const Layout = observer(function Layout() {
           </Button>
         </Link>
 
-        <div className="flex items-center gap-3 absolute top-8 right-5 lg:right-14 z-10">
+        <div className="flex items-center gap-3 absolute top-3 lg:top-6 right-5 lg:right-14 z-10">
           <div className="mr-2 relative">
             {renderResetButton && <ActionButton onClick={clearSearchParams}>reset</ActionButton>}
           </div>
