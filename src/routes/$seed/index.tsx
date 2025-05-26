@@ -66,9 +66,10 @@ const PageContent = observer(function PageContent() {
   const activeCollectionId = use$(uiTempStore$.activeCollectionId);
   const itemActive = activeCollectionId === encodedSeedData;
 
-  // Calculate the final values to use
   const stepsToUse =
-    previewSteps !== null || steps !== 'auto' ? (previewSteps ?? steps) : seedData.collection.steps;
+    previewSteps !== null ? previewSteps : steps === 'auto' ? seedData.collection.steps : steps;
+
+  // Calculate the final values to use
   const styleToUse =
     previewStyle !== null ? previewStyle : style === 'auto' ? seedData.collection.style : style;
   const angleToUse =
@@ -76,7 +77,6 @@ const PageContent = observer(function PageContent() {
       ? (previewAngle ??
         (typeof angle === 'number' ? parseFloat(angle.toFixed(1)) : seedData.collection.angle))
       : seedData.collection.angle;
-  const numStops = steps === 'auto' ? seedData.collection.steps : (stepsToUse as number);
   const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
 
   const previewCollection: AppCollection = {
@@ -138,7 +138,7 @@ const PageContent = observer(function PageContent() {
               collection={previewCollection}
               index={0}
               style={styleToUse}
-              steps={numStops}
+              steps={stepsToUse}
               angle={angleToUse}
               href={href}
               onChannelOrderChange={onChannelOrderChange}
@@ -159,7 +159,7 @@ const PageContent = observer(function PageContent() {
                 <GradientChannelsChart
                   className="h-full flex-1 hidden sm:block lg:hidden"
                   processedCoeffs={processedCoeffs}
-                  steps={numStops}
+                  steps={stepsToUse}
                   showLabels={true}
                   showGrid={true}
                 />
@@ -176,7 +176,7 @@ const PageContent = observer(function PageContent() {
                 <GradientChannelsChart
                   className="h-full w-full md:w-[420px] flex-1 hidden lg:block"
                   processedCoeffs={processedCoeffs}
-                  steps={numStops}
+                  steps={stepsToUse}
                   showLabels={true}
                   showGrid={true}
                 />
@@ -226,7 +226,7 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
       });
     } else {
       navigate({
-        search: { mod: modifier as any },
+        search: { mod: modifier },
         replace: true,
       });
     }
@@ -283,7 +283,7 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
     navigate({
       params: { seed: previewSeed },
       search: (search) => search,
-      replace: true,
+      replace: false,
     });
 
     // Clear the preview seed

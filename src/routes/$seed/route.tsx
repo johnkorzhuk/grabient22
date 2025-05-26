@@ -171,7 +171,7 @@ const Layout = observer(function Layout() {
     >
       <AppHeader className="sticky top-0 z-40 bg-background" />
 
-      <PrimaryDivider className="absolute top-17.5 lg:top-21.5 z-50" />
+      <PrimaryDivider className="absolute top-20.5 lg:top-23.5 z-50" />
 
       <main className="h-[calc(100vh-theme(spacing.16)-8px)] lg:h-[calc(100vh-theme(spacing.24)+8px)] min-h-[600px] relative flex flex-col">
         {/* Link Button that uses the navSelect state and lucid icon navSelect */}
@@ -188,6 +188,7 @@ const Layout = observer(function Layout() {
           <Button
             variant="outline"
             size="sm"
+            aria-label="Go back"
             className={cn(
               'justify-between',
               'font-bold text-sm h-8.5 lg:h-10 px-3',

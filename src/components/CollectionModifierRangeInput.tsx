@@ -11,6 +11,10 @@ interface CollectionModifierRangeInputProps
   value?: number[];
   onValueChange?: (value: number[]) => void;
   className?: string;
+  /**
+   * Accessible name for the slider. If not provided, the component will use the label from ModifierSlider
+   */
+  ariaLabel?: string;
 }
 
 const CollectionModifierRangeInput = React.forwardRef<
@@ -18,7 +22,7 @@ const CollectionModifierRangeInput = React.forwardRef<
   CollectionModifierRangeInputProps
 >(
   (
-    { className, min = 0, max = 100, step = 1, value, defaultValue, onValueChange, ...props },
+    { className, min = 0, max = 100, step = 1, value, defaultValue, onValueChange, ariaLabel, ...props },
     ref,
   ) => {
     // We need to ensure we're working with the correct value, whether controlled or uncontrolled
@@ -53,6 +57,11 @@ const CollectionModifierRangeInput = React.forwardRef<
         defaultValue={defaultValue}
         onValueChange={onValueChange}
         className={cn('relative flex w-full touch-none select-none items-center', className)}
+        aria-label={ariaLabel || 'Modifier value'}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={currentValue[0]}
+        aria-valuetext={`${currentValue[0].toFixed(2)}`}
         {...props}
       >
         <SliderPrimitive.Track className="relative h-[2px] w-full grow overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
@@ -81,10 +90,13 @@ const CollectionModifierRangeInput = React.forwardRef<
 
         <SliderPrimitive.Thumb
           className={cn(
-            'block h-[8px] w-[8px] rounded-full border text-muted-foreground group-hover:text-foreground transition-colors duration-200 border-current shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+            'relative block h-[8px] w-[8px] rounded-full border text-muted-foreground group-hover:text-foreground transition-colors duration-200 border-current shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
             valueIsMiddle ? 'bg-background' : 'bg-current',
           )}
-        />
+        >
+          {/* Invisible larger hit area around the thumb */}
+          <div className="absolute -inset-3 cursor-pointer" />
+        </SliderPrimitive.Thumb>
       </SliderPrimitive.Root>
     );
   },

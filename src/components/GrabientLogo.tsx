@@ -265,7 +265,7 @@ export const GrabientLogo = observer(function GrabientLogo({
   }, []);
 
   return (
-    <div className={cn('inline-flex items-center', className)}>
+    <div className={cn('inline-flex items-center', className)} aria-label="Grabient Logo">
       <svg
         width="220"
         height="50"

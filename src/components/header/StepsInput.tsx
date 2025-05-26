@@ -248,7 +248,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
       });
       uiTempStore$.preferredOptions.steps.set(clickedValue);
     }
-    
+
     // Close the popover after selection
     setOpen(false);
   };
@@ -362,6 +362,7 @@ export const StepsInput = observer(function NumberInputWithPresets({
                   onMouseEnter={() => {
                     uiTempStore$.previewSteps.set(preset);
                   }}
+                  aria-label={`Set steps to ${preset}`}
                   className="cursor-pointer relative w-full h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   {preset.toString()}

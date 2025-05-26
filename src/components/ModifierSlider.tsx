@@ -82,6 +82,7 @@ export function ModifierSlider({
         onMouseUp={onDragEnd}
         onKeyUp={onDragEnd}
         onPointerUp={onDragEnd}
+        ariaLabel={`${label} slider, value ${value.toFixed(3)}`}
       />
     </div>
   );

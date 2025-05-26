@@ -120,6 +120,7 @@ export const NavigationSelect = observer(function NavigationSelect({
                   >
                     <CommandItem
                       value={item.id}
+                      aria-label={`Navigate to ${item.label}`}
                       className="cursor-pointer relative h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
                     >
                       {item.label}

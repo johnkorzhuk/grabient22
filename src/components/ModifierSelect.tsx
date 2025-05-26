@@ -58,7 +58,7 @@ export const ModifierSelect = observer(function ModifierSelect({
           role="combobox"
           aria-haspopup="listbox"
           aria-expanded={false}
-          aria-label="Select gradient style"
+          aria-label="Select modifier type"
           className={cn(
             'w-[190px] justify-between',
             'font-bold capitalize text-sm h-8.5 lg:h-10 px-3',
@@ -86,6 +86,7 @@ export const ModifierSelect = observer(function ModifierSelect({
                   key={mod}
                   value={mod}
                   onSelect={() => handleValueClick(mod)}
+                  aria-label={`Select ${mod} modifier`}
                   className="cursor-pointer relative h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200 capitalize"
                 >
                   {mod}

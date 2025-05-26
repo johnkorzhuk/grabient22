@@ -119,6 +119,7 @@ export const StyleSelect = observer(function StyleSelect({
                     uiTempStore$.previewStyle.set(style);
                   }}
                   className="cursor-pointer relative h-9 min-h-[2.25rem] text-muted-foreground hover:text-foreground transition-colors duration-200"
+                  aria-label={`Select ${STYLE_LABELS[style]} style`}
                 >
                   {STYLE_LABELS[style]}
                   <CheckIcon

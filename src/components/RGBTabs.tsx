@@ -54,12 +54,15 @@ function SortableTab({ id, color, label }: SortableTabProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="w-9 h-5 rounded-md shadow-sm flex items-center justify-start pl-1.5 cursor-grab"
+      className="w-9 h-5 rounded-md shadow-sm flex items-center justify-start pl-1.5 cursor-grab relative"
       title={label} // Add tooltip with the color label
+      aria-label={`Drag ${label} channel to reorder`}
       suppressHydrationWarning
       {...attributes}
       {...listeners}
     >
+      {/* Invisible touch target that extends beyond visible element */}
+      <div className="absolute inset-0 -m-2" />
       <GripVertical size={10} className="text-white/80" />
     </div>
   );
@@ -191,7 +194,7 @@ export function RGBTabs({ collection, onOrderChange }: RGBTabsProps) {
         items={sortedTabs.map((tab) => tab.id)}
         strategy={horizontalListSortingStrategy}
       >
-        <div className="inline-flex gap-1">
+        <div className="inline-flex gap-1 relative touch-none">
           {sortedTabs.map((tab) => (
             <SortableTab
               key={tab.id}
