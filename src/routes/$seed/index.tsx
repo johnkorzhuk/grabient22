@@ -31,6 +31,7 @@ import { ModifierSelect, type SelectModifier } from '~/components/ModifierSelect
 import { ModifierSlider } from '~/components/ModifierSlider';
 import { rgbChannelConfig } from '~/constants/colors';
 import React from 'react';
+import { seo } from '~/utils/seo';
 
 export const SEARCH_DEFAULTS = {
   mod: DEFAULT_MODIFIER,
@@ -55,15 +56,11 @@ export const Route = createFileRoute('/$seed/')({
 
     return {
       meta: [
-        { title: `Grabient` },
-        { name: 'description', content: `Check out this Grabient.` },
-        { name: 'og:title', content: `Grabient` },
-        { name: 'og:description', content: `Check out this Grabient.` },
-        { name: 'og:image', content: ogImageUrl },
-        { name: 'og:image:width', content: '1200' },
-        { name: 'og:image:height', content: '630' },
-        { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:image', content: ogImageUrl },
+        ...seo({
+          title: `Grabient`,
+          description: `Check out this Grabient!`,
+          image: ogImageUrl,
+        }),
       ],
     };
   },

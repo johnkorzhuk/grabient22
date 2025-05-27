@@ -35,7 +35,6 @@ import type { AppCollection } from '~/types';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '~/components/ui/button';
-import type { NavigationItemPath } from '~/components/header/NavigationSelect';
 import { cn } from '~/lib/utils';
 import { ActionButton } from '~/components/header/ActionButton';
 

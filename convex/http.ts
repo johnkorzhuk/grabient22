@@ -41,10 +41,10 @@ http.route({
       const angle = query.angle ? parseInt(query.angle) : DEFAULT_ANGLE;
 
       // Deserialize the seed to get coefficients and globals
-      const { coeffs, globals } = deserializeCoeffs(seed);
+      const { coeffs } = deserializeCoeffs(seed);
 
       // Apply globals to get processed colors
-      const processedColors = applyGlobals(coeffs, globals);
+      const processedColors = applyGlobals(coeffs, DEFAULT_GLOBALS);
       const gradientColors = cosineGradient(steps, processedColors);
 
       // Generate SVG for the gradient
@@ -89,8 +89,8 @@ http.route({
       const averageBrightness =
         gradientColors.length > 0 ? totalBrightness / gradientColors.length : 0.5;
 
-      // Use white text on dark backgrounds (average < 0.5), black text on light backgrounds (average >= 0.5)
-      const logoTextColor = averageBrightness < 0.5 ? 'white' : 'black';
+      // Use higher threshold (0.7) to prefer white logo - only use black on very bright backgrounds
+      const logoTextColor = averageBrightness < 0.7 ? 'white' : 'black';
 
       // Extract the inner content of the SVG without the outer <svg> tags
       // The issue is that different style types format their SVGs differently
