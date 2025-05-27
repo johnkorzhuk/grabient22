@@ -1,4 +1,4 @@
-import type { CollectionStyle } from '~/types';
+type CollectionStyle = 'linearGradient' | 'linearSwatches' | 'angularGradient' | 'angularSwatches';
 
 export function getCollectionStyleSVG(
   type: CollectionStyle = 'linearGradient',

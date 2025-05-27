@@ -19,7 +19,14 @@ import { api } from '../../../convex/_generated/api';
 import { applyGlobals } from '~/lib/cosineGradient';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import * as v from 'valibot';
-import { DEFAULT_MODIFIER, MODIFIERS, modifierValidator } from '~/validators';
+import {
+  DEFAULT_ANGLE,
+  DEFAULT_MODIFIER,
+  DEFAULT_STEPS,
+  DEFAULT_STYLE,
+  MODIFIERS,
+  modifierValidator,
+} from '~/validators';
 import { ModifierSelect, type SelectModifier } from '~/components/ModifierSelect';
 import { ModifierSlider } from '~/components/ModifierSlider';
 import { rgbChannelConfig } from '~/constants/colors';
@@ -38,6 +45,27 @@ export const Route = createFileRoute('/$seed/')({
   validateSearch: searchValidatorSchema,
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
+  },
+  head: ({ params, match }) => {
+    const { seed } = params;
+    const { style, steps, angle } = match.search;
+
+    // Construct the OG image URL using the Convex HTTP action
+    const ogImageUrl = `${import.meta.env.VITE_CONVEX_SITE_URL}/og?seed=${seed}&style=${style}&steps=${steps}&angle=${angle}`;
+
+    return {
+      meta: [
+        { title: `Grabient` },
+        { name: 'description', content: `Check out this Grabient.` },
+        { name: 'og:title', content: `Grabient` },
+        { name: 'og:description', content: `Check out this Grabient.` },
+        { name: 'og:image', content: ogImageUrl },
+        { name: 'og:image:width', content: '1200' },
+        { name: 'og:image:height', content: '630' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: ogImageUrl },
+      ],
+    };
   },
 });
 
