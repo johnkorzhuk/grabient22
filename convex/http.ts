@@ -19,6 +19,7 @@ http.route({
     // Extract parameters from the request
     const url = new URL(request.url);
     const searchParams = url.searchParams;
+    // Use an empty string as default for seed if not provided
     const seed = searchParams.get('seed') || '';
     const query = {
       style: searchParams.get('style') || DEFAULT_STYLE,
@@ -26,10 +27,9 @@ http.route({
       angle: searchParams.get('angle'),
     };
     try {
-      // Validate seed parameter
-      if (!seed) {
-        return new Response('Missing seed parameter', { status: 400 });
-      }
+      // Generate a default seed if none is provided
+      // This ensures we always have a valid seed to work with
+      const effectiveSeed = seed || 'HQVgnADANMAsB'; // Default seed if none provided
 
       // Initialize WebAssembly for resvg
       // We need to fetch the WASM file from a CDN since we can't import it directly in Convex
@@ -37,11 +37,20 @@ http.route({
 
       // Get optional parameters from query string with defaults
       const style = query.style as CollectionStyle;
-      const steps = query.steps ? parseInt(query.steps) : DEFAULT_STEPS;
-      const angle = query.angle ? parseInt(query.angle) : DEFAULT_ANGLE;
+      // Use DEFAULT values when query params are null/undefined or parsing fails
+      const steps = query.steps
+        ? isNaN(parseInt(query.steps))
+          ? DEFAULT_STEPS
+          : parseInt(query.steps)
+        : DEFAULT_STEPS;
+      const angle = query.angle
+        ? isNaN(parseInt(query.angle))
+          ? DEFAULT_ANGLE
+          : parseInt(query.angle)
+        : DEFAULT_ANGLE;
 
       // Deserialize the seed to get coefficients and globals
-      const { coeffs } = deserializeCoeffs(seed);
+      const { coeffs } = deserializeCoeffs(effectiveSeed);
 
       // Apply globals to get processed colors
       const processedColors = applyGlobals(coeffs, DEFAULT_GLOBALS);
@@ -53,7 +62,7 @@ http.route({
         gradientColors,
         angle,
         {
-          seed,
+          seed: effectiveSeed,
           href: '',
         },
         null,

@@ -23,6 +23,7 @@ import type { ConvexReactClient } from 'convex/react';
 import type { ConvexQueryClient } from '@convex-dev/react-query';
 import { ThemeProvider } from '~/components/theme/ThemeProvider';
 import { PostHogProvider } from 'posthog-js/react';
+import { serializeCoeffs } from '~/lib/serialization';
 
 // const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
 //   const auth = await getAuth(getWebRequest());
@@ -123,6 +124,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const context = useRouteContext({ from: Route.id });
+
   return (
     <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY!} options={options}>
       <ClerkProvider>

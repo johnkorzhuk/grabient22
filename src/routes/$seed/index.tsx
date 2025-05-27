@@ -50,9 +50,12 @@ export const Route = createFileRoute('/$seed/')({
   head: ({ params, match }) => {
     const { seed } = params;
     const { style, steps, angle } = match.search;
+    const styleToUse = style === 'auto' ? DEFAULT_STYLE : style;
+    const stepsToUse = steps === 'auto' ? DEFAULT_STEPS : steps;
+    const angleToUse = angle === 'auto' ? DEFAULT_ANGLE : angle;
 
     // Construct the OG image URL using the Convex HTTP action
-    const ogImageUrl = `${import.meta.env.VITE_CONVEX_SITE_URL}/og?seed=${seed}&style=${style}&steps=${steps}&angle=${angle}`;
+    const ogImageUrl = `${import.meta.env.VITE_CONVEX_SITE_URL}/og?seed=${seed}&style=${styleToUse}&steps=${stepsToUse}&angle=${angleToUse}`;
 
     return {
       meta: [
