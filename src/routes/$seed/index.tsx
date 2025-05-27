@@ -23,7 +23,7 @@ import { DEFAULT_MODIFIER, MODIFIERS, modifierValidator } from '~/validators';
 import { ModifierSelect, type SelectModifier } from '~/components/ModifierSelect';
 import { ModifierSlider } from '~/components/ModifierSlider';
 import { rgbChannelConfig } from '~/constants/colors';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 export const SEARCH_DEFAULTS = {
   mod: DEFAULT_MODIFIER,

@@ -142,12 +142,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                   </div>
                 </TooltipProvider>
               </ThemeProvider>
-              {/* {import.meta.env.DEV && (
+              {import.meta.env.DEV && (
                 <>
                   <ReactQueryDevtools position="left" buttonPosition="bottom-left" />
                   <TanStackRouterDevtools position="bottom-left" />
                 </>
-              )} */}
+              )}
               <Scripts />
             </body>
           </html>

@@ -60,6 +60,31 @@ export const Route = createFileRoute('/$seed')({
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
+  head: ({ params }) => {
+    const { seed } = params;
+    // Use default values for the OG image
+    // The actual values will come from URL search params when the image is requested
+    const style = DEFAULT_STYLE;
+    const steps = DEFAULT_STEPS;
+    const angle = DEFAULT_ANGLE;
+
+    // Construct the OG image URL using the Convex HTTP action
+    const ogImageUrl = `${import.meta.env.VITE_CONVEX_SITE_URL}/og?seed=${seed}&style=${style}&steps=${steps}&angle=${angle}`;
+
+    return {
+      meta: [
+        { title: `Grabient` },
+        { name: 'description', content: `Check out this Grabient.` },
+        { name: 'og:title', content: `Grabient` },
+        { name: 'og:description', content: `Check out this Grabient.` },
+        { name: 'og:image', content: ogImageUrl },
+        { name: 'og:image:width', content: '1200' },
+        { name: 'og:image:height', content: '630' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: ogImageUrl },
+      ],
+    };
+  },
 
   beforeLoad: async ({ params, search, context }) => {
     const { seed } = params;
