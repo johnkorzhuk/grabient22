@@ -44,6 +44,12 @@ export const Route = createFileRoute('/_layout')({
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
+  headers: () => ({
+    // Browser: Cache for 30 minutes, allow stale for 1 hour
+    'cache-control': 'public, max-age=1800, stale-while-revalidate=3600',
+    // Cloudflare: Cache for 1 hour, stale-while-revalidate for 2 hours
+    'cdn-cache-control': 'max-age=3600, stale-while-revalidate=7200, durable',
+  }),
 });
 
 function RouteComponent() {
