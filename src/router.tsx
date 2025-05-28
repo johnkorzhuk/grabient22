@@ -29,6 +29,8 @@ export function createRouter() {
       queries: {
         queryKeyHashFn: convexQueryClient.hashFn(),
         queryFn: convexQueryClient.queryFn(),
+        staleTime: 30000, // Add this to prevent frequent refetches
+        gcTime: 300000, // Add this to keep data in cache longer
       },
     },
     mutationCache: new MutationCache({
