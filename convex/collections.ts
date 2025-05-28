@@ -209,7 +209,7 @@ export const list = query({
 
 export const listPopular = query({
   handler: async (ctx) => {
-    const collections = await ctx.db.query('popular').withIndex('likes').order('desc').take(48);
+    const collections = await ctx.db.query('popular').withIndex('likes').order('desc').take(72);
 
     return collections.map((collection) => ({
       ...collection,
@@ -221,7 +221,7 @@ export const listPopular = query({
 
 export const listPopularNew = query({
   handler: async (ctx) => {
-    const collections = await ctx.db.query('collections').withIndex('likes').order('desc').take(48);
+    const collections = await ctx.db.query('collections').withIndex('likes').order('desc').take(72);
 
     return collections.map((collection) => ({
       ...collection,
@@ -234,7 +234,7 @@ export const listPopularNew = query({
 export const listNew = query({
   handler: async (ctx) => {
     // Fetch collections ordered by creation time (newest first)
-    const collections = await ctx.db.query('collections').order('desc').take(48);
+    const collections = await ctx.db.query('collections').order('desc').take(72);
 
     return collections.map((collection) => ({
       ...collection,
@@ -247,7 +247,7 @@ export const listNew = query({
 export const listOld = query({
   handler: async (ctx) => {
     // Fetch collections ordered by creation time (oldest first)
-    const collections = await ctx.db.query('collections').order('asc').take(48);
+    const collections = await ctx.db.query('collections').order('asc').take(72);
 
     return collections.map((collection) => ({
       ...collection,
