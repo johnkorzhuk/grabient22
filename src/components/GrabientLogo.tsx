@@ -1,5 +1,4 @@
 import { cn } from '~/lib/utils';
-import { useEffect, useRef } from 'react';
 import type { AppCollection, CosineCoeffs } from '~/types';
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
@@ -41,64 +40,16 @@ export const GrabientLogo = observer(function GrabientLogo({
   // Check if we have a valid collection with coefficients
   const hasValidCollection = collection && collection.coeffs && collection.globals;
 
-  // Use collection colors or fallback to animation
+  // Use collection colors or fallback to a static gradient from COEFFS
   const useCollectionColors = Boolean(hasValidCollection);
-
-  // Only create animation refs if we're using animation
-  const gradientRef = useRef<SVGLinearGradientElement | null>(null);
-  const animationRef = useRef<number | null>(null);
-  // Initialize with a random time value to start at a random point in the animation
-  const timeRef = useRef<number>(Math.random() * COEFFS.length);
-
-  // We're now directly using the gradientColors array to create the gradient
-  // No need to use getCollectionStyleCSS anymore
-
-  // Generate initial random colors on component creation (before first render)
+  
+  // Select a static gradient from COEFFS array (using index 0 as default)
+  const staticCoeffsIndex = 0;
+  const staticCoeffs = COEFFS[staticCoeffsIndex] as CosineCoeffs;
+  
   const TAU = Math.PI * 2;
 
-  // Get a random initial position in the coefficient space
-  const t = timeRef.current;
-  const baseIndex = Math.floor(t % COEFFS.length);
-  const nextIndex = (baseIndex + 1) % COEFFS.length;
-  const progress = t % 1;
 
-  // Apply easing to the progress
-  const easedProgress = progress * progress * progress * (progress * (progress * 6 - 15) + 10);
-
-  // Get interpolated coefficients
-  const initialCoeffs = interpolateCoeffs(
-    COEFFS[baseIndex] as CosineCoeffs,
-    COEFFS[nextIndex] as CosineCoeffs,
-    easedProgress,
-  );
-
-  // Helper function to smoothly interpolate coefficients
-  function interpolateCoeffs(
-    coeffsA: CosineCoeffs,
-    coeffsB: CosineCoeffs,
-    progress: number,
-  ): CosineCoeffs {
-    return coeffsA.map((vector, i) =>
-      vector.map((value, j) => {
-        // Special handling for phase values (index 3)
-        if (i === 3) {
-          const targetValue = coeffsB[i][j];
-          // Handle phase wrapping for continuous rotation
-          let delta = targetValue - value;
-
-          // Normalize to find the shortest angular path
-          if (Math.abs(delta) > Math.PI) {
-            delta = delta > 0 ? delta - TAU : delta + TAU;
-          }
-
-          return value + delta * progress;
-        }
-
-        // Linear interpolation for other values
-        return value + (coeffsB[i][j] - value) * progress;
-      }),
-    ) as CosineCoeffs;
-  }
 
   // Generate gradient colors using the cosine formula
   function generateColor(t: number, coeffs: CosineCoeffs): [number, number, number] {
@@ -125,144 +76,14 @@ export const GrabientLogo = observer(function GrabientLogo({
       .join('')}`;
   }
 
-  // Generate the initial colors
-  const startColor = generateColor(0, initialCoeffs);
-  const endColor = generateColor(1, initialCoeffs);
+  // Generate static gradient colors
+  const startColor = generateColor(0, staticCoeffs);
+  const endColor = generateColor(1, staticCoeffs);
 
-  const initialColors = {
+  const staticGradientColors = {
     startColor: rgbToHex(startColor),
     endColor: rgbToHex(endColor),
   };
-
-  useEffect(() => {
-    // Even when using collection colors, we'll keep the animation running
-    // This ensures a smooth transition if we switch back to animated mode
-
-    const TAU = Math.PI * 2;
-    let lastTimestamp = 0;
-
-    // Animation speed control
-    const ANIMATION_SPEED = 0.0001; // Lower = slower, more fluid animation
-
-    const animate = (timestamp: number): void => {
-      // Initialize on first frame
-      if (lastTimestamp === 0) {
-        lastTimestamp = timestamp;
-      }
-
-      // Calculate elapsed time since last frame
-      const deltaTime = timestamp - lastTimestamp;
-      lastTimestamp = timestamp;
-
-      // Continuously increment time value for smooth motion
-      timeRef.current += deltaTime * ANIMATION_SPEED;
-
-      // Calculate the smooth index into the coefficient array
-      // This creates a continuous path through all coefficients
-      const t = timeRef.current;
-
-      // Get the base coefficient index and the interpolation progress
-      const baseIndex = Math.floor(t % COEFFS.length);
-      const nextIndex = (baseIndex + 1) % COEFFS.length;
-      const progress = t % 1; // Fractional part for smooth interpolation
-
-      // Use a smoother easing function
-      const easedProgress = smootherstep(progress);
-
-      // Generate the interpolated coefficients
-      const interpolatedCoeffs = smoothInterpolateCoeffs(
-        COEFFS[baseIndex] as CosineCoeffs,
-        COEFFS[nextIndex] as CosineCoeffs,
-        easedProgress,
-      );
-
-      // Generate gradient colors
-      const startColor = generateColor(0, interpolatedCoeffs);
-      const endColor = generateColor(1, interpolatedCoeffs);
-
-      // Apply colors to gradient
-      if (gradientRef.current) {
-        const stops = gradientRef.current.querySelectorAll('stop');
-        if (stops && stops.length >= 2) {
-          stops[0].setAttribute('stop-color', rgbToHex(startColor));
-          stops[1].setAttribute('stop-color', rgbToHex(endColor));
-        }
-      }
-
-      // Continue animation
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    // Improved interpolation between coefficient sets
-    const smoothInterpolateCoeffs = (
-      coeffsA: CosineCoeffs,
-      coeffsB: CosineCoeffs,
-      progress: number,
-    ): CosineCoeffs => {
-      return coeffsA.map((vector, i) =>
-        vector.map((value, j) => {
-          // Special handling for phase values (index 3)
-          if (i === 3) {
-            const targetValue = coeffsB[i][j];
-            // Handle phase wrapping for continuous rotation
-            let delta = targetValue - value;
-
-            // Normalize to find the shortest angular path
-            if (Math.abs(delta) > Math.PI) {
-              delta = delta > 0 ? delta - TAU : delta + TAU;
-            }
-
-            return value + delta * progress;
-          }
-
-          // Linear interpolation for other values
-          return value + (coeffsB[i][j] - value) * progress;
-        }),
-      ) as CosineCoeffs;
-    };
-
-    // Improved easing function for smoother transitions
-    // (smootherstep is smoother than easeInOutCubic)
-    const smootherstep = (x: number): number => {
-      // Improved smootherstep (Ken Perlin)
-      return x * x * x * (x * (x * 6 - 15) + 10);
-    };
-
-    // Generate a color using the cosine gradient formula
-    const generateColor = (t: number, coeffs: CosineCoeffs): [number, number, number] => {
-      const color: [number, number, number] = [0, 0, 0];
-
-      for (let i = 0; i < 3; i++) {
-        // a + b * cos(2π(c*t + d))
-        color[i] = coeffs[0][i] + coeffs[1][i] * Math.cos(TAU * (coeffs[2][i] * t + coeffs[3][i]));
-        // Clamp values between 0 and 1
-        color[i] = Math.max(0, Math.min(1, color[i]));
-      }
-
-      return color;
-    };
-
-    // Convert RGB array to hex color string
-    const rgbToHex = (rgb: [number, number, number]): string => {
-      return `#${rgb
-        .map((x) =>
-          Math.round(x * 255)
-            .toString(16)
-            .padStart(2, '0'),
-        )
-        .join('')}`;
-    };
-
-    // Start animation
-    animationRef.current = requestAnimationFrame(animate);
-
-    // Cleanup on unmount
-    return () => {
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className={cn('inline-flex items-center', className)} aria-label="Grabient Logo">
@@ -275,9 +96,9 @@ export const GrabientLogo = observer(function GrabientLogo({
       >
         <defs>
           {/* Always define both gradients */}
-          <linearGradient id="animatedGradient" x1="0%" y1="0%" x2="100%" y2="0%" ref={gradientRef}>
-            <stop offset="0%" stopColor={initialColors.startColor} suppressHydrationWarning />
-            <stop offset="100%" stopColor={initialColors.endColor} suppressHydrationWarning />
+          <linearGradient id="staticGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={staticGradientColors.startColor} />
+            <stop offset="100%" stopColor={staticGradientColors.endColor} />
           </linearGradient>
 
           <linearGradient id="collectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -309,13 +130,13 @@ export const GrabientLogo = observer(function GrabientLogo({
             }}
           />
 
-          {/* Animated gradient is always running in the background */}
+          {/* Static gradient as fallback */}
           <rect
             x="93"
             y="43"
             width="34"
             height="7"
-            fill="url(#animatedGradient)"
+            fill="url(#staticGradient)"
             style={{
               opacity: useCollectionColors ? 0 : 1,
               transition: 'opacity 0.5s ease-in-out',
