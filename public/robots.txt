@@ -1,0 +1,11 @@
+
+# Block crawlers from dynamic seed URLs
+User-agent: *
+Disallow: /*/
+Allow: /$
+Crawl-delay: 5
+
+# Allow specific static pages if needed
+Allow: /
+Allow: /newest
+Allow: /oldest
