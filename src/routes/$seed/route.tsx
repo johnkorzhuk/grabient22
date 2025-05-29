@@ -16,7 +16,6 @@ import {
   DEFAULT_STYLE,
   DEFAULT_ANGLE,
 } from '~/validators';
-
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
 import { useEffect, useRef } from 'react';
@@ -59,7 +58,12 @@ export const Route = createFileRoute('/$seed')({
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
   },
-
+  headers: () => ({
+    // Browser: Cache for 30 minutes, allow stale for 1 hour
+    'cache-control': 'public, max-age=1800, stale-while-revalidate=3600',
+    // Cloudflare: Cache for 1 hour, stale-while-revalidate for 2 hours
+    'cdn-cache-control': 'max-age=3600, stale-while-revalidate=7200, durable',
+  }),
   beforeLoad: async ({ params, search, context }) => {
     const { seed } = params;
     // let userLikedSeed = false;
