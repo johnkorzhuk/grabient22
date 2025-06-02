@@ -169,7 +169,7 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                         params={{
                           seed: collection.seed,
                         }}
-                        search={({ categories, ...search }) => {
+                        search={(search) => {
                           return {
                             ...search,
                             angle: angle === 'auto' ? collection.angle : search.angle,

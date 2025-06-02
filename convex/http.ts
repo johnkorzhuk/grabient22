@@ -27,17 +27,12 @@ http.route({
       angle: searchParams.get('angle'),
     };
     try {
-      // Generate a default seed if none is provided
-      // This ensures we always have a valid seed to work with
-      const effectiveSeed = seed || 'HQVgnADANMAsB'; // Default seed if none provided
+      const effectiveSeed =
+        seed || 'HQNgTAHANMAsEFYZjLKBaADMAzARmi2DAE4QZYTDtY8wNswQSY8B2cvXJh4BE%2Bui6ZMOIA';
 
-      // Initialize WebAssembly for resvg
-      // We need to fetch the WASM file from a CDN since we can't import it directly in Convex
       await initWasm(fetch('https://unpkg.com/@resvg/resvg-wasm/index_bg.wasm'));
 
-      // Get optional parameters from query string with defaults
       const style = query.style as CollectionStyle;
-      // Use DEFAULT values when query params are null/undefined or parsing fails
       const steps = query.steps
         ? isNaN(parseInt(query.steps))
           ? DEFAULT_STEPS
@@ -49,10 +44,8 @@ http.route({
           : parseInt(query.angle)
         : DEFAULT_ANGLE;
 
-      // Deserialize the seed to get coefficients and globals
       const { coeffs } = deserializeCoeffs(effectiveSeed);
 
-      // Apply globals to get processed colors
       const processedColors = applyGlobals(coeffs, DEFAULT_GLOBALS);
       const gradientColors = cosineGradient(steps, processedColors);
 

@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as analysis_common from "../analysis/common.js";
+import type * as analysis_gemini from "../analysis/gemini.js";
+import type * as analysis_openai from "../analysis/openai.js";
 import type * as collections from "../collections.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
@@ -30,6 +33,9 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "analysis/common": typeof analysis_common;
+  "analysis/gemini": typeof analysis_gemini;
+  "analysis/openai": typeof analysis_openai;
   collections: typeof collections;
   crons: typeof crons;
   http: typeof http;

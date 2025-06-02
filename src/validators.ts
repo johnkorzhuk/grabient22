@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { TAGS } from '../tags';
 
 /**
  * All valid palette category keys
@@ -46,8 +47,18 @@ export const angleWithAutoValidator = v.union([v.literal('auto'), angleValidator
 
 export const DEFAULT_MODIFIER = 'global' as const;
 export const MODIFIERS = ['global', 'exposure', 'contrast', 'frequency', 'phase'] as const;
-
 export const modifierValidator = v.union(MODIFIERS.map((t) => v.literal(t)));
+
+const tagValidator = v.union(TAGS.map((tag) => v.literal(tag)));
+
+export const tagsValidator = v.optional(
+  v.pipe(
+    v.array(v.string()), // Start with array of strings
+    v.filterItems((item: string) => TAGS.includes(item as any)), // Remove invalid tags
+    v.transform((validTags: string[]) => validTags as (typeof TAGS)[number][]), // Cast to proper type
+  ),
+  [], // Default value: empty array
+);
 
 export const PI = Math.PI;
 /**

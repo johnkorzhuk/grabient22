@@ -192,6 +192,21 @@ export const updateCollectionLikes = internalMutation({
   },
 });
 
+export const getCollectionById = query({
+  args: { id: v.id('collections') },
+  handler: async (ctx, args) => {
+    const collection = await ctx.db.get(args.id);
+    
+    if (!collection) return null;
+    
+    return {
+      ...collection,
+      coeffs: collection.coeffs as CosineCoeffs,
+      globals: DEFAULT_GLOBALS,
+    };
+  },
+});
+
 export const list = query({
   handler: async (ctx) => {
     return await ctx.db

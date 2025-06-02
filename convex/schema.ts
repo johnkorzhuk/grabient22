@@ -32,16 +32,6 @@ export const stepsValidator = zodToConvex(stepsSchema);
 export const styleValidator = zodToConvex(styleSchema);
 export const angleValidator = zodToConvex(angleSchema);
 
-export const Collections = Table('collections', {
-  coeffs: zodToConvex(gradientCoeffsSchema),
-  steps: stepsValidator,
-  style: styleValidator,
-  angle: angleValidator,
-  seed: v.string(),
-  tags: v.optional(v.array(v.string())),
-  likes: v.optional(v.number()),
-});
-
 export const PopularCollections = Table('popular', {
   seed: v.string(),
   likes: v.number(),
@@ -60,6 +50,48 @@ export const Likes = Table('likes', {
   isPublic: v.boolean(),
 });
 
+export const Collections = Table('collections', {
+  coeffs: zodToConvex(gradientCoeffsSchema),
+  steps: stepsValidator,
+  style: styleValidator,
+  angle: angleValidator,
+  seed: v.string(),
+  tags: v.optional(v.array(v.string())),
+  likes: v.optional(v.number()),
+});
+
+export const CollectionsAnalysis = Table('collections_analysis', {
+  collectionId: v.id('collections'),
+  existingTags: v.array(v.string()),
+  additionalTags: v.array(v.string()),
+  model: v.union(v.literal('gemini-2.0-flash-lite'), v.literal('gpt-4o-mini')),
+  meta: v.object({
+    temperature: v.number(),
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    totalTokens: v.number(),
+    duration: v.number(),
+  }),
+});
+
+export const TagAnalysis = Table('tag_analysis', {
+  collectionId: v.id('collections'),
+  tagFrequency: v.record(v.string(), v.number()),
+  meta: v.object({
+    temperature: v.number(),
+    promptTokens: v.number(),
+    completionTokens: v.number(),
+    totalTokens: v.number(),
+    duration: v.number(),
+  }),
+  existingTags: v.array(v.string()),
+  additionalTags: v.array(v.string()),
+  model: v.union(
+    v.literal('gemini-2.5-pro-preview-05-06'),
+    v.literal('gemini-2.5-flash-preview-05-20'),
+  ),
+});
+
 export const TaggedCollections = Table('tagged_collections', {
   tag: v.string(),
   collectionId: v.id('collections'),
@@ -67,9 +99,14 @@ export const TaggedCollections = Table('tagged_collections', {
 
 export default defineSchema({
   collections: Collections.table.index('seed', ['seed']).index('likes', ['likes']),
-  tagged_collections: TaggedCollections.table.index('tag', ['tag']).searchIndex('search_tag', {
-    searchField: 'tag',
-  }),
+  tagged_collections: TaggedCollections.table
+    .index('tag', ['tag'])
+    .index('collectionId', ['collectionId'])
+    .searchIndex('search_tag', {
+      searchField: 'tag',
+    }),
+  collections_analysis: CollectionsAnalysis.table.index('collectionId', ['collectionId']),
+  tag_analysis: TagAnalysis.table.index('collectionId', ['collectionId']),
   likes: Likes.table
     .index('seed', ['seed'])
     .index('userId', ['userId'])
