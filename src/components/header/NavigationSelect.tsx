@@ -87,7 +87,7 @@ export const NavigationSelect = observer(function NavigationSelect({
           className={cn(
             'w-[150px] md:w-[170px] justify-between',
             'font-bold text-sm h-8.5 lg:h-10 px-3',
-            'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
+            'bg-transparent border-input hover:border-muted-foreground/50 hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             className,
           )}
         >
@@ -110,7 +110,10 @@ export const NavigationSelect = observer(function NavigationSelect({
                   <Link
                     key={item.id}
                     to={path}
-                    search={preferredOptions}
+                    search={(prev) => ({
+                      ...prev,
+                      ...preferredOptions,
+                    })}
                     onClick={() => {
                       // Update the UI store with the selected route
                       uiTempStore$.navSelect.set(path as NavigationItemPath);

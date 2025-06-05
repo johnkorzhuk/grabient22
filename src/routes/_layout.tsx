@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, stripSearchParams } from '@tanstack/react-rout
 import { useEffect } from 'react';
 import * as v from 'valibot';
 import { AppHeader } from '~/components/header/AppHeader';
-import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
+import { TagsCarousel } from '~/components/TagsCarousel';
 import { ScrollToTop } from '~/components/ScrollToTop';
 import { FooterSection } from '~/components/FooterSection';
 import { uiTempStore$ } from '~/stores/ui';
@@ -17,7 +17,9 @@ import { SubHeader } from '~/components/header/PrimarySubHeader';
 import useScrollThreshold from '~/hooks/useScrollThreshold';
 import { useLocation } from '@tanstack/react-router';
 import { ROUTES } from '~/components/header/NavigationSelect';
-import { TAGS, type Tag } from '../../tags';
+import { type Tag } from '../../tags';
+
+export const DEFAULT_COLLECTION_PAGE_SIZE = 24 as const;
 
 export const SEARCH_DEFAULTS = {
   style: 'auto' as const,
@@ -70,8 +72,10 @@ function RouteComponent() {
 }
 
 const Layout = observer(function Layout() {
+  const location = useLocation();
   const isDragging = use$(uiTempStore$.isDragging);
   const { scrollContainerRef, isVisible: isHeroVisible } = useScrollThreshold(50);
+  const isCollection = location.pathname === '/collection';
 
   useEffect(() => {
     return () => {
@@ -87,124 +91,15 @@ const Layout = observer(function Layout() {
       <AppHeader className="sticky top-0 z-40 bg-background" />
 
       {/* Tags section with responsive layout */}
-      <div className="w-full bg-background/90 backdrop-blur-sm flex justify-center">
-        {/* pt-2 pb-6 lg:pb-8 */}
-        <div className="w-full md:max-w-[700px] lg:max-w-[900px] xl:max-w-[1000px] 2xl:max-w-[1200px] font-poppins pb-2 px-5 lg:px-14 md:flex md:justify-center">
-          {/* Mobile: Single row carousel */}
-          {/* <div className="md:hidden">
-            <Carousel
-              opts={{
-                align: 'start',
-                loop: false,
-                dragFree: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-2 pl-4">
-                {TAGS.map((tag, index) => (
-                  <CarouselItem
-                    key={tag}
-                    className={`pl-2 basis-auto ${index === 0 ? 'pl-4' : ''}`}
-                  >
-                    <button
-                      className="disable-animation-on-theme-change cursor-pointer font-poppins font-medium bg-background/20 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm px-3 py-1 rounded-sm border border-border select-none z-10 whitespace-nowrap inline-flex justify-center items-center h-8"
-                      onClick={() => {
-                        console.log(`Tag clicked: ${tag}`);
-                      }}
-                    >
-                      {tag}
-                    </button>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-          </div> */}
-
-          {/* md-lg: 2 rows with carousel */}
-          {/* <div className="hidden md:flex lg:hidden flex-col gap-2 w-full justify-center">
-            {Array.from({ length: 2 }).map((_, rowIndex) => {
-              const tagsPerRow = Math.ceil(TAGS.length / 2);
-              const startIndex = rowIndex * tagsPerRow;
-              const endIndex = Math.min(startIndex + tagsPerRow, TAGS.length);
-
-              return (
-                <Carousel
-                  key={`md-row-${rowIndex}`}
-                  opts={{
-                    align: 'start',
-                    loop: false,
-                    dragFree: true,
-                    containScroll: 'trimSnaps',
-                  }}
-                  className="w-full"
-                >
-                  <CarouselContent className={`-ml-2 md:-ml-4 ${rowIndex === 1 ? 'pl-4' : ''}`}>
-                    {TAGS.slice(startIndex, endIndex).map((tag) => (
-                      <CarouselItem key={tag} className="pl-2 md:pl-4 basis-auto">
-                        <button
-                          className="disable-animation-on-theme-change cursor-pointer font-poppins font-medium bg-background/20 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm px-3 py-1 rounded-sm border border-border select-none z-10 whitespace-nowrap inline-flex justify-center items-center h-8"
-                          onClick={() => {
-                            console.log(`Tag clicked: ${tag}`);
-                          }}
-                        >
-                          {tag}
-                        </button>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              );
-            })}
-          </div> */}
-
-          {/* lg+: 3 rows with carousel */}
-          {/* <div className="hidden lg:flex flex-col gap-2 w-full justify-center">
-            {Array.from({ length: 3 }).map((_, rowIndex) => {
-              const tagsPerRow = Math.ceil(TAGS.length / 3);
-              const startIndex = rowIndex * tagsPerRow;
-              const endIndex = Math.min(startIndex + tagsPerRow, TAGS.length);
-
-              return (
-                <Carousel
-                  key={`lg-row-${rowIndex}`}
-                  opts={{
-                    align: 'start',
-                    loop: false,
-                    dragFree: true,
-                    containScroll: 'trimSnaps',
-                  }}
-                  className="w-full"
-                >
-                  <CarouselContent
-                    className={`-ml-4 md:-ml-6 ${rowIndex === 0 || rowIndex === 2 ? 'pl-6' : ''}`}
-                  >
-                    {TAGS.slice(startIndex, endIndex).map((tag) => (
-                      <CarouselItem key={tag} className="pl-2 md:pl-6 basis-auto">
-                        <button
-                          className="disable-animation-on-theme-change cursor-pointer font-poppins font-medium bg-background/20 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm px-3 py-1 rounded-sm border border-border select-none z-10 whitespace-nowrap inline-flex justify-center items-center h-8"
-                          onClick={() => {
-                            console.log(`Tag clicked: ${tag}`);
-                          }}
-                        >
-                          {tag}
-                        </button>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              );
-            })}
-          </div> */}
-        </div>
-      </div>
+      {!isCollection && <TagsCarousel />}
 
       <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" isHeroVisible={isHeroVisible} />
 
       <div className="pt-10">
-        <main className="relative pb-13">
+        <main className="relative pb-12">
           <Outlet />
         </main>
-        <FooterSection className="mt-13" />
+        <FooterSection className="mt-12" />
         <ScrollToTop />
       </div>
     </div>

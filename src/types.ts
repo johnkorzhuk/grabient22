@@ -6,6 +6,7 @@ import type {
 } from './validators';
 import * as v from 'valibot';
 import type { Doc } from '../convex/_generated/dataModel';
+import type { Tag } from '../tags';
 
 // Cosine gradient types
 export type CosineCoeffs = v.InferOutput<typeof coeffsSchema>;
@@ -15,6 +16,7 @@ export type CosineGlobals = v.InferOutput<typeof globalsSchema>;
 export interface AppCollection extends Omit<Doc<'collections'>, 'coeffs' | 'globals'> {
   coeffs: CosineCoeffs;
   globals: CosineGlobals;
+  tagMatches?: Tag[];
 }
 
 export type RGBAVector = [number, number, number, number];

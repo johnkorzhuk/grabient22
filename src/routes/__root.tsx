@@ -146,7 +146,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               </ThemeProvider>
               {import.meta.env.DEV && (
                 <>
-                  <ReactQueryDevtools position="left" buttonPosition="bottom-left" />
+                  <ReactQueryDevtools position="right" buttonPosition="bottom-right" />
                   <TanStackRouterDevtools position="bottom-left" />
                 </>
               )}

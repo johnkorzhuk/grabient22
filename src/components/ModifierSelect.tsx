@@ -62,7 +62,7 @@ export const ModifierSelect = observer(function ModifierSelect({
           className={cn(
             'w-[190px] justify-between',
             'font-bold capitalize text-sm h-8.5 lg:h-10 px-3',
-            'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
+            'bg-transparent border-input hover:border-muted-foreground/50 hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             'disable-animation-on-theme-change',
             className,
           )}

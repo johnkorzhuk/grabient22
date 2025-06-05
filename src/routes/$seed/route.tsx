@@ -3,7 +3,6 @@ import {
   Outlet,
   redirect,
   stripSearchParams,
-  useSearch,
   Link,
   useNavigate,
 } from '@tanstack/react-router';
@@ -18,13 +17,11 @@ import {
 } from '~/validators';
 import { observer, use$ } from '@legendapp/state/react';
 import { uiTempStore$ } from '~/stores/ui';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { AppHeader } from '~/components/header/AppHeader';
 import { FooterSection } from '~/components/FooterSection';
 import { deserializeCoeffs } from '~/lib/serialization';
-import { SubHeader } from '~/components/header/PrimarySubHeader';
 import { SEARCH_DEFAULTS } from '../_layout';
-import { ViewOptions } from '~/components/header/ViewOptions';
 import { StyleSelect } from '~/components/header/StyleSelect';
 import { StepsInput } from '~/components/header/StepsInput';
 import { AngleInput } from '~/components/header/AngleInput';
@@ -64,22 +61,8 @@ export const Route = createFileRoute('/$seed')({
     // Cloudflare: Cache for 1 hour, stale-while-revalidate for 2 hours
     'cdn-cache-control': 'max-age=3600, stale-while-revalidate=7200, durable',
   }),
-  beforeLoad: async ({ params, search, context }) => {
+  beforeLoad: async ({ params, search }) => {
     const { seed } = params;
-    // let userLikedSeed = false;
-    // try {
-    //   const { userId } = await fetchClerkAuth();
-
-    //   userLikedSeed = await context.queryClient.fetchQuery({
-    //     ...convexQuery(api.likes.checkUserLikedSeed, {
-    //       userId: userId!,
-    //       seed,
-    //     }),
-    //     gcTime: 2000,
-    //   });
-    // } catch (error) {
-    //   console.error('Error fetching liked seed:', error);
-    // }
 
     try {
       // Try to deserialize the data - if it fails, redirect to home
@@ -126,6 +109,7 @@ export const Route = createFileRoute('/$seed')({
   onLeave: () => {
     uiTempStore$.previewSeed.set(null);
     uiTempStore$.activeCollectionId.set(null);
+    uiTempStore$.previewColorIndex.set(null);
   },
 });
 
@@ -135,12 +119,9 @@ function RouteComponent() {
 
 const Layout = observer(function Layout() {
   const { style, steps, angle } = Route.useSearch();
-  const { seed } = Route.useParams();
   const navigate = useNavigate({ from: '/$seed' });
   const isDragging = use$(uiTempStore$.isDragging);
   const navSelect = use$(uiTempStore$.navSelect);
-  const activeCollectionId = use$(uiTempStore$.activeCollectionId);
-  const itemActive = activeCollectionId === seed;
   const preferredOptions = use$(uiTempStore$.preferredOptions);
   const initialSearchDataRef = useRef({
     style: style === 'auto' ? DEFAULT_STYLE : style,
@@ -195,7 +176,7 @@ const Layout = observer(function Layout() {
             className={cn(
               'justify-between',
               'font-bold text-sm h-8.5 lg:h-10 px-3',
-              'border-input bg-background/80  hover:bg-background/90 backdrop-blur-sm disable-animation-on-theme-change text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
+              'border-input hover:border-muted-foreground/50 bg-background/80 hover:bg-background/90 backdrop-blur-sm disable-animation-on-theme-change text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             )}
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={2.5} />

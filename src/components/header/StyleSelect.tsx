@@ -65,7 +65,7 @@ export const StyleSelect = observer(function StyleSelect({
       });
       uiTempStore$.preferredOptions.style.set(clickedStyle);
     }
-    
+
     // Close the popover after selection
     setOpen(false);
   };
@@ -82,7 +82,7 @@ export const StyleSelect = observer(function StyleSelect({
           className={cn(
             'w-full justify-between',
             'font-bold text-sm h-10 px-3',
-            'bg-transparent border-input hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
+            'bg-transparent border-input hover:border-muted-foreground/50 hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer',
             className,
           )}
         >

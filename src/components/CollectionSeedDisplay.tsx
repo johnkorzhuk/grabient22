@@ -48,6 +48,9 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
   const previewColorIndex = use$(uiTempStore$.previewColorIndex);
   const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
   const gradientColors = cosineGradient(steps, processedCoeffs);
+  
+  // If the seed exists as a key in likedSeeds, we can assume it's in the original order
+  const isOriginalOrder = likedSeeds ? Object.hasOwn(likedSeeds, collection.seed) : false;
   const { styles, cssString } = getCollectionStyleCSS(
     style,
     gradientColors,
@@ -68,7 +71,7 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
     <>
       {/* Gradient container with fixed height */}
       <div
-        className={cn('relative h-[300px] w-full', className)}
+        className={cn('relative h-[300px] w-full group', className)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -122,6 +125,25 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
             }}
           />
         </div>
+
+        {/* Bottom tag matches - only show if seed is in likedSeeds */}
+        {collection.tagMatches && collection.tagMatches.length > 0 && isOriginalOrder && (
+          <div
+            className={cn('absolute bottom-3 left-3 z-10 flex flex-wrap gap-2 transition-opacity group/tags', {
+              'opacity-0 group-hover:opacity-100': !itemActive,
+              'opacity-100': itemActive,
+            })}
+          >
+            {collection.tagMatches.map((tag, i) => (
+              <span
+                key={i}
+                className="px-2 py-1 text-xs font-medium text-foreground select-none lowercase rounded-md bg-background/20 backdrop-blur-sm group-hover/tags:bg-background/40 transition-colors duration-200 cursor-default"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Like button and count moved below the gradient container - always visible */}

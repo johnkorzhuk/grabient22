@@ -56,11 +56,10 @@ export const Route = createFileRoute('/$seed/')({
 
     // Construct the OG image URL using the Convex HTTP action
     const ogImageUrl = `${import.meta.env.VITE_CONVEX_SITE_URL}/og?seed=${seed}&style=${styleToUse}&steps=${stepsToUse}&angle=${angleToUse}`;
-
     return {
       meta: [
         ...seo({
-          title: `Grabient`,
+          title: `Grabient.com`,
           description: `Check out this Grabient!`,
           image: ogImageUrl,
         }),

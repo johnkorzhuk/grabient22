@@ -56,8 +56,7 @@ export const Collections = Table('collections', {
   style: styleValidator,
   angle: angleValidator,
   seed: v.string(),
-  tags: v.optional(v.array(v.string())),
-  likes: v.optional(v.number()),
+  likes: v.number(),
 });
 
 export const CollectionsAnalysis = Table('collections_analysis', {

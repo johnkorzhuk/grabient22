@@ -264,7 +264,7 @@ export const AngleInput = observer(function AngleInput({
       });
       uiTempStore$.preferredOptions.angle.set(clickedAngle);
     }
-    
+
     // Close the popover after selection
     setOpen(false);
   };
@@ -304,7 +304,7 @@ export const AngleInput = observer(function AngleInput({
           aria-label="Angle input"
           className={cn(
             'flex items-center relative border border-input rounded-md',
-            'bg-transparent hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 w-full',
+            'bg-transparent hover:border-muted-foreground/50 hover:bg-background text-muted-foreground hover:text-foreground transition-colors duration-200 w-full',
             'font-bold text-sm h-10 shadow-sm',
             className,
           )}

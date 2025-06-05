@@ -15,7 +15,7 @@ import type { CosineCoeffs } from '../src/types';
 import { applyGlobals } from '../src/lib/cosineGradient';
 import { publicLikesBySeed } from './likes';
 import { Collections } from './schema';
-import { Doc } from './_generated/dataModel';
+import { Doc, Id } from './_generated/dataModel';
 import { paginationOptsValidator } from 'convex/server';
 
 export const updatePopularCollections = internalMutation({
@@ -196,9 +196,9 @@ export const getCollectionById = query({
   args: { id: v.id('collections') },
   handler: async (ctx, args) => {
     const collection = await ctx.db.get(args.id);
-    
+
     if (!collection) return null;
-    
+
     return {
       ...collection,
       coeffs: collection.coeffs as CosineCoeffs,
@@ -245,6 +245,223 @@ export const listPopularNew = query({
     }));
   },
 });
+
+export const listPopularNewNew = query({
+  args: { tags: v.optional(v.array(v.string())) },
+  handler: async (ctx, args) => {
+    if (!args.tags || args.tags.length === 0) {
+      // Default: sort by likes
+      const collections = await ctx.db
+        .query('collections')
+        .withIndex('likes')
+        .order('desc')
+        .take(72);
+
+      return collections.map((collection) => ({
+        ...collection,
+        coeffs: collection.coeffs as CosineCoeffs,
+        globals: DEFAULT_GLOBALS,
+      }));
+    }
+
+    // 1. Gather all tagged collections for the provided tags
+    const taggedCollectionsArrays = await Promise.all(
+      args.tags.map((tag) =>
+        ctx.db
+          .query('tagged_collections')
+          .withIndex('tag', (q) => q.eq('tag', tag))
+          .collect(),
+      ),
+    );
+
+    // 2. Count tag matches for each collection
+    const matchCount: Record<string, number> = {};
+    taggedCollectionsArrays.forEach((taggedCollections) => {
+      taggedCollections.forEach((item) => {
+        matchCount[item.collectionId] = (matchCount[item.collectionId] || 0) + 1;
+      });
+    });
+
+    // 3. Fetch the actual collections
+    const collectionsWithNulls = await Promise.all(
+      Object.keys(matchCount).map((id) => ctx.db.get(id as Id<'collections'>)),
+    );
+    const collections = collectionsWithNulls.filter((c): c is Doc<'collections'> => c !== null);
+
+    // 4. Sort: first by match count (desc), then by likes (desc)
+    collections.sort((a, b) => {
+      const matchDiff = (matchCount[b._id] ?? 0) - (matchCount[a._id] ?? 0);
+      if (matchDiff !== 0) return matchDiff;
+      return (b.likes ?? 0) - (a.likes ?? 0);
+    });
+
+    // 5. Return the top 72
+    return collections.slice(0, 72).map((collection) => ({
+      ...collection,
+      coeffs: collection.coeffs as CosineCoeffs,
+      globals: DEFAULT_GLOBALS,
+    }));
+  },
+});
+
+export const listCollections = query({
+  args: {
+    tags: v.optional(v.array(v.string())),
+    paginationOpts: paginationOptsValidator,
+    sort: v.optional(v.union(v.literal('popular'), v.literal('new'), v.literal('old'))), // "popular", "new", "old"
+  },
+  handler: async (ctx, args) => {
+    const pageSize = args.paginationOpts.numItems ?? 72;
+    const offset = args.paginationOpts.cursor ? parseInt(args.paginationOpts.cursor, 10) : 0;
+    const sort = args.sort ?? 'popular'; // default to "popular"
+
+    // If no tags, use native Convex pagination with the requested sort
+    if (!args.tags || args.tags.length === 0) {
+      const query = ctx.db.query('collections');
+
+      let paginationResult;
+
+      if (sort === 'popular') {
+        paginationResult = await query
+          .withIndex('likes')
+          .order('desc')
+          .paginate(args.paginationOpts);
+      } else if (sort === 'new') {
+        paginationResult = await query.order('desc').paginate(args.paginationOpts);
+      } else {
+        // 'old' or any other value
+        paginationResult = await query.order('asc').paginate(args.paginationOpts);
+      }
+
+      // Add globals field to each collection
+      return {
+        ...paginationResult,
+        page: paginationResult.page.map((collection) => ({
+          ...collection,
+          coeffs: collection.coeffs as CosineCoeffs,
+          globals: DEFAULT_GLOBALS,
+        })),
+      };
+    }
+
+    // Tags filtering (manual pagination)
+    const taggedCollectionsArrays = await Promise.all(
+      args.tags.map((tag) =>
+        ctx.db
+          .query('tagged_collections')
+          .withIndex('tag', (q) => q.eq('tag', tag))
+          .collect(),
+      ),
+    );
+
+    const matchCount: Record<string, number> = {};
+    const matchedTags: Record<string, string[]> = {};
+    taggedCollectionsArrays.forEach((taggedCollections, tagIdx) => {
+      const tag = args.tags![tagIdx];
+      taggedCollections.forEach((item) => {
+        matchCount[item.collectionId] = (matchCount[item.collectionId] || 0) + 1;
+        if (!matchedTags[item.collectionId]) matchedTags[item.collectionId] = [];
+        matchedTags[item.collectionId].push(tag);
+      });
+    });
+
+    const collectionsWithNulls = await Promise.all(
+      Object.keys(matchCount).map((id) => ctx.db.get(id as Id<'collections'>)),
+    );
+    const collections = collectionsWithNulls.filter((c): c is Doc<'collections'> => c !== null);
+
+    // Sort: first by match count (desc), then by requested sort
+    collections.sort((a, b) => {
+      const matchDiff = (matchCount[b._id] ?? 0) - (matchCount[a._id] ?? 0);
+      if (matchDiff !== 0) return matchDiff;
+      if (sort === 'popular') {
+        return (b.likes ?? 0) - (a.likes ?? 0);
+      } else if (sort === 'new') {
+        return (b._creationTime ?? 0) - (a._creationTime ?? 0);
+      } else if (sort === 'old') {
+        return (a._creationTime ?? 0) - (b._creationTime ?? 0);
+      }
+      return 0;
+    });
+
+    const page = collections.slice(offset, offset + pageSize);
+
+    return {
+      page: page.map((collection) => ({
+        ...collection,
+        coeffs: collection.coeffs as CosineCoeffs,
+        globals: DEFAULT_GLOBALS,
+        tagMatches: matchedTags[collection._id] ?? [],
+      })),
+      isDone: offset + pageSize >= collections.length,
+      continueCursor: (offset + pageSize).toString(),
+    };
+  },
+});
+// export const listPopularNewNewNew = query({
+//   args: {
+//     tags: v.optional(v.array(v.string())),
+//     paginationOpts: paginationOptsValidator,
+//   },
+//   handler: async (ctx, args) => {
+//     const pageSize = args.paginationOpts.numItems ?? 72;
+//     const offset = args.paginationOpts.cursor ? parseInt(args.paginationOpts.cursor, 10) : 0;
+
+//     if (!args.tags || args.tags.length === 0) {
+//       // Use native Convex pagination
+//       return await ctx.db
+//         .query('collections')
+//         .withIndex('likes')
+//         .order('desc')
+//         .paginate(args.paginationOpts);
+//     }
+
+//     // 1. Gather all tagged collections for the provided tags
+//     const taggedCollectionsArrays = await Promise.all(
+//       args.tags.map((tag) =>
+//         ctx.db
+//           .query('tagged_collections')
+//           .withIndex('tag', (q) => q.eq('tag', tag))
+//           .collect(),
+//       ),
+//     );
+
+//     // 2. Count tag matches for each collection
+//     const matchCount: Record<string, number> = {};
+//     taggedCollectionsArrays.forEach((taggedCollections) => {
+//       taggedCollections.forEach((item) => {
+//         matchCount[item.collectionId] = (matchCount[item.collectionId] || 0) + 1;
+//       });
+//     });
+
+//     // 3. Fetch the actual collections
+//     const collectionsWithNulls = await Promise.all(
+//       Object.keys(matchCount).map((id) => ctx.db.get(id as Id<'collections'>)),
+//     );
+//     const collections = collectionsWithNulls.filter((c): c is Doc<'collections'> => c !== null);
+
+//     // 4. Sort: first by match count (desc), then by likes (desc)
+//     collections.sort((a, b) => {
+//       const matchDiff = (matchCount[b._id] ?? 0) - (matchCount[a._id] ?? 0);
+//       if (matchDiff !== 0) return matchDiff;
+//       return (b.likes ?? 0) - (a.likes ?? 0);
+//     });
+
+//     // 5. Manual pagination: slice the sorted array
+//     const page = collections.slice(offset, offset + pageSize);
+
+//     // 6. Return the page and a cursor for the next page
+//     return {
+//       page: page.map((collection) => ({
+//         ...collection,
+//         coeffs: collection.coeffs as CosineCoeffs,
+//         globals: DEFAULT_GLOBALS,
+//       })),
+//       isDone: offset + pageSize >= collections.length,
+//       continueCursor: (offset + pageSize).toString(),
+//     };
+//   },
+// });
 
 export const listNew = query({
   handler: async (ctx) => {
@@ -381,25 +598,13 @@ export const createCollection = mutation({
   handler: async (ctx, args) => {
     // Create the collection
     const collectionId = await ctx.db.insert('collections', {
-      tags: args.tags,
       coeffs: args.coeffs,
       steps: args.steps,
       style: args.style,
       angle: args.angle,
       seed: args.seed,
+      likes: 0,
     });
-
-    if (args.tags && args.tags.length > 0) {
-      // Create entries in tagged_collections for each tag
-      await Promise.all(
-        args.tags.map((tag) =>
-          ctx.db.insert('tagged_collections', {
-            tag,
-            collectionId,
-          }),
-        ),
-      );
-    }
 
     return collectionId;
   },

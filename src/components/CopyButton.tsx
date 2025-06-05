@@ -1,7 +1,7 @@
 import { useClipboard } from '@mantine/hooks';
 import { Copy, Check, Download } from 'lucide-react';
 import { cn } from '~/lib/utils';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,20 +78,28 @@ export function CopyButton({
     }
   }, [clipboard.copied, copiedType]);
 
+  // Create a ref to track hover state
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div className="relative">
       {/* The copy button container */}
       <div
+        ref={buttonRef}
         className={cn(
-          'bg-background/20 backdrop-blur-sm rounded-md transition-opacity flex items-center justify-center px-0.5 z-10',
+          'bg-background/20 backdrop-blur-sm rounded-md transition-all flex items-center justify-center px-0.5 z-10',
           {
             'opacity-0 group-hover:opacity-100': !open && !isActive,
             'opacity-100': open || isActive,
+            'bg-background/40': isHovered,
           },
         )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {/* The actual copy button that's always visible */}
-        <div className={cn('p-1.5 rounded-full transition-colors cursor-pointer hover:text-foreground group', copyClassName)}>
+        <div className={cn('p-1.5 rounded-full transition-colors cursor-pointer hover:text-foreground', copyClassName)}>
           {clipboard.copied ? (
             <Check
               className="w-5 h-5 text-foreground"
@@ -115,7 +123,12 @@ export function CopyButton({
           }}
         >
           <DropdownMenuTrigger asChild>
-            <button className="w-full h-full opacity-0 cursor-pointer" aria-label="Copy options">
+            <button 
+              className="w-full h-full opacity-0 cursor-pointer z-20" 
+              aria-label="Copy options"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
               <span className="sr-only">Open copy options</span>
             </button>
           </DropdownMenuTrigger>

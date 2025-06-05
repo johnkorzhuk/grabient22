@@ -57,11 +57,39 @@ export const checkUserLikedSeeds = query({
           .query('likes')
           .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', seed))
           .unique();
-        return [seed, like !== null];
+        return [seed, like !== null] as [string, boolean];
       }),
     );
 
     return Object.fromEntries(results);
+  },
+});
+
+/**
+ * Optimized version of checkUserLikedSeeds that returns a Boolean array instead of an object
+ * The array maintains the same order as the input seeds array
+ */
+export const checkUserLikedSeedsNew = query({
+  args: {
+    userId: v.optional(v.union(v.string(), v.null())),
+    seeds: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (!args.userId || args.seeds.length === 0) {
+      return [];
+    }
+
+    const results = await Promise.all(
+      args.seeds.map(async (seed) => {
+        const like = await ctx.db
+          .query('likes')
+          .withIndex('byUserIdAndSeed', (q) => q.eq('userId', args.userId!).eq('seed', seed))
+          .unique();
+        return like !== null;
+      }),
+    );
+
+    return results;
   },
 });
 
