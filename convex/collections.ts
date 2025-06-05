@@ -246,64 +246,6 @@ export const listPopularNew = query({
   },
 });
 
-export const listPopularNewNew = query({
-  args: { tags: v.optional(v.array(v.string())) },
-  handler: async (ctx, args) => {
-    if (!args.tags || args.tags.length === 0) {
-      // Default: sort by likes
-      const collections = await ctx.db
-        .query('collections')
-        .withIndex('likes')
-        .order('desc')
-        .take(72);
-
-      return collections.map((collection) => ({
-        ...collection,
-        coeffs: collection.coeffs as CosineCoeffs,
-        globals: DEFAULT_GLOBALS,
-      }));
-    }
-
-    // 1. Gather all tagged collections for the provided tags
-    const taggedCollectionsArrays = await Promise.all(
-      args.tags.map((tag) =>
-        ctx.db
-          .query('tagged_collections')
-          .withIndex('tag', (q) => q.eq('tag', tag))
-          .collect(),
-      ),
-    );
-
-    // 2. Count tag matches for each collection
-    const matchCount: Record<string, number> = {};
-    taggedCollectionsArrays.forEach((taggedCollections) => {
-      taggedCollections.forEach((item) => {
-        matchCount[item.collectionId] = (matchCount[item.collectionId] || 0) + 1;
-      });
-    });
-
-    // 3. Fetch the actual collections
-    const collectionsWithNulls = await Promise.all(
-      Object.keys(matchCount).map((id) => ctx.db.get(id as Id<'collections'>)),
-    );
-    const collections = collectionsWithNulls.filter((c): c is Doc<'collections'> => c !== null);
-
-    // 4. Sort: first by match count (desc), then by likes (desc)
-    collections.sort((a, b) => {
-      const matchDiff = (matchCount[b._id] ?? 0) - (matchCount[a._id] ?? 0);
-      if (matchDiff !== 0) return matchDiff;
-      return (b.likes ?? 0) - (a.likes ?? 0);
-    });
-
-    // 5. Return the top 72
-    return collections.slice(0, 72).map((collection) => ({
-      ...collection,
-      coeffs: collection.coeffs as CosineCoeffs,
-      globals: DEFAULT_GLOBALS,
-    }));
-  },
-});
-
 export const listCollections = query({
   args: {
     tags: v.optional(v.array(v.string())),
@@ -398,70 +340,6 @@ export const listCollections = query({
     };
   },
 });
-// export const listPopularNewNewNew = query({
-//   args: {
-//     tags: v.optional(v.array(v.string())),
-//     paginationOpts: paginationOptsValidator,
-//   },
-//   handler: async (ctx, args) => {
-//     const pageSize = args.paginationOpts.numItems ?? 72;
-//     const offset = args.paginationOpts.cursor ? parseInt(args.paginationOpts.cursor, 10) : 0;
-
-//     if (!args.tags || args.tags.length === 0) {
-//       // Use native Convex pagination
-//       return await ctx.db
-//         .query('collections')
-//         .withIndex('likes')
-//         .order('desc')
-//         .paginate(args.paginationOpts);
-//     }
-
-//     // 1. Gather all tagged collections for the provided tags
-//     const taggedCollectionsArrays = await Promise.all(
-//       args.tags.map((tag) =>
-//         ctx.db
-//           .query('tagged_collections')
-//           .withIndex('tag', (q) => q.eq('tag', tag))
-//           .collect(),
-//       ),
-//     );
-
-//     // 2. Count tag matches for each collection
-//     const matchCount: Record<string, number> = {};
-//     taggedCollectionsArrays.forEach((taggedCollections) => {
-//       taggedCollections.forEach((item) => {
-//         matchCount[item.collectionId] = (matchCount[item.collectionId] || 0) + 1;
-//       });
-//     });
-
-//     // 3. Fetch the actual collections
-//     const collectionsWithNulls = await Promise.all(
-//       Object.keys(matchCount).map((id) => ctx.db.get(id as Id<'collections'>)),
-//     );
-//     const collections = collectionsWithNulls.filter((c): c is Doc<'collections'> => c !== null);
-
-//     // 4. Sort: first by match count (desc), then by likes (desc)
-//     collections.sort((a, b) => {
-//       const matchDiff = (matchCount[b._id] ?? 0) - (matchCount[a._id] ?? 0);
-//       if (matchDiff !== 0) return matchDiff;
-//       return (b.likes ?? 0) - (a.likes ?? 0);
-//     });
-
-//     // 5. Manual pagination: slice the sorted array
-//     const page = collections.slice(offset, offset + pageSize);
-
-//     // 6. Return the page and a cursor for the next page
-//     return {
-//       page: page.map((collection) => ({
-//         ...collection,
-//         coeffs: collection.coeffs as CosineCoeffs,
-//         globals: DEFAULT_GLOBALS,
-//       })),
-//       isDone: offset + pageSize >= collections.length,
-//       continueCursor: (offset + pageSize).toString(),
-//     };
-//   },
-// });
 
 export const listNew = query({
   handler: async (ctx) => {

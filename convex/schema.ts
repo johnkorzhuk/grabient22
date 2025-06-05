@@ -88,6 +88,7 @@ export const TagAnalysis = Table('tag_analysis', {
   model: v.union(
     v.literal('gemini-2.5-pro-preview-05-06'),
     v.literal('gemini-2.5-flash-preview-05-20'),
+    v.literal('gpt-4o-mini'),
   ),
 });
 

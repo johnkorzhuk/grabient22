@@ -70,129 +70,6 @@ export const getCollectionsByTags = query({
   },
 });
 
-export const TagGenerationSchema = z.object({
-  // 5 tags selected from the tagFrequency that also exist in TAGS array
-  existingTags: z
-    .array(z.enum(TAGS as readonly [string, ...string[]]))
-    .length(5)
-    .describe(
-      '5 most relevant tags selected from the tag frequency data that exist in the TAGS array.',
-    ),
-  additionalTags: z
-    .array(z.string())
-    .max(3)
-    .describe(
-      '0-3 unique additional tags that would be valuable additions to the TAGS list. These should be specific, meaningful, and not too generic (avoid terms like "Gradient", "Color", etc.).',
-    ),
-});
-
-export const analyzeTagFrequency = internalAction({
-  args: {
-    collectionId: v.id('collections'),
-    tagFrequency: TagAnalysis.withoutSystemFields.tagFrequency, // Record<string, number>
-  },
-  handler: async (ctx, { collectionId, tagFrequency }) => {
-    const collection = await ctx.runQuery(api.collections.getCollectionById, {
-      id: collectionId,
-    });
-
-    if (!collection) {
-      console.log(`Collection ${collectionId} not found, skipping...`);
-      return null;
-    }
-
-    const STEPS = 5 as const;
-    const { coeffs, globals } = deserializeCoeffs(collection.seed);
-    const appliedCoeffs = applyGlobals(coeffs, globals);
-
-    const gradientColors = cosineGradient(STEPS, appliedCoeffs);
-    const colorFormats = gradientColors.map((color) => colorToAllFormats(color));
-
-    // Initialize WebAssembly for resvg
-    await initWasm(fetch('https://unpkg.com/@resvg/resvg-wasm/index_bg.wasm'));
-
-    const svgString = getCollectionStyleSVG(
-      'linearSwatches',
-      gradientColors,
-      90,
-      undefined,
-      undefined,
-      800,
-      200,
-    );
-
-    // Convert SVG to PNG using resvg-wasm
-    const resvg = new Resvg(svgString, {
-      background: 'transparent',
-      fitTo: {
-        mode: 'width',
-        value: 800,
-      },
-      font: {
-        loadSystemFonts: true,
-      },
-    });
-
-    // Render the PNG
-    const pngData = resvg.render();
-    const pngBuffer = pngData.asPng();
-
-    const prompt = getTagAnalysisPrompt(tagFrequency, colorFormats);
-    const temperature = 0.5; // Lower temperature for more consistent tag selection
-    // const model = 'gemini-2.5-pro-preview-05-06' as const;
-    const model = 'gemini-2.5-flash-preview-05-20' as const;
-
-    const startTime = Date.now();
-
-    // Call Gemini with structured output and the PNG image
-    const result = await generateObject({
-      model: google(model),
-      messages: [
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt },
-            {
-              type: 'image',
-              image: pngBuffer,
-            },
-          ],
-        },
-      ],
-      schema: TagGenerationSchema,
-      temperature: temperature,
-    });
-
-    // Store the analysis in TagAnalysis table
-    await ctx.runMutation(internal.tags.insertTagAnalysis, {
-      collectionId,
-      tagFrequency,
-      existingTags: result.object.existingTags,
-      additionalTags: result.object.additionalTags,
-      model,
-      meta: {
-        temperature,
-        promptTokens: result.usage.promptTokens,
-        completionTokens: result.usage.completionTokens,
-        totalTokens: result.usage.totalTokens,
-        duration: Date.now() - startTime,
-      },
-    });
-
-    // Create TaggedCollections records for the selected existing tags in a single batch
-    // to avoid OCC conflicts when running parallel mutations
-    await ctx.runMutation(internal.tags.insertTaggedCollections, {
-      tags: result.object.existingTags,
-      collectionId,
-    });
-
-    return {
-      existingTags: result.object.existingTags,
-      additionalTags: result.object.additionalTags,
-    };
-  },
-});
-
 export const insertTaggedCollections = internalMutation({
   args: {
     tags: v.array(v.string()),
@@ -243,8 +120,11 @@ export const insertTagAnalysis = internalMutation({
 });
 
 export const generateTags = internalAction({
-  args: { startIndexKey: v.optional(v.any()) },
-  handler: async (ctx, { startIndexKey }) => {
+  args: {
+    startIndexKey: v.optional(v.any()),
+    model: v.union(v.literal('gemini'), v.literal('openai')),
+  },
+  handler: async (ctx, { startIndexKey, model }) => {
     // Fetch a batch of items
     const { page, indexKeys, hasMore } = await ctx.runQuery(internal.analysis.common.batchOfItems, {
       startIndexKey,
@@ -306,7 +186,7 @@ export const generateTags = internalAction({
         }
 
         // Analyze the tag frequency and generate final tags
-        const analysis = await ctx.runAction(internal.tags.analyzeTagFrequency, {
+        const analysis = await ctx.runAction(internal.analysis[model].analyzeTagFrequency, {
           collectionId,
           tagFrequency,
         });
@@ -326,58 +206,10 @@ export const generateTags = internalAction({
     // If there are more items, schedule the next batch
     if (hasMore) {
       const nextStartIndexKey = indexKeys[indexKeys.length - 1];
-      await ctx.scheduler.runAfter(5000, internal.tags.generateTags, {
+      await ctx.scheduler.runAfter(model === 'gemini' ? 5000 : 15000, internal.tags.generateTags, {
         startIndexKey: nextStartIndexKey,
+        model,
       });
     }
   },
 });
-
-const getTagAnalysisPrompt = (
-  tagFrequency: Record<string, number>,
-  colorFormats: ColorFormats[],
-) => {
-  const availableTagsList = TAGS.join(', ');
-  const tagFrequencyEntries = Object.entries(tagFrequency)
-    .map(([tag, count]) => `${tag}: ${count}`)
-    .join('\n');
-
-  return `You are an expert color theorist and designer analyzing tag frequency data for a color palette. Based on previous AI analysis of this palette, you need to select the most relevant tags and suggest valuable additions.
-
-CONTEXT:
-- Multiple AI models have analyzed this color palette and suggested tags
-- The tag frequency data shows how often each tag was suggested across different analyses
-- You have access to the original color data and visual representation
-- Your task is to distill this into the 5 most relevant existing tags plus 0-3 valuable new tags
-
-ORIGINAL COLOR ANALYSIS CONTEXT:
-${getColorAnalysisPrompt(colorFormats)}
-
-TAG FREQUENCY DATA (tag: occurrence_count):
-${tagFrequencyEntries}
-
-AVAILABLE TAGS TO CHOOSE FROM:
-${availableTagsList}
-
-TASK REQUIREMENTS:
-
-1. EXISTING TAGS (exactly 5 required):
-Select exactly 5 tags from the predefined TAGS list that:
-- Appear in the tag frequency data (prioritize higher frequency tags when appropriate)
-- Best represent the core characteristics of this color palette
-- Provide the most descriptive and useful categorization
-- Cover different aspects: color theory, mood, temperature, style, etc.
-
-Consider both frequency AND relevance - a tag that appears less frequently might still be more descriptive than a more common but generic tag.
-
-2. ADDITIONAL TAGS (0-3 optional):
-Suggest 0-3 new tags that:
-- Are NOT already in the predefined TAGS list
-- Would be valuable additions to the overall tag vocabulary
-- Are specific and meaningful (avoid generic terms like "Gradient", "Palette", "Color")
-- Capture unique aspects of color palettes that aren't well represented in the current tag set
-- Are single words or short compound terms
-- Would be useful for categorizing other color palettes, not just this one
-
-Focus on quality over quantity - only suggest additional tags if they truly add value to the existing tag system.`;
-};
