@@ -75,11 +75,7 @@ export const getColorAnalysisPrompt = (colorFormats: ColorFormats[]) => {
   ${availableTagsList}
   
   Your selection should include the most relevant tags that capture:
-  - Color harmony relationships (complementary, analogous, triadic, etc.)
   - Emotional mood and psychological associations
-  - Color temperature (warm/cool)
-  - Saturation levels (vibrant/muted/pastel)
-  - Contrast levels (high/low contrast)
   - Seasonal associations
   - Style categories
   - Use case scenarios
@@ -115,7 +111,7 @@ export const getTagAnalysisPrompt = (
   - Multiple AI models have analyzed this color palette and suggested tags
   - The tag frequency data shows how often each tag was suggested across different analyses
   - You have access to the original color data and visual representation
-  - Your task is to distill this into the 5 most relevant existing tags plus 0-3 valuable new tags
+  - Your task is to distill this into the most relevant existing tags plus 0-3 valuable new tags
   
   ORIGINAL COLOR ANALYSIS CONTEXT:
   ${getColorAnalysisPrompt(colorFormats)}
@@ -128,8 +124,8 @@ export const getTagAnalysisPrompt = (
   
   TASK REQUIREMENTS:
   
-  1. EXISTING TAGS (exactly 5 required):
-  Select exactly 5 tags from the predefined TAGS list that:
+  1. EXISTING TAGS (required):
+  Select tags from the predefined TAGS list that:
   - Appear in the tag frequency data (prioritize higher frequency tags when appropriate)
   - Best represent the core characteristics of this color palette
   - Provide the most descriptive and useful categorization
@@ -153,9 +149,8 @@ export const TagGenerationSchema = z.object({
   // 5 tags selected from the tagFrequency that also exist in TAGS array
   existingTags: z
     .array(z.enum(TAGS as readonly [string, ...string[]]))
-    .length(5)
     .describe(
-      '5 most relevant tags selected from the tag frequency data that exist in the TAGS array.',
+      'The most relevant tags selected from the tag frequency data that exist in the TAGS array.',
     ),
   additionalTags: z
     .array(z.string())

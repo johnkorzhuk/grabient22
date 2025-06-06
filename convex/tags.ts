@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { internalAction, internalMutation, query } from './_generated/server';
+import { internalAction, internalMutation, internalQuery, query } from './_generated/server';
 import { Id } from './_generated/dataModel';
 import { api, internal } from './_generated/api';
 import { deserializeCoeffs } from '../src/lib/serialization';
@@ -119,6 +119,16 @@ export const insertTagAnalysis = internalMutation({
   },
 });
 
+export const getTagAnalysisForCollection = internalQuery({
+  args: { collectionId: v.id('collections') },
+  handler: async (ctx, { collectionId }) => {
+    return await ctx.db
+      .query('tag_analysis')
+      .withIndex('collectionId', (q: any) => q.eq('collectionId', collectionId))
+      .collect();
+  },
+});
+
 export const generateTags = internalAction({
   args: {
     startIndexKey: v.optional(v.any()),
@@ -138,6 +148,11 @@ export const generateTags = internalAction({
           collectionId: item._id,
         });
 
+        // Query existing TagAnalysis records for this collection
+        const tagAnalysisRecords = await ctx.runQuery(internal.tags.getTagAnalysisForCollection, {
+          collectionId: item._id,
+        });
+
         // Count tag occurrences from existingTags
         const tagFrequency: Record<string, number> = {};
 
@@ -153,6 +168,26 @@ export const generateTags = internalAction({
           // Process additionalTags
           if (record.additionalTags && record.additionalTags.length > 0) {
             record.additionalTags.forEach((tag) => {
+              tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
+            });
+          }
+        });
+
+        // Include data from TagAnalysis records
+        tagAnalysisRecords.forEach((record: {
+          existingTags?: string[];
+          additionalTags?: string[];
+        }) => {
+          // Include existingTags
+          if (record.existingTags && record.existingTags.length > 0) {
+            record.existingTags.forEach((tag: string) => {
+              tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
+            });
+          }
+
+          // Include additionalTags
+          if (record.additionalTags && record.additionalTags.length > 0) {
+            record.additionalTags.forEach((tag: string) => {
               tagFrequency[tag] = (tagFrequency[tag] || 0) + 1;
             });
           }

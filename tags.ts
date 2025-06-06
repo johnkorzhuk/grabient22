@@ -1,15 +1,14 @@
 const TAGS = [
-  'Analogous',
+  // 'Analogous',
   'Autumn',
   'Beach',
   'Bohemian',
   'Botanical',
-  'Bronze',
-  'Celestial',
+  // 'Bronze',
   'Christmas',
   'Cold',
-  'Complementary',
-  'Copper',
+  // 'Complementary',
+  // 'Copper',
   'Corporate',
   'Cozy',
   'Cyberpunk',
@@ -21,7 +20,7 @@ const TAGS = [
   'Ethereal',
   'Forest',
   'Fresh',
-  'Gold',
+  // 'Gold',
   'Gothic',
   'Halloween',
   'Happy',
@@ -33,7 +32,7 @@ const TAGS = [
   'Kids',
   'Low Contrast',
   'Luxury',
-  'Matte',
+  // 'Matte',
   'Melancholic',
   'Metallic',
   'Minimalist',
@@ -46,28 +45,28 @@ const TAGS = [
   'Nostalgic',
   'Ocean',
   'Pastel',
-  'Psychedelic',
+  // 'Psychedelic',
   'Retro',
   'Rustic',
   'Serene',
-  'Silver',
+  // 'Silver',
   'Sky',
   'Space',
-  'Split Complementary',
+  // 'Split Complementary',
   'Spring',
   'Stone',
   'Summer',
   'Sunset',
   'Sweet',
-  'Tetradic',
-  'Triadic',
+  // 'Tetradic',
+  // 'Triadic',
   'Tropical',
   'Valentine',
   'Vintage',
   'Warm',
-  'Wedding',
+  // 'Wedding',
   'Winter',
-  'Wood',
+  // 'Wood',
   'Vibrant',
 ] as const;
 
@@ -81,27 +80,26 @@ type BlacklistType = Record<Tag, Tag[]>;
 const TAG_BLACKLIST: Partial<BlacklistType> = {
   Cold: ['Warm', 'Desert', 'Tropical', 'Autumn'],
   'High Contrast': ['Low Contrast', 'Muted', 'Pastel'],
-  Muted: ['Vibrant', 'Neon', 'Psychedelic'],
-  Monochromatic: ['Split Complementary', 'Triadic', 'Tetradic', 'Complementary'],
+  Muted: ['Vibrant', 'Neon'],
   Winter: ['Summer', 'Tropical', 'Desert', 'Beach'],
   Autumn: ['Spring', 'Tropical'],
-  Minimalist: ['Psychedelic', 'Bohemian', 'Nostalgic'],
-  Industrial: ['Botanical', 'Tropical', 'Forest', 'Beach', 'Wedding'],
-  Corporate: ['Psychedelic', 'Cyberpunk', 'Kids', 'Bohemian', 'Halloween'],
+  Minimalist: ['Bohemian', 'Nostalgic'],
+  Industrial: ['Botanical', 'Tropical', 'Forest', 'Beach'],
+  Corporate: ['Cyberpunk', 'Kids', 'Bohemian', 'Halloween'],
   Kids: ['Luxury', 'Corporate', 'Elegant', 'Melancholic'],
   Rustic: ['Digital', 'Cyberpunk', 'Neon', 'Holographic', 'Modern', 'Space'],
-  Elegant: ['Kids', 'Cyberpunk', 'Halloween', 'Psychedelic'],
+  Elegant: ['Kids', 'Cyberpunk', 'Halloween'],
   Modern: ['Vintage', 'Retro', 'Nostalgic', 'Rustic'],
-  Neon: ['Earthy', 'Rustic', 'Matte', 'Pastel', 'Stone', 'Wood'],
-  Neutral: ['Neon', 'Psychedelic', 'Vibrant'],
+  Neon: ['Earthy', 'Rustic', 'Pastel', 'Stone'],
+  Neutral: ['Neon', 'Vibrant'],
   Pastel: ['High Contrast', 'Industrial', 'Gothic', 'Halloween'],
   Melancholic: ['Happy', 'Kids', 'Fresh', 'Sweet'],
-  Serene: ['Psychedelic', 'Halloween', 'Cyberpunk', 'Neon'],
+  Serene: ['Halloween', 'Cyberpunk', 'Neon'],
   Luxury: ['Kids', 'Rustic', 'Industrial'],
   Gothic: ['Pastel', 'Kids', 'Sweet', 'Beach', 'Tropical'],
   Earthy: ['Space', 'Digital', 'Cyberpunk', 'Neon'],
-  Cyberpunk: ['Rustic', 'Earthy', 'Wedding', 'Corporate', 'Elegant', 'Serene'],
-  Wedding: ['Halloween', 'Industrial', 'Cyberpunk', 'Gothic'],
+  Cyberpunk: ['Rustic', 'Earthy', 'Corporate', 'Elegant', 'Serene'],
+  // Wedding: ['Halloween', 'Industrial', 'Cyberpunk', 'Gothic'],
   Christmas: ['Halloween', 'Easter', 'Valentine', 'Summer', 'Beach'],
   Valentine: ['Halloween', 'Industrial', 'Rustic'],
   Easter: ['Halloween', 'Gothic', 'Industrial', 'Winter'],
@@ -112,8 +110,8 @@ const TAG_BLACKLIST: Partial<BlacklistType> = {
  * and typical applications in design contexts.
  */
 const TAG_DESCRIPTIONS: Record<Tag, string> = {
-  Analogous:
-    'Colors adjacent to each other on the color wheel, creating a harmonious and cohesive look.',
+  // Analogous:
+  //   'Colors adjacent to each other on the color wheel, creating a harmonious and cohesive look.',
   Autumn:
     'Warm, earthy colors reminiscent of fall foliage - oranges, deep reds, browns, and olive greens.',
   Beach:
@@ -122,15 +120,13 @@ const TAG_DESCRIPTIONS: Record<Tag, string> = {
     'Rich, eclectic colors with a mix of jewel tones, earthy hues, and unexpected combinations.',
   Botanical:
     'Natural greens, soft pinks, and earthy browns inspired by plants and botanical illustrations.',
-  Bronze:
-    'Warm metallic browns with amber and copper undertones, often paired with deep complementary colors.',
-  Celestial:
-    'Deep blues, purples, and teals with sparkles of white and gold, inspired by night skies.',
+  // Bronze:
+  //   'Warm metallic browns with amber and copper undertones, often paired with deep complementary colors.',
   Christmas: 'Traditional red and green combinations, often with gold, white, or blue accents.',
   Cold: 'Cool blues, purples, and grays that evoke winter temperatures and icy landscapes.',
-  Complementary:
-    'Colors opposite each other on the color wheel, creating vibrant contrast and visual interest.',
-  Copper: 'Warm, reddish-brown metallic shades paired with complementary or analogous colors.',
+  // Complementary:
+  //   'Colors opposite each other on the color wheel, creating vibrant contrast and visual interest.',
+  // Copper: 'Warm, reddish-brown metallic shades paired with complementary or analogous colors.',
   Corporate:
     'Professional, restrained color schemes often featuring blues, grays, and minimal accent colors.',
   Cozy: 'Warm, soft colors that create a sense of comfort - muted oranges, browns, and cream tones.',
@@ -150,7 +146,7 @@ const TAG_DESCRIPTIONS: Record<Tag, string> = {
   Forest: 'Various greens with browns and dark blues inspired by woodland environments.',
   Fresh:
     'Bright, clean colors that feel invigorating, often with prominent whites and light accents.',
-  Gold: 'Rich yellow-orange metallic tones paired with complementary colors for a luxurious effect.',
+  // Gold: 'Rich yellow-orange metallic tones paired with complementary colors for a luxurious effect.',
   Gothic: 'Dark, dramatic colors dominated by black, deep purples, reds, and emerald greens.',
   Halloween: 'Orange and black combinations, often with purple, green, or blood red accents.',
   Happy: 'Bright, cheerful colors with high saturation that evoke positive emotions.',
@@ -169,8 +165,8 @@ const TAG_DESCRIPTIONS: Record<Tag, string> = {
     'Subtle color combinations with minimal difference in value, creating a soft, cohesive look.',
   Luxury:
     'Rich, saturated colors often incorporating gold, black, and deep jewel tones for an opulent effect.',
-  Matte:
-    'Flat, non-reflective color appearance with slightly reduced saturation and no glossy effect.',
+  // Matte:
+  //   'Flat, non-reflective color appearance with slightly reduced saturation and no glossy effect.',
   Melancholic: 'Subdued, often cool-toned colors that evoke thoughtfulness or gentle sadness.',
   Metallic:
     'Colors that mimic metal surfaces with reflective qualities - silvers, golds, bronzes, and chromes.',
@@ -190,37 +186,37 @@ const TAG_DESCRIPTIONS: Record<Tag, string> = {
     'Various blues and greens inspired by sea water, sometimes with sandy beiges or coral accents.',
   Pastel:
     'Soft, light colors with high brightness and low to medium saturation, creating a gentle effect.',
-  Psychedelic:
-    'Intensely saturated, contrasting colors in unusual combinations, inspired by 1960s art and hallucinations.',
+  // Psychedelic:
+  //   'Intensely saturated, contrasting colors in unusual combinations, inspired by 1960s art and hallucinations.',
   Retro: 'Color combinations specific to past design eras, especially the 50s, 60s, 70s, and 80s.',
   Rustic:
     'Weathered, natural colors inspired by farmhouses and rural settings - browns, reds, and muted greens.',
   Serene: 'Gentle, calming colors with low saturation, often cool-toned blues and greens.',
-  Silver:
-    'Cool metallic gray tones with blue undertones, paired with complementary or analogous colors.',
+  // Silver:
+  //   'Cool metallic gray tones with blue undertones, paired with complementary or analogous colors.',
   Sky: 'Various blue tones inspired by the sky, from pale morning light to deep evening hues.',
   Space:
     'Deep blues, purples, and blacks with bright nebula-inspired accents and occasional metallic highlights.',
-  'Split Complementary':
-    'A base color plus two colors adjacent to its direct complement, creating balanced contrast.',
+  // 'Split Complementary':
+  //   'A base color plus two colors adjacent to its direct complement, creating balanced contrast.',
   Spring:
     'Fresh, light colors with medium saturation - soft greens, pinks, and yellows inspired by new growth.',
   Stone: 'Gray, beige, and taupe tones inspired by various types of rock and mineral formations.',
   Summer: 'Bright, clear colors with high saturation - vibrant blues, pinks, yellows, and greens.',
   Sunset: 'Warm oranges, pinks, purples, and golden yellows inspired by the setting sun.',
   Sweet: 'Cheerful, often pink-based palettes reminiscent of candies and desserts.',
-  Tetradic: 'Four colors arranged as two complementary pairs, creating a rich, balanced scheme.',
-  Triadic:
-    'Three colors evenly spaced around the color wheel, creating a vibrant and balanced combination.',
+  // Tetradic: 'Four colors arranged as two complementary pairs, creating a rich, balanced scheme.',
+  // Triadic:
+  //   'Three colors evenly spaced around the color wheel, creating a vibrant and balanced combination.',
   Tropical:
     'Vibrant, exotic colors inspired by tropical flowers, birds, and fruits - hot pinks, turquoise, yellow, and orange.',
   Valentine: "Red, pink, and white combinations associated with romance and Valentine's Day.",
   Vintage: 'Slightly desaturated colors with warm undertones, evoking an aged, nostalgic feel.',
   Warm: 'Colors from the red, orange, and yellow side of the color wheel that evoke heat and energy.',
-  Wedding: 'Elegant, often light color schemes featuring whites, creams, and subtle accent colors.',
+  // Wedding: 'Elegant, often light color schemes featuring whites, creams, and subtle accent colors.',
   Winter:
     'Cool, clear colors with high contrast - whites, blues, and silvers reminiscent of snow and ice.',
-  Wood: 'Various brown tones from light maple to dark walnut, inspired by different wood types.',
+  // Wood: 'Various brown tones from light maple to dark walnut, inspired by different wood types.',
   Vibrant: 'Highly saturated, intense colors that create energy and visual impact.',
 };
 
