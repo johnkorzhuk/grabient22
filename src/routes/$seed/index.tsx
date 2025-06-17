@@ -136,7 +136,7 @@ const PageContent = observer(function PageContent() {
 
   return (
     <div className="h-full w-full flex items-center justify-center overflow-hidden">
-      <div className="pt-18 lg:pt-26 pb-6 h-full w-full px-5 lg:px-14">
+      <div className="pt-18 lg:pt-26 pb-12 h-full w-full px-5 lg:px-14">
         {/* Responsive container layout */}
         <div className="h-full w-full flex flex-col lg:flex-row">
           {/* Top container (left on lg+) */}
@@ -248,12 +248,12 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
     // If clicking the already active modifier, deactivate it
     if (modifier === mod) {
       navigate({
-        search: { mod: DEFAULT_MODIFIER },
+        search: (search) => ({ ...search, mod: DEFAULT_MODIFIER }),
         replace: true,
       });
     } else {
       navigate({
-        search: { mod: modifier },
+        search: (search) => ({ ...search, mod: modifier }),
         replace: true,
       });
     }

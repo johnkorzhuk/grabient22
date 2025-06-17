@@ -13,6 +13,7 @@ import type * as analysis_gemini from "../analysis/gemini.js";
 import type * as analysis_openai from "../analysis/openai.js";
 import type * as collections from "../collections.js";
 import type * as crons from "../crons.js";
+import type * as generate_palettes from "../generate/palettes.js";
 import type * as http from "../http.js";
 import type * as likes from "../likes.js";
 import type * as migrations from "../migrations.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   "analysis/openai": typeof analysis_openai;
   collections: typeof collections;
   crons: typeof crons;
+  "generate/palettes": typeof generate_palettes;
   http: typeof http;
   likes: typeof likes;
   migrations: typeof migrations;
