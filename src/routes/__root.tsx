@@ -127,7 +127,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
   return (
     <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY!} options={options}>
-      <ClerkProvider>
+      <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
         <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
           <html suppressHydrationWarning lang="en">
             <head>

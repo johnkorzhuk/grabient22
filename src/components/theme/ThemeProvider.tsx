@@ -53,12 +53,12 @@ function ThemeProvider({ children }: PropsWithChildren) {
 
     // Find all elements with the disable-animation class
     const elements = document.querySelectorAll('.disable-animation-on-theme-change');
-    
+
     // Add a temporary class to disable all transitions
     elements.forEach((element) => {
       element.classList.add('no-transitions');
     });
-    
+
     // Remove the class after the specified duration
     timeoutRef.current = window.setTimeout(() => {
       elements.forEach((element) => {
@@ -75,10 +75,10 @@ function ThemeProvider({ children }: PropsWithChildren) {
   useDidUpdate(() => {
     // Disable animations before changing theme
     disableAnimationsTemporarily();
-    
+
     document.documentElement.dataset.theme = resolvedTheme;
     document.documentElement.style.colorScheme = resolvedTheme;
-    
+
     // Apply or remove the 'dark' class for Tailwind 4 dark mode
     if (resolvedTheme === 'dark') {
       document.documentElement.classList.add('dark');

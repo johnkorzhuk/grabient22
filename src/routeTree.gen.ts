@@ -8,131 +8,173 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as SeedRouteRouteImport } from './routes/$seed/route'
+import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as SeedIndexRouteImport } from './routes/$seed/index'
+import { Route as LayoutOldestRouteImport } from './routes/_layout/oldest'
+import { Route as LayoutNewestRouteImport } from './routes/_layout/newest'
+import { Route as LayoutCollectionRouteImport } from './routes/_layout/collection'
+import { Route as SeedFullRouteImport } from './routes/$seed/full'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as LayoutImport } from './routes/_layout'
-import { Route as SeedRouteImport } from './routes/$seed/route'
-import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as SeedIndexImport } from './routes/$seed/index'
-import { Route as LayoutOldestImport } from './routes/_layout/oldest'
-import { Route as LayoutNewestImport } from './routes/_layout/newest'
-import { Route as LayoutCollectionImport } from './routes/_layout/collection'
-import { Route as SeedFullImport } from './routes/$seed/full'
-
-// Create/Update Routes
-
-const LayoutRoute = LayoutImport.update({
+const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const SeedRouteRoute = SeedRouteImport.update({
+const SeedRouteRoute = SeedRouteRouteImport.update({
   id: '/$seed',
   path: '/$seed',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const LayoutIndexRoute = LayoutIndexImport.update({
+const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const SeedIndexRoute = SeedIndexImport.update({
+const SeedIndexRoute = SeedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SeedRouteRoute,
 } as any)
-
-const LayoutOldestRoute = LayoutOldestImport.update({
+const LayoutOldestRoute = LayoutOldestRouteImport.update({
   id: '/oldest',
   path: '/oldest',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const LayoutNewestRoute = LayoutNewestImport.update({
+const LayoutNewestRoute = LayoutNewestRouteImport.update({
   id: '/newest',
   path: '/newest',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const LayoutCollectionRoute = LayoutCollectionImport.update({
+const LayoutCollectionRoute = LayoutCollectionRouteImport.update({
   id: '/collection',
   path: '/collection',
   getParentRoute: () => LayoutRoute,
 } as any)
-
-const SeedFullRoute = SeedFullImport.update({
+const SeedFullRoute = SeedFullRouteImport.update({
   id: '/full',
   path: '/full',
   getParentRoute: () => SeedRouteRoute,
 } as any)
 
-// Populate the FileRoutesByPath interface
+export interface FileRoutesByFullPath {
+  '/$seed': typeof SeedRouteRouteWithChildren
+  '/$seed/full': typeof SeedFullRoute
+  '/collection': typeof LayoutCollectionRoute
+  '/newest': typeof LayoutNewestRoute
+  '/oldest': typeof LayoutOldestRoute
+  '/$seed/': typeof SeedIndexRoute
+  '/': typeof LayoutIndexRoute
+}
+export interface FileRoutesByTo {
+  '/$seed/full': typeof SeedFullRoute
+  '/collection': typeof LayoutCollectionRoute
+  '/newest': typeof LayoutNewestRoute
+  '/oldest': typeof LayoutOldestRoute
+  '/$seed': typeof SeedIndexRoute
+  '/': typeof LayoutIndexRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/$seed': typeof SeedRouteRouteWithChildren
+  '/_layout': typeof LayoutRouteWithChildren
+  '/$seed/full': typeof SeedFullRoute
+  '/_layout/collection': typeof LayoutCollectionRoute
+  '/_layout/newest': typeof LayoutNewestRoute
+  '/_layout/oldest': typeof LayoutOldestRoute
+  '/$seed/': typeof SeedIndexRoute
+  '/_layout/': typeof LayoutIndexRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/$seed'
+    | '/$seed/full'
+    | '/collection'
+    | '/newest'
+    | '/oldest'
+    | '/$seed/'
+    | '/'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/$seed/full' | '/collection' | '/newest' | '/oldest' | '/$seed' | '/'
+  id:
+    | '__root__'
+    | '/$seed'
+    | '/_layout'
+    | '/$seed/full'
+    | '/_layout/collection'
+    | '/_layout/newest'
+    | '/_layout/oldest'
+    | '/$seed/'
+    | '/_layout/'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  SeedRouteRoute: typeof SeedRouteRouteWithChildren
+  LayoutRoute: typeof LayoutRouteWithChildren
+}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/$seed': {
-      id: '/$seed'
-      path: '/$seed'
-      fullPath: '/$seed'
-      preLoaderRoute: typeof SeedRouteImport
-      parentRoute: typeof rootRoute
-    }
     '/_layout': {
       id: '/_layout'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof LayoutImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof LayoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/$seed/full': {
-      id: '/$seed/full'
-      path: '/full'
-      fullPath: '/$seed/full'
-      preLoaderRoute: typeof SeedFullImport
-      parentRoute: typeof SeedRouteImport
-    }
-    '/_layout/collection': {
-      id: '/_layout/collection'
-      path: '/collection'
-      fullPath: '/collection'
-      preLoaderRoute: typeof LayoutCollectionImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/newest': {
-      id: '/_layout/newest'
-      path: '/newest'
-      fullPath: '/newest'
-      preLoaderRoute: typeof LayoutNewestImport
-      parentRoute: typeof LayoutImport
-    }
-    '/_layout/oldest': {
-      id: '/_layout/oldest'
-      path: '/oldest'
-      fullPath: '/oldest'
-      preLoaderRoute: typeof LayoutOldestImport
-      parentRoute: typeof LayoutImport
-    }
-    '/$seed/': {
-      id: '/$seed/'
-      path: '/'
-      fullPath: '/$seed/'
-      preLoaderRoute: typeof SeedIndexImport
-      parentRoute: typeof SeedRouteImport
+    '/$seed': {
+      id: '/$seed'
+      path: '/$seed'
+      fullPath: '/$seed'
+      preLoaderRoute: typeof SeedRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/': {
       id: '/_layout/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof LayoutIndexImport
-      parentRoute: typeof LayoutImport
+      preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/$seed/': {
+      id: '/$seed/'
+      path: '/'
+      fullPath: '/$seed/'
+      preLoaderRoute: typeof SeedIndexRouteImport
+      parentRoute: typeof SeedRouteRoute
+    }
+    '/_layout/oldest': {
+      id: '/_layout/oldest'
+      path: '/oldest'
+      fullPath: '/oldest'
+      preLoaderRoute: typeof LayoutOldestRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/newest': {
+      id: '/_layout/newest'
+      path: '/newest'
+      fullPath: '/newest'
+      preLoaderRoute: typeof LayoutNewestRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/collection': {
+      id: '/_layout/collection'
+      path: '/collection'
+      fullPath: '/collection'
+      preLoaderRoute: typeof LayoutCollectionRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/$seed/full': {
+      id: '/$seed/full'
+      path: '/full'
+      fullPath: '/$seed/full'
+      preLoaderRoute: typeof SeedFullRouteImport
+      parentRoute: typeof SeedRouteRoute
     }
   }
 }
-
-// Create and export the route tree
 
 interface SeedRouteRouteChildren {
   SeedFullRoute: typeof SeedFullRoute
@@ -165,128 +207,10 @@ const LayoutRouteChildren: LayoutRouteChildren = {
 const LayoutRouteWithChildren =
   LayoutRoute._addFileChildren(LayoutRouteChildren)
 
-export interface FileRoutesByFullPath {
-  '/$seed': typeof SeedRouteRouteWithChildren
-  '': typeof LayoutRouteWithChildren
-  '/$seed/full': typeof SeedFullRoute
-  '/collection': typeof LayoutCollectionRoute
-  '/newest': typeof LayoutNewestRoute
-  '/oldest': typeof LayoutOldestRoute
-  '/$seed/': typeof SeedIndexRoute
-  '/': typeof LayoutIndexRoute
-}
-
-export interface FileRoutesByTo {
-  '/$seed/full': typeof SeedFullRoute
-  '/collection': typeof LayoutCollectionRoute
-  '/newest': typeof LayoutNewestRoute
-  '/oldest': typeof LayoutOldestRoute
-  '/$seed': typeof SeedIndexRoute
-  '/': typeof LayoutIndexRoute
-}
-
-export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/$seed': typeof SeedRouteRouteWithChildren
-  '/_layout': typeof LayoutRouteWithChildren
-  '/$seed/full': typeof SeedFullRoute
-  '/_layout/collection': typeof LayoutCollectionRoute
-  '/_layout/newest': typeof LayoutNewestRoute
-  '/_layout/oldest': typeof LayoutOldestRoute
-  '/$seed/': typeof SeedIndexRoute
-  '/_layout/': typeof LayoutIndexRoute
-}
-
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/$seed'
-    | ''
-    | '/$seed/full'
-    | '/collection'
-    | '/newest'
-    | '/oldest'
-    | '/$seed/'
-    | '/'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/$seed/full' | '/collection' | '/newest' | '/oldest' | '/$seed' | '/'
-  id:
-    | '__root__'
-    | '/$seed'
-    | '/_layout'
-    | '/$seed/full'
-    | '/_layout/collection'
-    | '/_layout/newest'
-    | '/_layout/oldest'
-    | '/$seed/'
-    | '/_layout/'
-  fileRoutesById: FileRoutesById
-}
-
-export interface RootRouteChildren {
-  SeedRouteRoute: typeof SeedRouteRouteWithChildren
-  LayoutRoute: typeof LayoutRouteWithChildren
-}
-
 const rootRouteChildren: RootRouteChildren = {
   SeedRouteRoute: SeedRouteRouteWithChildren,
   LayoutRoute: LayoutRouteWithChildren,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/$seed",
-        "/_layout"
-      ]
-    },
-    "/$seed": {
-      "filePath": "$seed/route.tsx",
-      "children": [
-        "/$seed/full",
-        "/$seed/"
-      ]
-    },
-    "/_layout": {
-      "filePath": "_layout.tsx",
-      "children": [
-        "/_layout/collection",
-        "/_layout/newest",
-        "/_layout/oldest",
-        "/_layout/"
-      ]
-    },
-    "/$seed/full": {
-      "filePath": "$seed/full.tsx",
-      "parent": "/$seed"
-    },
-    "/_layout/collection": {
-      "filePath": "_layout/collection.tsx",
-      "parent": "/_layout"
-    },
-    "/_layout/newest": {
-      "filePath": "_layout/newest.tsx",
-      "parent": "/_layout"
-    },
-    "/_layout/oldest": {
-      "filePath": "_layout/oldest.tsx",
-      "parent": "/_layout"
-    },
-    "/$seed/": {
-      "filePath": "$seed/index.tsx",
-      "parent": "/$seed"
-    },
-    "/_layout/": {
-      "filePath": "_layout/index.tsx",
-      "parent": "/_layout"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
