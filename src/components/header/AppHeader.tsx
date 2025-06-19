@@ -40,7 +40,7 @@ export const AppHeader = observer(function AppHeader({ className }: { className?
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          {/* <ThemeToggle /> */}
+          <ThemeToggle />
           <div
             className={cn(
               'flex items-center justify-end',
