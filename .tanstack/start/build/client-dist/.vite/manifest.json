@@ -3,41 +3,41 @@
     "file": "assets/styles-BmoMoC8C.css",
     "src": "C:/Users/jkorz/projects/grabient2two/src/styles.css"
   },
-  "_ActionButton-DxDt0DSX.js": {
-    "file": "assets/ActionButton-DxDt0DSX.js",
+  "_ActionButton-DzBZZ-Bd.js": {
+    "file": "assets/ActionButton-DzBZZ-Bd.js",
     "name": "ActionButton",
     "imports": [
       "src/client.tsx",
-      "_collection-C7ye2bw7.js",
-      "_en-US-CHBZc2Iv.js"
+      "_collection-CYD1e6ti.js",
+      "_en-US-s7Pp4Z1R.js"
     ]
   },
-  "_CollectionSeedDisplay-peIBYdoW.js": {
-    "file": "assets/CollectionSeedDisplay-peIBYdoW.js",
+  "_CollectionSeedDisplay-DZBrMBWB.js": {
+    "file": "assets/CollectionSeedDisplay-DZBrMBWB.js",
     "name": "CollectionSeedDisplay",
     "imports": [
       "src/client.tsx",
-      "_en-US-CHBZc2Iv.js"
+      "_en-US-s7Pp4Z1R.js"
     ]
   },
-  "_CollectionsDisplay-B5FEnWJY.js": {
-    "file": "assets/CollectionsDisplay-B5FEnWJY.js",
+  "_CollectionsDisplay-C-GoTGzb.js": {
+    "file": "assets/CollectionsDisplay-C-GoTGzb.js",
     "name": "CollectionsDisplay",
     "imports": [
       "src/client.tsx",
-      "_collection-C7ye2bw7.js",
-      "_CollectionSeedDisplay-peIBYdoW.js"
+      "_collection-CYD1e6ti.js",
+      "_CollectionSeedDisplay-DZBrMBWB.js"
     ]
   },
-  "_collection-C7ye2bw7.js": {
-    "file": "assets/collection-C7ye2bw7.js",
+  "_collection-CYD1e6ti.js": {
+    "file": "assets/collection-CYD1e6ti.js",
     "name": "collection",
     "imports": [
       "src/client.tsx"
     ]
   },
-  "_en-US-CHBZc2Iv.js": {
-    "file": "assets/en-US-CHBZc2Iv.js",
+  "_en-US-s7Pp4Z1R.js": {
+    "file": "assets/en-US-s7Pp4Z1R.js",
     "name": "en-US",
     "imports": [
       "src/client.tsx"
@@ -52,7 +52,7 @@
     "src": "node_modules/.pnpm/@fontsource+poppins@5.2.6/node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff2"
   },
   "src/client.tsx": {
-    "file": "assets/main-BRGrFMQM.js",
+    "file": "assets/main-BBfrF5_e.js",
     "name": "main",
     "src": "src/client.tsx",
     "isEntry": true,
@@ -76,7 +76,7 @@
     ]
   },
   "src/routes/$seed/full.tsx?tsr-split=component": {
-    "file": "assets/full-DX6-vsvV.js",
+    "file": "assets/full-BMbm9P7I.js",
     "name": "full",
     "src": "src/routes/$seed/full.tsx?tsr-split=component",
     "isDynamicEntry": true,
@@ -85,90 +85,90 @@
     ]
   },
   "src/routes/$seed/index.tsx?tsr-split=component": {
-    "file": "assets/index-mEjiCfTM.js",
+    "file": "assets/index-CxtWJT4q.js",
     "name": "index",
     "src": "src/routes/$seed/index.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_CollectionSeedDisplay-peIBYdoW.js",
-      "_en-US-CHBZc2Iv.js"
+      "_CollectionSeedDisplay-DZBrMBWB.js",
+      "_en-US-s7Pp4Z1R.js"
     ]
   },
   "src/routes/$seed/route.tsx?tsr-split=component": {
-    "file": "assets/route-ChPUQEb-.js",
+    "file": "assets/route-BF0UvoSV.js",
     "name": "route",
     "src": "src/routes/$seed/route.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_ActionButton-DxDt0DSX.js",
-      "_collection-C7ye2bw7.js",
-      "_en-US-CHBZc2Iv.js"
+      "_ActionButton-DzBZZ-Bd.js",
+      "_collection-CYD1e6ti.js",
+      "_en-US-s7Pp4Z1R.js"
     ]
   },
   "src/routes/_layout.tsx?tsr-split=component": {
-    "file": "assets/_layout-A1peZz8A.js",
+    "file": "assets/_layout-DBX3Gx6-.js",
     "name": "_layout",
     "src": "src/routes/_layout.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_ActionButton-DxDt0DSX.js",
-      "_collection-C7ye2bw7.js",
-      "_en-US-CHBZc2Iv.js"
+      "_ActionButton-DzBZZ-Bd.js",
+      "_collection-CYD1e6ti.js",
+      "_en-US-s7Pp4Z1R.js"
     ]
   },
   "src/routes/_layout/collection.tsx?tsr-split=component": {
-    "file": "assets/collection-BC6kQccB.js",
+    "file": "assets/collection-DApDnC47.js",
     "name": "collection",
     "src": "src/routes/_layout/collection.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_CollectionsDisplay-B5FEnWJY.js",
-      "_CollectionSeedDisplay-peIBYdoW.js",
-      "_collection-C7ye2bw7.js",
-      "_en-US-CHBZc2Iv.js"
+      "_CollectionsDisplay-C-GoTGzb.js",
+      "_CollectionSeedDisplay-DZBrMBWB.js",
+      "_collection-CYD1e6ti.js",
+      "_en-US-s7Pp4Z1R.js"
     ]
   },
   "src/routes/_layout/index.tsx?tsr-split=component": {
-    "file": "assets/index-BAmQ9tc5.js",
+    "file": "assets/index-Bp47qYGS.js",
     "name": "index",
     "src": "src/routes/_layout/index.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_CollectionSeedDisplay-peIBYdoW.js",
-      "_CollectionsDisplay-B5FEnWJY.js",
-      "_en-US-CHBZc2Iv.js",
-      "_collection-C7ye2bw7.js"
+      "_CollectionSeedDisplay-DZBrMBWB.js",
+      "_CollectionsDisplay-C-GoTGzb.js",
+      "_en-US-s7Pp4Z1R.js",
+      "_collection-CYD1e6ti.js"
     ]
   },
   "src/routes/_layout/newest.tsx?tsr-split=component": {
-    "file": "assets/newest-D9a50_Tc.js",
+    "file": "assets/newest-CO32mHRp.js",
     "name": "newest",
     "src": "src/routes/_layout/newest.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_CollectionSeedDisplay-peIBYdoW.js",
-      "_CollectionsDisplay-B5FEnWJY.js",
-      "_en-US-CHBZc2Iv.js",
-      "_collection-C7ye2bw7.js"
+      "_CollectionSeedDisplay-DZBrMBWB.js",
+      "_CollectionsDisplay-C-GoTGzb.js",
+      "_en-US-s7Pp4Z1R.js",
+      "_collection-CYD1e6ti.js"
     ]
   },
   "src/routes/_layout/oldest.tsx?tsr-split=component": {
-    "file": "assets/oldest-BliCRkZg.js",
+    "file": "assets/oldest-CPiYs3Ut.js",
     "name": "oldest",
     "src": "src/routes/_layout/oldest.tsx?tsr-split=component",
     "isDynamicEntry": true,
     "imports": [
       "src/client.tsx",
-      "_CollectionSeedDisplay-peIBYdoW.js",
-      "_CollectionsDisplay-B5FEnWJY.js",
-      "_en-US-CHBZc2Iv.js",
-      "_collection-C7ye2bw7.js"
+      "_CollectionSeedDisplay-DZBrMBWB.js",
+      "_CollectionsDisplay-C-GoTGzb.js",
+      "_en-US-s7Pp4Z1R.js",
+      "_collection-CYD1e6ti.js"
     ]
   }
 }

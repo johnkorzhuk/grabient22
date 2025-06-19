@@ -134,16 +134,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <HeadContent />
             </head>
             <body>
-              <ThemeProvider>
-                <TooltipProvider>
-                  <div className="h-screen flex flex-col min-h-0">
-                    <div className="flex-grow min-h-0 h-full flex flex-col">
-                      {children}
-                      {/* <Toaster /> */}
-                    </div>
+              <TooltipProvider>
+                <div className="h-screen flex flex-col min-h-0">
+                  <div className="flex-grow min-h-0 h-full flex flex-col">
+                    {children}
+                    {/* <Toaster /> */}
                   </div>
-                </TooltipProvider>
-              </ThemeProvider>
+                </div>
+              </TooltipProvider>
               {import.meta.env.DEV && (
                 <>
                   <ReactQueryDevtools position="right" buttonPosition="bottom-right" />

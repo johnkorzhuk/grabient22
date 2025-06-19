@@ -2,12 +2,13 @@ import { cn } from '~/lib/utils';
 import { useTheme } from './theme/ThemeProvider';
 
 export function PrimaryDivider({ className }: { className?: string }) {
-  const { resolved: theme } = useTheme();
+  // const { resolved: theme } = useTheme();
+  const theme: 'light' | 'dark' = 'light';
   return (
     <div
       suppressHydrationWarning
       className={cn('block w-full px-5 lg:px-14 absolute top-0', className, {
-        'opacity-50': theme === 'dark',
+        // 'opacity-50': theme === 'dark',
         'opacity-80': theme === 'light',
       })}
     >

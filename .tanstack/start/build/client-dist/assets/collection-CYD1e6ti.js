@@ -1,0 +1,2 @@
+import{ak as n}from"./main-BBfrF5_e.js";try{let e=typeof window<"u"?window:typeof global<"u"?global:typeof globalThis<"u"?globalThis:typeof self<"u"?self:{},d=new e.Error().stack;d&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[d]="1440dcc0-3a67-4fa5-811c-77c8d637e1e4",e._sentryDebugIdIdentifier="sentry-dbid-1440dcc0-3a67-4fa5-811c-77c8d637e1e4")}catch{}const t=n({collections:[]});export{t as c};
+//# sourceMappingURL=collection-CYD1e6ti.js.map
