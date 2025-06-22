@@ -16,7 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { convexQuery } from '@convex-dev/react-query';
 import { useAuth } from '@clerk/tanstack-react-start';
 import { api } from '../../../convex/_generated/api';
-import { applyGlobals } from '~/lib/cosineGradient';
+import { applyGlobals, updateCoeffWithInverseGlobal } from '~/lib/cosineGradient';
 import { GradientChannelsChart } from '~/components/GradientChannelsChart';
 import * as v from 'valibot';
 import {
@@ -268,7 +268,6 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
     const newGlobals = [...currentGlobals] as [number, number, number, number];
     newGlobals[modifierIndex] = value;
 
-    // Update the preview data
     const newPreviewData = {
       coeffs: previewData ? previewData.coeffs : seedCollection.coeffs,
       globals: newGlobals,
@@ -280,24 +279,30 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
   };
 
   // Handle RGB channel changes
-  const handleRGBChannelChange = (modifierIndex: number, channelIndex: number, value: number) => {
-    // Get the current coefficients
+  const handleRGBChannelChange = (
+    modifierIndex: number,
+    channelIndex: number,
+    value: number,
+  ) => {
+    // Get the current coefficients (raw)
     const currentCoeffs = previewData ? previewData.coeffs : seedCollection.coeffs;
 
-    // Create a new coefficients array with the updated value
-    const newCoeffs = currentCoeffs.map((modifierCoeffs, mIdx) =>
-      mIdx === modifierIndex
-        ? modifierCoeffs.map((coeff, cIdx) => (cIdx === channelIndex ? value : coeff))
-        : [...modifierCoeffs],
-    ) as CosineCoeffs;
+    // Compute new coeffs array converting the displayed value back to raw using inverse globals
+    const newCoeffs = updateCoeffWithInverseGlobal(
+      currentCoeffs,
+      modifierIndex,
+      channelIndex,
+      value,
+      renderPreviewGlobals ? previewData!.globals : globals,
+    );
 
-    // Update the preview data
+    // Prepare new preview data
     const newPreviewData = {
       coeffs: newCoeffs,
       globals: renderPreviewGlobals ? previewData!.globals : globals,
     };
 
-    // Set the preview seed
+    // Update preview seed
     const newSeed = serializeCoeffs(newPreviewData.coeffs, newPreviewData.globals);
     uiTempStore$.previewSeed.set(newSeed);
   };
@@ -393,9 +398,10 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
               if (modifierIndex === -1) return null;
 
               const coeffs = previewData ? previewData.coeffs : seedCollection.coeffs;
+              const processedCoeffs = applyGlobals(coeffs, renderPreviewGlobals ? previewData!.globals : globals);
 
               return rgbChannels.map((channel, channelIndex) => {
-                const channelValue = coeffs[modifierIndex][channelIndex];
+                const channelValue = processedCoeffs[modifierIndex][channelIndex];
 
                 return (
                   <div key={channel.key} className="flex-1 flex flex-col justify-center">
