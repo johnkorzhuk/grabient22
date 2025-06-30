@@ -167,7 +167,6 @@ const PageContent = observer(function PageContent() {
               style={styleToUse}
               steps={stepsToUse}
               angle={angleToUse}
-              href={href}
               onChannelOrderChange={onChannelOrderChange}
               renderChannelTabs
               itemActive={itemActive}
@@ -279,11 +278,7 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
   };
 
   // Handle RGB channel changes
-  const handleRGBChannelChange = (
-    modifierIndex: number,
-    channelIndex: number,
-    value: number,
-  ) => {
+  const handleRGBChannelChange = (modifierIndex: number, channelIndex: number, value: number) => {
     // Get the current coefficients (raw)
     const currentCoeffs = previewData ? previewData.coeffs : seedCollection.coeffs;
 
@@ -398,7 +393,10 @@ function ModifierSelectWrapper({ className }: { className?: string }) {
               if (modifierIndex === -1) return null;
 
               const coeffs = previewData ? previewData.coeffs : seedCollection.coeffs;
-              const processedCoeffs = applyGlobals(coeffs, renderPreviewGlobals ? previewData!.globals : globals);
+              const processedCoeffs = applyGlobals(
+                coeffs,
+                renderPreviewGlobals ? previewData!.globals : globals,
+              );
 
               return rgbChannels.map((channel, channelIndex) => {
                 const channelValue = processedCoeffs[modifierIndex][channelIndex];

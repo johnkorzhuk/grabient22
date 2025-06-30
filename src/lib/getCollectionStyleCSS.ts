@@ -4,9 +4,9 @@ export function getCollectionStyleCSS(
   type: CollectionStyle = 'linearGradient',
   processedColors: number[][],
   angle: number = 90,
-  creditProps: { seed: string; href: string },
+  creditProps: { seed: string; searchString: string },
   activeIndex?: number | null,
-): { cssString: string; styles: React.CSSProperties } {
+): { cssString: string; styles: React.CSSProperties; gradientString: string } {
   // Convert RGB values from 0-1 range to 0-255 range for CSS
   const getRgbString = (color: number[]) =>
     `${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)}`;
@@ -19,12 +19,13 @@ export function getCollectionStyleCSS(
   const inactiveAlpha = 0.5;
 
   // Credit comment for gradient inspiration
-  const creditComment = `/* https://grabient.com/${creditProps.seed}${creditProps.href} */`;
+  const creditComment = `/* https://grabient.com/${creditProps.seed}${creditProps.searchString} */`;
 
   if (processedColors.length === 0) {
     return {
       cssString: `${creditComment}\n\nbackground: none`,
       styles: { background: 'none' },
+      gradientString: '',
     };
   }
 
@@ -33,6 +34,7 @@ export function getCollectionStyleCSS(
     return {
       cssString: `${creditComment}\n\nbackground: ${bgValue}`,
       styles: { background: bgValue },
+      gradientString: '',
     };
   }
 
@@ -114,6 +116,7 @@ export function getCollectionStyleCSS(
       return {
         cssString: `${creditComment}\n\nbackground: ${gradientString}`,
         styles: { background: gradientString },
+        gradientString,
       };
     }
 
@@ -155,6 +158,7 @@ export function getCollectionStyleCSS(
       return {
         cssString: `${creditComment}\n\nbackground: ${gradientString}`,
         styles: { background: gradientString },
+        gradientString,
       };
     }
 
@@ -235,6 +239,7 @@ export function getCollectionStyleCSS(
       return {
         cssString: `${creditComment}\n\nbackground: ${gradientString}`,
         styles: { background: gradientString },
+        gradientString,
       };
     }
 
@@ -276,6 +281,7 @@ export function getCollectionStyleCSS(
       return {
         cssString: `${creditComment}\n\nbackground: ${gradientString}`,
         styles: { background: gradientString },
+        gradientString,
       };
     }
 
@@ -283,6 +289,7 @@ export function getCollectionStyleCSS(
       return {
         cssString: `${creditComment}\nbackground: none`,
         styles: { background: 'none' },
+        gradientString: '',
       };
   }
 }

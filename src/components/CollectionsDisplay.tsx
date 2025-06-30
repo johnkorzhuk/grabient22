@@ -24,7 +24,6 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
   likesPending,
   isLoading = false,
 }: CollectionsDisplayProps) {
-  const { href } = useLocation();
   const { style, steps, angle } = useSearch({ from: '/_layout' });
 
   const storeCollections = use$(collectionStore$.collections);
@@ -128,7 +127,6 @@ export const CollectionsDisplay = observer(function CollectionsDisplay({
                 style={styleToUse}
                 steps={stepsToUse}
                 angle={angleToUse}
-                href={href}
                 onChannelOrderChange={onChannelOrderChange}
                 itemActive={itemActive}
                 likesPending={likesPending}

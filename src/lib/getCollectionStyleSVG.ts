@@ -4,7 +4,7 @@ export function getCollectionStyleSVG(
   type: CollectionStyle = 'linearGradient',
   processedColors: number[][],
   angle: number = 90,
-  creditProps?: { seed: string; href: string },
+  creditProps?: { seed: string; searchString: string },
   activeIndex?: number | null,
   width: number = 800,
   height: number = 400,
@@ -18,7 +18,7 @@ export function getCollectionStyleSVG(
 
   // Credit comment for gradient inspiration
   const creditComment = creditProps
-    ? `<!-- https://grabient.com/${creditProps.seed}${creditProps.href} -->`
+    ? `<!-- https://grabient.com/${creditProps.seed}${creditProps.searchString} -->`
     : '';
 
   if (processedColors.length === 0) {

@@ -21,7 +21,6 @@ type CollectionSeedDisplayProps = {
   style: v.InferOutput<typeof collectionStyleValidator>;
   steps: v.InferOutput<typeof stepsValidator>;
   angle: v.InferOutput<typeof angleValidator>;
-  href: string;
   children?: ReactNode;
   onChannelOrderChange: (coeffs: AppCollection['coeffs'], collection: AppCollection) => void;
   renderChannelTabs?: boolean;
@@ -37,7 +36,6 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
   style,
   steps,
   angle,
-  href,
   children,
   index,
   renderChannelTabs = false,
@@ -47,24 +45,24 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
 }: CollectionSeedDisplayProps) {
   const previewColorIndex = use$(uiTempStore$.previewColorIndex);
   const processedCoeffs = applyGlobals(collection.coeffs, collection.globals);
-  const gradientColors = cosineGradient(steps, processedCoeffs);
-  
+  const processedColors = cosineGradient(steps, processedCoeffs);
+
   // If the seed exists as a key in likedSeeds, we can assume it's in the original order
   const isOriginalOrder = likedSeeds ? Object.hasOwn(likedSeeds, collection.seed) : false;
   const { styles, cssString } = getCollectionStyleCSS(
     style,
-    gradientColors,
+    processedColors,
     angle,
     {
       seed: collection.seed,
-      href,
+      searchString: `?style=${style}&steps=${steps}&angle=${angle}`,
     },
     previewColorIndex,
   );
 
-  const svgString = getCollectionStyleSVG(style, gradientColors, angle, {
+  const svgString = getCollectionStyleSVG(style, processedColors, angle, {
     seed: collection.seed,
-    href,
+    searchString: `?style=${style}&steps=${steps}&angle=${angle}`,
   });
 
   return (
@@ -98,7 +96,7 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
         <figure
           className="relative z-10 h-full w-full overflow-hidden rounded-xl border border-gray-500/10"
           role="img"
-          aria-label={`Gradient preview with ${gradientColors.length} color stops using gradient ${index + 1}`}
+          aria-label={`Gradient preview with ${steps} color stops using gradient ${index + 1}`}
         >
           <GradientPreview cssProps={styles} className="rounded-xl" />
           <figcaption className="sr-only">
@@ -129,10 +127,13 @@ export const CollectionSeedDisplay = observer(function CollectionSeedDisplay({
         {/* Bottom tag matches - only show if seed is in likedSeeds */}
         {collection.tagMatches && collection.tagMatches.length > 0 && isOriginalOrder && (
           <div
-            className={cn('absolute bottom-3 left-3 z-10 flex flex-wrap gap-2 transition-opacity group/tags', {
-              'opacity-0 group-hover:opacity-100': !itemActive,
-              'opacity-100': itemActive,
-            })}
+            className={cn(
+              'absolute bottom-3 left-3 z-10 flex flex-wrap gap-2 transition-opacity group/tags',
+              {
+                'opacity-0 group-hover:opacity-100': !itemActive,
+                'opacity-100': itemActive,
+              },
+            )}
           >
             {collection.tagMatches.map((tag, i) => (
               <span
