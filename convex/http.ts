@@ -44,9 +44,9 @@ http.route({
           : parseInt(query.angle)
         : DEFAULT_ANGLE;
 
-      const { coeffs } = deserializeCoeffs(effectiveSeed);
+      const { coeffs, globals } = deserializeCoeffs(effectiveSeed);
 
-      const processedColors = applyGlobals(coeffs, DEFAULT_GLOBALS);
+      const processedColors = applyGlobals(coeffs, globals);
       const gradientColors = cosineGradient(steps, processedColors);
 
       // Generate SVG for the gradient
@@ -56,7 +56,7 @@ http.route({
         angle,
         {
           seed: effectiveSeed,
-          href: '',
+          searchString: '',
         },
         null,
         1200,
