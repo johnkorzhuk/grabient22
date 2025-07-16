@@ -2,9 +2,10 @@ import { defineConfig } from 'vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 // Remove this import: import viteReact from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import comlink from 'vite-plugin-comlink';
+// import comlink from 'vite-plugin-comlink';
 import { FontaineTransform } from 'fontaine';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import tsConfigPaths from 'vite-tsconfig-paths';
 
 import path from 'node:path';
 
@@ -55,7 +56,7 @@ export default defineConfig({
     // Only generate source maps if Sentry is enabled
     sourcemap: !!process.env.SENTRY_AUTH_TOKEN,
   },
-  worker: {
-    plugins: () => [comlink()],
-  },
+  // worker: {
+  //   plugins: () => [comlink()],
+  // },
 });
