@@ -80,20 +80,20 @@ export const Route = createRootRouteWithContext<{
       { rel: 'icon', href: '/favicon.ico' },
     ],
   }),
-  beforeLoad: async (ctx) => {
-    const auth = await fetchClerkAuth()
-    const { userId, token } = auth
-    // During SSR only (the only time serverHttpClient exists),
-    // set the Clerk auth token to make HTTP queries with.
-    if (token) {
-      ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
-    }
+  // beforeLoad: async (ctx) => {
+  //   const auth = await fetchClerkAuth()
+  //   const { userId, token } = auth
+  //   // During SSR only (the only time serverHttpClient exists),
+  //   // set the Clerk auth token to make HTTP queries with.
+  //   if (token) {
+  //     ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
+  //   }
 
-    return {
-      userId,
-      token,
-    }
-  },
+  //   return {
+  //     userId,
+  //     token,
+  //   }
+  // },
   component: RootComponent,
   notFoundComponent: () => <NotFound />,
   errorComponent: (props) => {
