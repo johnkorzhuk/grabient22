@@ -76,6 +76,7 @@ const Layout = observer(function Layout() {
   const isDragging = use$(uiTempStore$.isDragging);
   const { scrollContainerRef, isVisible: isHeroVisible } = useScrollThreshold(50);
   const isCollection = location.pathname === '/collection';
+  const isContactPage = location.pathname === '/contact';
 
   useEffect(() => {
     return () => {
@@ -91,7 +92,7 @@ const Layout = observer(function Layout() {
       <AppHeader className="sticky top-0 z-40 bg-background" />
 
       {/* Tags section with responsive layout */}
-      {!isCollection && <TagsCarousel />}
+      {!isCollection && !isContactPage && <TagsCarousel />}
 
       <SubHeader className="sticky top-17.5 lg:top-21.5 z-50" isHeroVisible={isHeroVisible} />
 

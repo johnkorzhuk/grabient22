@@ -15,6 +15,7 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as SeedIndexRouteImport } from './routes/$seed/index'
 import { Route as LayoutOldestRouteImport } from './routes/_layout/oldest'
 import { Route as LayoutNewestRouteImport } from './routes/_layout/newest'
+import { Route as LayoutContactRouteImport } from './routes/_layout/contact'
 import { Route as LayoutCollectionRouteImport } from './routes/_layout/collection'
 
 const LayoutRoute = LayoutRouteImport.update({
@@ -46,6 +47,11 @@ const LayoutNewestRoute = LayoutNewestRouteImport.update({
   path: '/newest',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutContactRoute = LayoutContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutCollectionRoute = LayoutCollectionRouteImport.update({
   id: '/collection',
   path: '/collection',
@@ -55,6 +61,7 @@ const LayoutCollectionRoute = LayoutCollectionRouteImport.update({
 export interface FileRoutesByFullPath {
   '/$seed': typeof SeedRouteRouteWithChildren
   '/collection': typeof LayoutCollectionRoute
+  '/contact': typeof LayoutContactRoute
   '/newest': typeof LayoutNewestRoute
   '/oldest': typeof LayoutOldestRoute
   '/$seed/': typeof SeedIndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/collection': typeof LayoutCollectionRoute
+  '/contact': typeof LayoutContactRoute
   '/newest': typeof LayoutNewestRoute
   '/oldest': typeof LayoutOldestRoute
   '/$seed': typeof SeedIndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesById {
   '/$seed': typeof SeedRouteRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
   '/_layout/collection': typeof LayoutCollectionRoute
+  '/_layout/contact': typeof LayoutContactRoute
   '/_layout/newest': typeof LayoutNewestRoute
   '/_layout/oldest': typeof LayoutOldestRoute
   '/$seed/': typeof SeedIndexRoute
@@ -79,14 +88,22 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/$seed' | '/collection' | '/newest' | '/oldest' | '/$seed/' | '/'
+  fullPaths:
+    | '/$seed'
+    | '/collection'
+    | '/contact'
+    | '/newest'
+    | '/oldest'
+    | '/$seed/'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/collection' | '/newest' | '/oldest' | '/$seed' | '/'
+  to: '/collection' | '/contact' | '/newest' | '/oldest' | '/$seed' | '/'
   id:
     | '__root__'
     | '/$seed'
     | '/_layout'
     | '/_layout/collection'
+    | '/_layout/contact'
     | '/_layout/newest'
     | '/_layout/oldest'
     | '/$seed/'
@@ -142,6 +159,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutNewestRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/contact': {
+      id: '/_layout/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof LayoutContactRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/collection': {
       id: '/_layout/collection'
       path: '/collection'
@@ -166,6 +190,7 @@ const SeedRouteRouteWithChildren = SeedRouteRoute._addFileChildren(
 
 interface LayoutRouteChildren {
   LayoutCollectionRoute: typeof LayoutCollectionRoute
+  LayoutContactRoute: typeof LayoutContactRoute
   LayoutNewestRoute: typeof LayoutNewestRoute
   LayoutOldestRoute: typeof LayoutOldestRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
@@ -173,6 +198,7 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCollectionRoute: LayoutCollectionRoute,
+  LayoutContactRoute: LayoutContactRoute,
   LayoutNewestRoute: LayoutNewestRoute,
   LayoutOldestRoute: LayoutOldestRoute,
   LayoutIndexRoute: LayoutIndexRoute,

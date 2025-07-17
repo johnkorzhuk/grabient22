@@ -53,6 +53,7 @@ export const SubHeader = observer(function SubHeader({
       : search.angle
   const location = useLocation()
   const navSelect = use$(uiTempStore$.navSelect)
+  const isContactPage = location.pathname === '/contact'
   // Determine the source route for navigation
   // If we're on a seed route, use that, otherwise use the preferred navigation route
   const from = isSeedRoute ? '/$seed' : navSelect === '/' ? '/' : navSelect
@@ -146,55 +147,59 @@ export const SubHeader = observer(function SubHeader({
           </div>
 
           {/* Desktop view (> 450px) */}
-          <div className="hidden sm:flex items-center relative">
-            <div className="mr-2 relative">
-              {/* Render apply button when activeItemId exists and not all searches are set */}
-              {renderApplyButton && (
-                <ActionButton onClick={setActiveSearch}>apply</ActionButton>
-              )}
-              {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
-              {renderResetButton && (
-                <ActionButton onClick={clearSearchParams}>reset</ActionButton>
-              )}
+          {!isContactPage && (
+            <div className="hidden sm:flex items-center relative">
+              <div className="mr-2 relative">
+                {/* Render apply button when activeItemId exists and not all searches are set */}
+                {renderApplyButton && (
+                  <ActionButton onClick={setActiveSearch}>apply</ActionButton>
+                )}
+                {/* Render reset button when all searches are set with activeItemId, or when any search is set without activeItemId */}
+                {renderResetButton && (
+                  <ActionButton onClick={clearSearchParams}>reset</ActionButton>
+                )}
+              </div>
+              <ViewOptions
+                style={style}
+                steps={steps}
+                angle={angle}
+                variant="fixed"
+              />
             </div>
-            <ViewOptions
-              style={style}
-              steps={steps}
-              angle={angle}
-              variant="fixed"
-            />
-          </div>
+          )}
 
           {/* Mobile view (≤ 450px) */}
-          <div className="sm:hidden relative flex items-center" ref={menuRef}>
-            <div className="mr-4 relative -top-0.5">
-              {renderApplyButton && isMenuOpen && (
-                <ActionButton onClick={setActiveSearch}>apply</ActionButton>
-              )}
-              {renderResetButton && isMenuOpen && (
-                <ActionButton onClick={clearSearchParams}>reset</ActionButton>
-              )}
+          {!isContactPage && (
+            <div className="sm:hidden relative flex items-center" ref={menuRef}>
+              <div className="mr-4 relative -top-0.5">
+                {renderApplyButton && isMenuOpen && (
+                  <ActionButton onClick={setActiveSearch}>apply</ActionButton>
+                )}
+                {renderResetButton && isMenuOpen && (
+                  <ActionButton onClick={clearSearchParams}>reset</ActionButton>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleMenu}
+                aria-label="Toggle menu"
+                className="h-8 w-8 cursor-pointer hover:bg-background hover:border-input"
+                aria-expanded={isMenuOpen}
+              >
+                {isMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-              className="h-8 w-8 cursor-pointer hover:bg-background hover:border-input"
-              aria-expanded={isMenuOpen}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+          )}
         </div>
       </div>
 
       {/* Mobile dropdown menu - full width row */}
-      {isMenuOpen && (
+      {isMenuOpen && !isContactPage && (
         <div
           ref={menuContentRef}
           className={cn(

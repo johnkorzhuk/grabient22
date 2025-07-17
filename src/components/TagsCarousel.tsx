@@ -1,44 +1,48 @@
-import { Carousel, CarouselContent, CarouselItem } from '~/components/ui/carousel';
-import { X } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from '~/components/ui/carousel'
+import { X } from 'lucide-react'
 
-import { TAGS, type Tag } from '../../tags';
-import { useNavigate, useSearch } from '@tanstack/react-router';
-import { observer, use$ } from '@legendapp/state/react';
-import { uiTempStore$ } from '~/stores/ui';
+import { TAGS, type Tag } from '../../tags'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { observer, use$ } from '@legendapp/state/react'
+import { uiTempStore$ } from '~/stores/ui'
 
 export const TagsCarousel = observer(function TagsCarousel() {
-  const navSelect = use$(uiTempStore$.navSelect);
+  const navSelect = use$(uiTempStore$.navSelect)
   const search = useSearch({
     from: '/_layout',
-  });
+  })
   const navigate = useNavigate({
     from: navSelect,
-  });
+  })
 
   // Check if any tags are selected
-  const hasSelectedTags = search.tags && search.tags.length > 0;
+  const hasSelectedTags = search.tags && search.tags.length > 0
 
   const handleTagClick = (tag: Tag) => {
     navigate({
       search: (search) => {
-        const currentTags = search.tags || [];
+        const currentTags = search.tags || []
 
         // If tag already exists, remove it; otherwise, add it
         if (currentTags.includes(tag)) {
           return {
             ...search,
             tags: currentTags.filter((t) => t !== tag),
-          };
+          }
         } else {
           return {
             ...search,
             tags: [...currentTags, tag],
-          };
+          }
         }
       },
       replace: true,
-    });
-  };
+    })
+  }
 
   // Function to clear all selected tags
   const clearAllTags = () => {
@@ -48,8 +52,8 @@ export const TagsCarousel = observer(function TagsCarousel() {
         tags: undefined,
       }),
       replace: true,
-    });
-  };
+    })
+  }
 
   return (
     <div className="w-full bg-background/90 backdrop-blur-sm flex justify-center mb-6 lg:mb-8 mt-3">
@@ -110,11 +114,11 @@ export const TagsCarousel = observer(function TagsCarousel() {
               {/* Sort tags to move selected tags to the front */}
               {[...TAGS]
                 .sort((a, b) => {
-                  const aSelected = search.tags?.includes(a) || false;
-                  const bSelected = search.tags?.includes(b) || false;
-                  if (aSelected && !bSelected) return -1;
-                  if (!aSelected && bSelected) return 1;
-                  return 0;
+                  const aSelected = search.tags?.includes(a) || false
+                  const bSelected = search.tags?.includes(b) || false
+                  if (aSelected && !bSelected) return -1
+                  if (!aSelected && bSelected) return 1
+                  return 0
                 })
                 .map((tag, index) => (
                   <CarouselItem
@@ -144,5 +148,5 @@ export const TagsCarousel = observer(function TagsCarousel() {
         </div>
       </div>
     </div>
-  );
-});
+  )
+})
