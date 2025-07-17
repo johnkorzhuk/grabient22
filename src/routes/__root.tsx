@@ -7,11 +7,11 @@ import {
 } from '@tanstack/react-router'
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { createServerFn } from '@tanstack/react-start'
+// import { createServerFn } from '@tanstack/react-start'
 import { QueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { getAuth } from '@clerk/tanstack-react-start/server'
-import { getWebRequest } from '@tanstack/react-start/server'
+// import { getAuth } from '@clerk/tanstack-react-start/server'
+// import { getWebRequest } from '@tanstack/react-start/server'
 import appCss from '~/styles/app.css?url'
 import { ConvexQueryClient } from '@convex-dev/react-query'
 import { ConvexReactClient } from 'convex/react'
@@ -24,18 +24,18 @@ import { PostHogProvider } from 'posthog-js/react'
 import { TooltipProvider } from '~/components/ui/tooltip'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools/production'
 
-const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
-  const request = getWebRequest()
-  if (!request) throw new Error('No request found')
+// const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
+//   const request = getWebRequest()
+//   if (!request) throw new Error('No request found')
 
-  const auth = await getAuth(getWebRequest())
-  const token = await auth.getToken({ template: 'convex' })
+//   const auth = await getAuth(getWebRequest())
+//   const token = await auth.getToken({ template: 'convex' })
 
-  return {
-    userId: auth.userId,
-    token,
-  }
-})
+//   return {
+//     userId: auth.userId,
+//     token,
+//   }
+// })
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
