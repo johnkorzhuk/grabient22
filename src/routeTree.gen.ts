@@ -16,7 +16,6 @@ import { Route as SeedIndexRouteImport } from './routes/$seed/index'
 import { Route as LayoutOldestRouteImport } from './routes/_layout/oldest'
 import { Route as LayoutNewestRouteImport } from './routes/_layout/newest'
 import { Route as LayoutCollectionRouteImport } from './routes/_layout/collection'
-import { Route as SeedFullRouteImport } from './routes/$seed/full'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/_layout',
@@ -52,15 +51,9 @@ const LayoutCollectionRoute = LayoutCollectionRouteImport.update({
   path: '/collection',
   getParentRoute: () => LayoutRoute,
 } as any)
-const SeedFullRoute = SeedFullRouteImport.update({
-  id: '/full',
-  path: '/full',
-  getParentRoute: () => SeedRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/$seed': typeof SeedRouteRouteWithChildren
-  '/$seed/full': typeof SeedFullRoute
   '/collection': typeof LayoutCollectionRoute
   '/newest': typeof LayoutNewestRoute
   '/oldest': typeof LayoutOldestRoute
@@ -68,7 +61,6 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesByTo {
-  '/$seed/full': typeof SeedFullRoute
   '/collection': typeof LayoutCollectionRoute
   '/newest': typeof LayoutNewestRoute
   '/oldest': typeof LayoutOldestRoute
@@ -79,7 +71,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/$seed': typeof SeedRouteRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
-  '/$seed/full': typeof SeedFullRoute
   '/_layout/collection': typeof LayoutCollectionRoute
   '/_layout/newest': typeof LayoutNewestRoute
   '/_layout/oldest': typeof LayoutOldestRoute
@@ -88,21 +79,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/$seed'
-    | '/$seed/full'
-    | '/collection'
-    | '/newest'
-    | '/oldest'
-    | '/$seed/'
-    | '/'
+  fullPaths: '/$seed' | '/collection' | '/newest' | '/oldest' | '/$seed/' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$seed/full' | '/collection' | '/newest' | '/oldest' | '/$seed' | '/'
+  to: '/collection' | '/newest' | '/oldest' | '/$seed' | '/'
   id:
     | '__root__'
     | '/$seed'
     | '/_layout'
-    | '/$seed/full'
     | '/_layout/collection'
     | '/_layout/newest'
     | '/_layout/oldest'
@@ -166,23 +149,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCollectionRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/$seed/full': {
-      id: '/$seed/full'
-      path: '/full'
-      fullPath: '/$seed/full'
-      preLoaderRoute: typeof SeedFullRouteImport
-      parentRoute: typeof SeedRouteRoute
-    }
   }
 }
 
 interface SeedRouteRouteChildren {
-  SeedFullRoute: typeof SeedFullRoute
   SeedIndexRoute: typeof SeedIndexRoute
 }
 
 const SeedRouteRouteChildren: SeedRouteRouteChildren = {
-  SeedFullRoute: SeedFullRoute,
   SeedIndexRoute: SeedIndexRoute,
 }
 

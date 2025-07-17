@@ -16,7 +16,6 @@ import type * as crons from "../crons.js";
 import type * as generate_palettes from "../generate/palettes.js";
 import type * as http from "../http.js";
 import type * as likes from "../likes.js";
-import type * as migrations from "../migrations.js";
 import type * as tags from "../tags.js";
 
 import type {
@@ -42,7 +41,6 @@ declare const fullApi: ApiFromModules<{
   "generate/palettes": typeof generate_palettes;
   http: typeof http;
   likes: typeof likes;
-  migrations: typeof migrations;
   tags: typeof tags;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

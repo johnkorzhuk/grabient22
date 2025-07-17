@@ -1,4 +1,4 @@
-import { defineSchema, defineTable } from 'convex/server';
+import { defineSchema } from 'convex/server';
 import { v } from 'convex/values';
 import { Table } from 'convex-helpers/server';
 import { z } from 'zod';

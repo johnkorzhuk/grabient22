@@ -1,13 +1,13 @@
-import { internalMutation, mutation, query } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import { DEFAULT_ANGLE, DEFAULT_STEPS, DEFAULT_STYLE } from '../src/validators';
-import { deserializeCoeffs, serializeCoeffs } from '../src/lib/serialization';
+import { deserializeCoeffs } from '../src/lib/serialization';
 import { angleValidator, stepsValidator, styleValidator } from './schema';
 import { paginationOptsValidator } from 'convex/server';
 
 import { TableAggregate } from '@convex-dev/aggregate';
 import { components } from './_generated/api';
-import { DataModel } from './_generated/dataModel';
+import type { DataModel } from './_generated/dataModel';
 
 export const publicLikesBySeed = new TableAggregate<{
   Namespace: string; // seed as namespace

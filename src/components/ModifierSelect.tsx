@@ -1,29 +1,38 @@
-import { observer, use$ } from '@legendapp/state/react';
-import { useNavigate } from '@tanstack/react-router';
-import * as v from 'valibot';
-import { useState } from 'react';
-import { Command, CommandGroup, CommandItem, CommandList } from '~/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
-import { Button } from '~/components/ui/button';
-import { CheckIcon, ChevronsUpDown } from 'lucide-react';
-import { cn } from '~/lib/utils';
-import { MODIFIERS, modifierValidator } from '~/validators';
+import { observer } from '@legendapp/state/react'
+import { useNavigate } from '@tanstack/react-router'
+import * as v from 'valibot'
+import { useState } from 'react'
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '~/components/ui/command'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover'
+import { Button } from '~/components/ui/button'
+import { CheckIcon, ChevronsUpDown } from 'lucide-react'
+import { cn } from '~/lib/utils'
+import { MODIFIERS, modifierValidator } from '~/validators'
 
-export type SelectModifier = v.InferOutput<typeof modifierValidator>;
+export type SelectModifier = v.InferOutput<typeof modifierValidator>
 
 type ModifierSelectProps = {
-  value: SelectModifier;
-  className?: string;
-  popoverClassName?: string;
-};
+  value: SelectModifier
+  className?: string
+  popoverClassName?: string
+}
 
 export const ModifierSelect = observer(function ModifierSelect({
   value,
   className,
   popoverClassName,
 }: ModifierSelectProps) {
-  const navigate = useNavigate({ from: '/$seed/' });
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate({ from: '/$seed/' })
+  const [open, setOpen] = useState(false)
 
   const handleValueClick = (clickedMod: SelectModifier) => {
     // If clicking the already selected style, toggle to auto
@@ -34,7 +43,7 @@ export const ModifierSelect = observer(function ModifierSelect({
           style: 'auto',
         }),
         replace: true,
-      });
+      })
     } else {
       // Otherwise set to the new style
       navigate({
@@ -43,12 +52,12 @@ export const ModifierSelect = observer(function ModifierSelect({
           mod: clickedMod,
         }),
         replace: true,
-      });
+      })
     }
 
     // Close the popover after selection
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -103,5 +112,5 @@ export const ModifierSelect = observer(function ModifierSelect({
         </Command>
       </PopoverContent>
     </Popover>
-  );
-});
+  )
+})

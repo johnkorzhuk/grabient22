@@ -2,10 +2,10 @@ import { z } from 'zod';
 import { TAG_DESCRIPTIONS, TAGS } from '../../tags';
 import type { ColorFormats } from '../../src/lib/colorUtils';
 import { v } from 'convex/values';
-import { getPage, IndexKey } from 'convex-helpers/server/pagination';
+import { getPage } from 'convex-helpers/server/pagination';
+import type { IndexKey } from 'convex-helpers/server/pagination';
 import schema, { CollectionsAnalysis } from '../schema';
-import { internalAction, internalMutation, internalQuery } from '../_generated/server';
-import { internal } from '../_generated/api';
+import { internalMutation, internalQuery } from '../_generated/server';
 
 export const insertCollectionsAnalysis = internalMutation({
   args: CollectionsAnalysis.withoutSystemFields,

@@ -1,61 +1,77 @@
-import { ChartContainer } from '~/components/ui/chart';
-import { Line, LineChart, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import { coeffsSchema } from '~/validators';
-import * as v from 'valibot';
-import { lazy, Suspense } from 'react';
-import { observer, use$ } from '@legendapp/state/react';
-import { applyGlobals, cosineGradient } from '~/lib/cosineGradient';
-import { uiTempStore$ } from '~/stores/ui';
-import { useHotkeys, useClipboard, useMediaQuery, useElementSize } from '@mantine/hooks';
-import { Copy, Check } from 'lucide-react';
-import { deserializeCoeffs } from '~/lib/serialization';
-import { rgbChannelConfig } from '~/constants/colors';
-import { cn } from '~/lib/utils';
+import { ChartContainer } from '~/components/ui/chart'
+import { Line, LineChart, XAxis, YAxis, Tooltip } from 'recharts'
+import { coeffsSchema } from '~/validators'
+import * as v from 'valibot'
+import { lazy, Suspense } from 'react'
+import { observer, use$ } from '@legendapp/state/react'
+import { applyGlobals, cosineGradient } from '~/lib/cosineGradient'
+import { uiTempStore$ } from '~/stores/ui'
+import {
+  useHotkeys,
+  useClipboard,
+  useMediaQuery,
+  useElementSize,
+} from '@mantine/hooks'
+import { Copy, Check } from 'lucide-react'
+import { deserializeCoeffs } from '~/lib/serialization'
+import { rgbChannelConfig } from '~/constants/colors'
+import { cn } from '~/lib/utils'
 
 interface GradientChannelsChartProps {
-  steps: number;
-  processedCoeffs: v.InferOutput<typeof coeffsSchema>;
-  className?: string;
-  showLabels?: boolean;
-  showGrid?: boolean;
+  steps: number
+  processedCoeffs: v.InferOutput<typeof coeffsSchema>
+  className?: string
+  showLabels?: boolean
+  showGrid?: boolean
 }
 
 // Define proper types for the tooltip props
 interface CustomTooltipProps {
-  active?: boolean;
+  active?: boolean
   payload?: Array<{
     payload: {
-      t: number;
-      red: number;
-      green: number;
-      blue: number;
-      rgb: string;
-      hex: string;
-    };
-  }>;
-  label?: string;
-  copied?: boolean;
+      t: number
+      red: number
+      green: number
+      blue: number
+      rgb: string
+      hex: string
+    }
+  }>
+  label?: string
+  copied?: boolean
 }
 
 // Custom tooltip component for the chart
-const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) => {
-  if (!active || !payload || !payload.length) return null;
+const CustomTooltip = ({
+  active,
+  payload,
+  copied = false,
+}: CustomTooltipProps) => {
+  if (!active || !payload || !payload.length) return null
 
-  const data = payload[0].payload;
-  const r = Math.round(data.red * 255);
-  const g = Math.round(data.green * 255);
-  const b = Math.round(data.blue * 255);
-  const rgbColor = `rgb(${r}, ${g}, ${b})`;
-  const hexColor = data.hex;
+  const data = payload[0].payload
+  const r = Math.round(data.red * 255)
+  const g = Math.round(data.green * 255)
+  const b = Math.round(data.blue * 255)
+  const rgbColor = `rgb(${r}, ${g}, ${b})`
+  const hexColor = data.hex
 
   return (
     <div className="rounded-lg border border-border/50 bg-background/20 backdrop-blur-sm shadow-xl p-2 z-20">
       <div className="flex flex-col gap-2.5 font-poppins">
         <div className="flex items-center gap-3">
-          <div className="h-5 w-5 rounded-sm" style={{ backgroundColor: rgbColor }}></div>
+          <div
+            className="h-5 w-5 rounded-sm"
+            style={{ backgroundColor: rgbColor }}
+          ></div>
           <span className="font-mono text-xs">{hexColor}</span>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            {copied ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
             <span>cmd + c</span>
           </div>
         </div>
@@ -107,23 +123,23 @@ const CustomTooltip = ({ active, payload, copied = false }: CustomTooltipProps) 
         </div> */}
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface ChartProps {
   data: Array<{
-    t: number;
-    red: number;
-    green: number;
-    blue: number;
-    rgb: string;
-    hex: string;
-  }>;
-  isPreview?: boolean;
-  onIndexChange?: (index: number | null) => void;
-  copied?: boolean;
-  width?: number;
-  height?: number;
+    t: number
+    red: number
+    green: number
+    blue: number
+    rgb: string
+    hex: string
+  }>
+  isPreview?: boolean
+  onIndexChange?: (index: number | null) => void
+  copied?: boolean
+  width?: number
+  height?: number
 }
 
 const Chart = lazy(() =>
@@ -136,14 +152,14 @@ const Chart = lazy(() =>
       width,
       height,
     }: ChartProps) => {
-      const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+      const isLargeScreen = useMediaQuery('(min-width: 1024px)')
 
       const margins = {
         left: isLargeScreen ? 20 : 0,
         right: isLargeScreen ? 0 : 20,
         top: isLargeScreen ? 28 : 16,
         bottom: isLargeScreen ? 16 : 4,
-      };
+      }
 
       // If we have valid dimensions from useElementSize, use them directly
       if (width && height && width > 0 && height > 0) {
@@ -156,18 +172,28 @@ const Chart = lazy(() =>
               height={height}
               margin={margins}
               onMouseMove={(state) => {
-                if (!isPreview && onIndexChange && state?.activeTooltipIndex !== undefined) {
-                  onIndexChange(state.activeTooltipIndex);
+                if (
+                  !isPreview &&
+                  onIndexChange &&
+                  state?.activeTooltipIndex !== undefined
+                ) {
+                  onIndexChange(state.activeTooltipIndex)
                 }
               }}
               onMouseLeave={() => {
                 if (!isPreview && onIndexChange) {
-                  onIndexChange(null);
+                  onIndexChange(null)
                 }
               }}
             >
               {/* Force exact domain to match GraphBG */}
-              <XAxis dataKey="t" hide={true} domain={[0, 1]} type="number" scale="linear" />
+              <XAxis
+                dataKey="t"
+                hide={true}
+                domain={[0, 1]}
+                type="number"
+                scale="linear"
+              />
 
               {/* Force exact Y domain and disable automatic scaling */}
               <YAxis
@@ -178,14 +204,21 @@ const Chart = lazy(() =>
                 allowDataOverflow={false}
               />
 
-              <Tooltip content={<CustomTooltip copied={copied} />} isAnimationActive={false} />
+              <Tooltip
+                content={<CustomTooltip copied={copied} />}
+                isAnimationActive={false}
+              />
 
               <Line
                 dataKey="red"
                 type="linear"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.red.color }}
+                activeDot={{
+                  r: 4,
+                  strokeWidth: 1,
+                  stroke: rgbChannelConfig.red.color,
+                }}
                 isAnimationActive={false}
                 animationDuration={200}
                 stroke={rgbChannelConfig.red.color}
@@ -196,7 +229,11 @@ const Chart = lazy(() =>
                 type="linear"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.green.color }}
+                activeDot={{
+                  r: 4,
+                  strokeWidth: 1,
+                  stroke: rgbChannelConfig.green.color,
+                }}
                 isAnimationActive={false}
                 animationDuration={200}
                 stroke={rgbChannelConfig.green.color}
@@ -207,7 +244,11 @@ const Chart = lazy(() =>
                 type="linear"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 4, strokeWidth: 1, stroke: rgbChannelConfig.blue.color }}
+                activeDot={{
+                  r: 4,
+                  strokeWidth: 1,
+                  stroke: rgbChannelConfig.blue.color,
+                }}
                 isAnimationActive={false}
                 animationDuration={200}
                 stroke={rgbChannelConfig.blue.color}
@@ -215,36 +256,43 @@ const Chart = lazy(() =>
               />
             </LineChart>
           </div>
-        );
+        )
       }
 
       // Fallback: show a loading state while dimensions are being measured
-      return <div className="h-full w-full flex items-center justify-center"></div>;
+      return (
+        <div className="h-full w-full flex items-center justify-center"></div>
+      )
     },
   }),
-);
+)
 
 /**
  * GraphBG component provides a styled background for gradient charts
  * with optional grid lines and Y-axis labels
  */
 const GraphBG: React.FC<{
-  className?: string;
-  showLabels?: boolean;
-  showGrid?: boolean;
+  className?: string
+  showLabels?: boolean
+  showGrid?: boolean
 }> = ({ className = '', showLabels = true, showGrid = true }) => {
   // Y-axis values from 0 to 1.0 in increments of 0.2
-  const yAxisValues = [1, 0.8, 0.6, 0.4, 0.2, 0];
+  const yAxisValues = [1, 0.8, 0.6, 0.4, 0.2, 0]
 
   return (
-    <div className={cn('relative w-full h-full rounded-md overflow-hidden', className)}>
+    <div
+      className={cn(
+        'relative w-full h-full rounded-md overflow-hidden',
+        className,
+      )}
+    >
       {/* Graph area container */}
       <div className="relative w-full h-full">
         {/* Horizontal grid lines */}
         {showGrid &&
           yAxisValues.map((value) => {
             // Calculate position from top (0% for 1.0, 100% for 0)
-            const topPercent = (1 - value) * 100;
+            const topPercent = (1 - value) * 100
 
             return (
               <div
@@ -260,14 +308,14 @@ const GraphBG: React.FC<{
                   width: '100%',
                 }}
               />
-            );
+            )
           })}
 
         {/* Floating Y-axis labels */}
         {showLabels &&
           yAxisValues.map((value) => {
             // Calculate position from top (0% for 1.0, 100% for 0)
-            const topPercent = (1 - value) * 100;
+            const topPercent = (1 - value) * 100
 
             return (
               <div
@@ -280,12 +328,12 @@ const GraphBG: React.FC<{
               >
                 {value.toFixed(value === 1 || value === 0 ? 0 : 1)}
               </div>
-            );
+            )
           })}
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const GradientChannelsChart = observer(function GradientChannelsChart({
   processedCoeffs,
@@ -294,40 +342,42 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
   showLabels = true,
   showGrid = true,
 }: GradientChannelsChartProps) {
-  const previewSeed = use$(uiTempStore$.previewSeed);
-  const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null;
+  const previewSeed = use$(uiTempStore$.previewSeed)
+  const previewData = previewSeed ? deserializeCoeffs(previewSeed) : null
   const previewCoeffs = previewData
     ? applyGlobals(previewData.coeffs, previewData.globals)
-    : processedCoeffs;
-  const previewColors = previewSeed ? cosineGradient(steps, previewCoeffs) : undefined;
-  const gradientColors = cosineGradient(steps, processedCoeffs);
-  const previewChartData = previewColors ? getChartData(previewColors) : [];
-  const chartData = getChartData(gradientColors);
-  const activeIndex = use$(uiTempStore$.previewColorIndex);
-  const clipboard = useClipboard({ timeout: 1500 });
-  const { ref, width, height } = useElementSize();
+    : processedCoeffs
+  const previewColors = previewSeed
+    ? cosineGradient(steps, previewCoeffs)
+    : undefined
+  const gradientColors = cosineGradient(steps, processedCoeffs)
+  const previewChartData = previewColors ? getChartData(previewColors) : []
+  const chartData = getChartData(gradientColors)
+  const activeIndex = use$(uiTempStore$.previewColorIndex)
+  const clipboard = useClipboard({ timeout: 1500 })
+  const { ref, width, height } = useElementSize()
 
   const handleChartIndexChange = (index: number | null) => {
     if (index !== undefined) {
-      uiTempStore$.previewColorIndex.set(index);
+      uiTempStore$.previewColorIndex.set(index)
     } else {
-      uiTempStore$.previewColorIndex.set(null);
+      uiTempStore$.previewColorIndex.set(null)
     }
-  };
+  }
 
   useHotkeys([
     [
       'mod+c',
       () => {
-        if (typeof activeIndex !== 'number') return;
+        if (typeof activeIndex !== 'number') return
 
-        const hexColor = chartData[activeIndex]?.hex;
+        const hexColor = chartData[activeIndex]?.hex
         if (hexColor) {
-          clipboard.copy(hexColor);
+          clipboard.copy(hexColor)
         }
       },
     ],
-  ]);
+  ])
 
   return (
     <figure
@@ -345,7 +395,10 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
       />
 
       {/* Chart layers on top of GraphBG */}
-      <div className="relative flex-1 w-full h-full" style={{ minHeight: '150px', height: '100%' }}>
+      <div
+        className="relative flex-1 w-full h-full"
+        style={{ minHeight: '150px', height: '100%' }}
+      >
         {/* Preview chart layer with reduced opacity */}
         <ChartContainer
           config={rgbChannelConfig}
@@ -363,7 +416,10 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
         </ChartContainer>
 
         {/* Main chart layer */}
-        <ChartContainer config={rgbChannelConfig} className="absolute inset-0 h-full w-full">
+        <ChartContainer
+          config={rgbChannelConfig}
+          className="absolute inset-0 h-full w-full"
+        >
           <Suspense fallback={<div className="w-full h-full" />}>
             <Chart
               data={chartData}
@@ -382,19 +438,19 @@ export const GradientChannelsChart = observer(function GradientChannelsChart({
       </div>
 
       <div id="palette-graph-description" className="sr-only">
-        Interactive graph showing red, green, and blue color channel curves generated. X- axis is
-        color(t). Y-axis is 0 to 1.
+        Interactive graph showing red, green, and blue color channel curves
+        generated. X- axis is color(t). Y-axis is 0 to 1.
       </div>
     </figure>
-  );
-});
+  )
+})
 
 function rgbToHex(r: number, g: number, b: number) {
   const toHex = (value: number) => {
-    const hex = Math.round(value * 255).toString(16);
-    return hex.length === 1 ? '0' + hex : hex;
-  };
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    const hex = Math.round(value * 255).toString(16)
+    return hex.length === 1 ? '0' + hex : hex
+  }
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
 
 function getChartData(colors: number[][]) {
@@ -405,5 +461,5 @@ function getChartData(colors: number[][]) {
     blue: color[2],
     rgb: `rgb(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)})`,
     hex: rgbToHex(color[0], color[1], color[2]),
-  }));
+  }))
 }

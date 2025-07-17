@@ -1,17 +1,7 @@
 import { v } from 'convex/values';
 import { internalAction, internalMutation, internalQuery, query } from './_generated/server';
-import { Id } from './_generated/dataModel';
-import { api, internal } from './_generated/api';
-import { deserializeCoeffs } from '../src/lib/serialization';
-import { applyGlobals, cosineGradient } from '../src/lib/cosineGradient';
-import { ColorFormats, colorToAllFormats } from '../src/lib/colorUtils';
-import { Resvg, initWasm } from '@resvg/resvg-wasm';
-import { getCollectionStyleSVG } from '../src/lib/getCollectionStyleSVG';
-import { getColorAnalysisPrompt } from './analysis/common';
-import { TAGS } from '../tags';
-import { z } from 'zod';
-import { generateObject } from 'ai';
-import { google } from '@ai-sdk/google';
+import type { Id } from './_generated/dataModel';
+import { internal } from './_generated/api';
 import { TagAnalysis, TaggedCollections } from './schema';
 
 export const searchCollectionsByTagText = query({
