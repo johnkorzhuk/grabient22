@@ -35,11 +35,7 @@ const SUBJECT_OPTIONS = [
 
 // Valibot schema for form validation
 const contactSchema = v.object({
-  email: v.pipe(
-    v.string(),
-    v.minLength(1, 'Email is required'),
-    v.email('Please enter a valid email address'),
-  ),
+  email: v.optional(v.string()),
   subject: v.optional(v.string()),
   message: v.pipe(
     v.string(),
@@ -58,7 +54,7 @@ function ContactPage() {
 
   const form = useForm({
     defaultValues: {
-      email: '',
+      email: undefined,
       subject: undefined,
       message: '',
     } as ContactFormData,
@@ -84,9 +80,10 @@ function ContactPage() {
     validators: {
       onChange: ({ value }) => {
         try {
-          // Create a copy of the value with proper handling of undefined subject
+          // Create a copy of the value with proper handling of undefined email and subject
           const valueToValidate = {
             ...value,
+            email: value.email || undefined,
             subject: value.subject || undefined,
           }
           v.parse(contactSchema, valueToValidate)
@@ -150,22 +147,25 @@ function ContactPage() {
               name="email"
               validators={{
                 onChange: ({ value }) => {
-                  try {
-                    v.parse(
-                      v.pipe(
-                        v.string(),
-                        v.minLength(1, 'Email is required'),
-                        v.email('Please enter a valid email address'),
-                      ),
-                      value,
-                    )
-                    return undefined
-                  } catch (error) {
-                    if (v.isValiError(error)) {
-                      return error.issues[0]?.message || 'Invalid email'
+                  // Email is now optional, only validate if provided
+                  if (value && value.trim()) {
+                    try {
+                      v.parse(
+                        v.pipe(
+                          v.string(),
+                          v.email('Please enter a valid email address'),
+                        ),
+                        value,
+                      )
+                      return undefined
+                    } catch (error) {
+                      if (v.isValiError(error)) {
+                        return error.issues[0]?.message || 'Invalid email'
+                      }
+                      return 'Invalid email'
                     }
-                    return 'Invalid email'
                   }
+                  return undefined
                 },
               }}
             >
