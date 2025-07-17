@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { Button } from '~/components/ui/button'
+import { useMutation } from 'convex/react'
+import { api } from '../../../convex/_generated/api'
 import {
   Command,
   CommandGroup,
@@ -51,6 +53,7 @@ function ContactPage() {
   const [customSubject, setCustomSubject] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const navigate = useNavigate()
+  const sendContactEmail = useMutation(api.emails.sendContactEmail)
 
   const form = useForm({
     defaultValues: {
@@ -59,23 +62,28 @@ function ContactPage() {
       message: '',
     } as ContactFormData,
     onSubmit: async ({ value }) => {
-      // TODO: Implement actual form submission logic
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API call
+      try {
+        const submitData = {
+          email: value.email || undefined,
+          subject:
+            value.subject === 'other'
+              ? customSubject
+              : value.subject || undefined,
+          message: value.message,
+        }
 
-      const submitData = {
-        ...value,
-        subject:
-          value.subject === 'other'
-            ? customSubject
-            : value.subject || undefined,
+        await sendContactEmail(submitData)
+
+        // Show success message
+        setIsSubmitted(true)
+
+        // Reset form after successful submission
+        form.reset()
+        setCustomSubject('')
+      } catch (error) {
+        console.error('Failed to send email:', error)
+        // Handle error state here if needed
       }
-
-      // Show success message
-      setIsSubmitted(true)
-
-      // Reset form after successful submission
-      form.reset()
-      setCustomSubject('')
     },
     validators: {
       onChange: ({ value }) => {

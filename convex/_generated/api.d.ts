@@ -13,6 +13,7 @@ import type * as analysis_gemini from "../analysis/gemini.js";
 import type * as analysis_openai from "../analysis/openai.js";
 import type * as collections from "../collections.js";
 import type * as crons from "../crons.js";
+import type * as emails from "../emails.js";
 import type * as generate_palettes from "../generate/palettes.js";
 import type * as http from "../http.js";
 import type * as likes from "../likes.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   "analysis/openai": typeof analysis_openai;
   collections: typeof collections;
   crons: typeof crons;
+  emails: typeof emails;
   "generate/palettes": typeof generate_palettes;
   http: typeof http;
   likes: typeof likes;
@@ -280,6 +282,62 @@ export declare const components: {
           value: any;
         },
         any
+      >;
+    };
+  };
+  resend: {
+    lib: {
+      cancelEmail: FunctionReference<
+        "mutation",
+        "internal",
+        { emailId: string },
+        null
+      >;
+      get: FunctionReference<"query", "internal", { emailId: string }, any>;
+      getStatus: FunctionReference<
+        "query",
+        "internal",
+        { emailId: string },
+        {
+          complained: boolean;
+          errorMessage: string | null;
+          opened: boolean;
+          status:
+            | "waiting"
+            | "queued"
+            | "cancelled"
+            | "sent"
+            | "delivered"
+            | "delivery_delayed"
+            | "bounced";
+        }
+      >;
+      handleEmailEvent: FunctionReference<
+        "mutation",
+        "internal",
+        { event: any },
+        null
+      >;
+      sendEmail: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          from: string;
+          headers?: Array<{ name: string; value: string }>;
+          html?: string;
+          options: {
+            apiKey: string;
+            initialBackoffMs: number;
+            onEmailEvent?: { fnHandle: string };
+            retryAttempts: number;
+            testMode: boolean;
+          };
+          replyTo?: Array<string>;
+          subject: string;
+          text?: string;
+          to: string;
+        },
+        string
       >;
     };
   };

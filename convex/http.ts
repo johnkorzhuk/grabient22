@@ -7,7 +7,18 @@ import { DEFAULT_STYLE, DEFAULT_STEPS, DEFAULT_ANGLE } from '../src/validators'
 import type { CollectionStyle } from '../src/types'
 // Using the WebAssembly version for Convex environment
 import { Resvg, initWasm } from '@resvg/resvg-wasm'
+import { resend } from './emails'
+
 const http = httpRouter()
+
+// resend webhook endpoint
+http.route({
+  path: '/resend-webhook',
+  method: 'POST',
+  handler: httpAction(async (ctx, req) => {
+    return await resend.handleResendEventWebhook(ctx, req)
+  }),
+})
 
 // OG Image endpoint for dynamic social media previews
 http.route({
