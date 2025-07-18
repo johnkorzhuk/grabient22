@@ -362,7 +362,7 @@ function ContactPage() {
                       htmlFor={field.name}
                       className="text-sm font-medium text-foreground"
                     >
-                      Message
+                      Message*
                     </label>
                     {field.state.meta.errors.length > 0 && (
                       <span className="text-sm text-red-500 font-poppins">
@@ -386,7 +386,7 @@ function ContactPage() {
                       'transition-colors duration-200',
                       'resize-none',
                     )}
-                    placeholder="Your message"
+                    placeholder="Your message (required)"
                   />
                 </div>
               )}

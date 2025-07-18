@@ -16,10 +16,8 @@ export const sendContactEmail = mutation({
   handler: async (ctx, args) => {
     const { email, subject, message } = args
 
-    // Determine the subject line
     const emailSubject = subject || 'New Contact Form Submission'
 
-    // Create the email content
     const emailContent = `
       <h2>New Contact Form Submission</h2>
       
@@ -40,8 +38,8 @@ export const sendContactEmail = mutation({
 
     try {
       await resend.sendEmail(ctx, {
-        from: 'Contact Form <noreply@grabient.com>', // Replace with your verified domain
-        to: 'john@grabient.com', // Replace with your email address
+        from: 'Contact Form <noreply@grabient.com>',
+        to: 'john@grabient.com',
         subject: emailSubject,
         html: emailContent,
         ...(email && { replyTo: [email] }),
